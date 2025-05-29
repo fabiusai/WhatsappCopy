@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poste Italiane - Contatore Caratteri</title>
     <style>
-        /* Tutti gli stili CSS della versione precedente */
         :root {
             --poste-blue: #0047bb;
             --poste-yellow: #eedc00;
@@ -39,14 +38,6 @@
             font-weight: normal;
         }
 
-        .counter {
-            font-size: 0.9em;
-            color: var(--poste-blue);
-            margin: 5px 0 10px 0;
-            display: block;
-        }
-
-        /* Resto dello stile invariato */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -59,7 +50,7 @@
         .tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .tab {
@@ -141,6 +132,27 @@
         button.copied {
             background-color: var(--poste-green) !important;
         }
+
+        .import-excel {
+            margin-bottom: 20px;
+        }
+
+        .import-excel input[type="file"] {
+            display: none;
+        }
+
+        .import-excel label {
+            background-color: var(--poste-light-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .import-excel label:hover {
+            background-color: var(--poste-blue);
+        }
     </style>
 </head>
 <body>
@@ -150,22 +162,22 @@
             <span class="title-sub">Contatore caratteri</span>
         </div>
     </div>
-<link rel="icon" href="icons8-whatsapp-16.png" type="image/png">
+
     <div class="tabs">
         <div class="tab active" onclick="switchTab(0)">News 1</div>
         <div class="tab" onclick="switchTab(1)">News 2</div>
         <div class="tab" onclick="switchTab(2)">News 3</div>
     </div>
 
-    <div class="csv-buttons" style="margin: 1em 0;">
-        <button id="exportCsv">Esporta CSV</button>
-        <button id="importButton">Importa CSV</button>
-        <input type="file" id="importCsvInput" accept=".csv" style="display:none" />
+    <div class="import-excel">
+        <label for="excelInput">Importa da Excel</label>
+        <input type="file" id="excelInput" accept=".xlsx" onchange="importFromExcel(this.files[0])">
     </div>
+
     <div id="tabContents"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // CODICE JAVASCRIPT COMPLETO
         const tabsConfig = Array.from({length: 3}, () => ({
             limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
             fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
@@ -179,44 +191,36 @@
                         <div class="counter">0/${tabsConfig[tabIndex].limits.wa}</div>
                         <textarea data-type="wa"></textarea>
                     </div>
-
                     <div class="input-group">
                         <label class="field-label">Titolo YouTube</label>
                         <div class="counter">0/${tabsConfig[tabIndex].limits.ytTitle}</div>
                         <textarea data-type="ytTitle"></textarea>
                     </div>
-
                     <div class="input-group">
                         <label class="field-label">Copy post e descrizione YT</label>
                         <div class="counter">0/${tabsConfig[tabIndex].limits.ytDesc}</div>
                         <textarea data-type="ytDesc"></textarea>
                     </div>
-
                     <label class="field-label">Link YouTube</label>
                     <textarea data-type="ytLink"></textarea>
-
                     <label class="field-label" style="margin-top:20px;">Link TG Poste</label>
                     <textarea data-type="tgLink"></textarea>
-
                     <div class="output-field" data-type="waOutput"></div>
                     <button class="copy-btn" onclick="copyContent(this)">Copia Contenuto WA</button>
-
                     <div class="output-field" data-type="socialOutput"></div>
                     <button class="copy-btn" onclick="copyContent(this)">Copia Contenuto Social</button>
-
                     <div class="button-group">
                         <button onclick="saveData(${tabIndex})">Salva</button>
                         <button onclick="clearAll(${tabIndex})">Cancella tutto</button>
                         <button class="copy-all-btn" onclick="copyAllTabsContent()">Contenuto completo</button>
+                        <button onclick="exportToExcel()">Esporta in Excel</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
         function initializeApp() {
             const tabContents = document.getElementById('tabContents');
             tabContents.innerHTML = tabsConfig.map((_, i) => createTabContent(i)).join('');
-            
             tabsConfig.forEach((_, index) => {
                 const savedData = localStorage.getItem(`posteTab${index}`);
                 if(savedData) {
@@ -228,37 +232,26 @@
                     });
                 }
             });
-
-            document.querySelectorAll('textarea').forEach(textarea => {
-                textarea.addEventListener('input', updateOutputs);
-            });
-            
+            document.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', updateOutputs));
             updateOutputs();
         }
 
         function switchTab(tabIndex) {
-            document.querySelectorAll('.tab').forEach((tab, i) => 
-                tab.classList.toggle('active', i === tabIndex));
-            
-            document.querySelectorAll('.tab-content').forEach((content, i) => 
-                content.classList.toggle('active', i === tabIndex));
-            
+            document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === tabIndex));
+            document.querySelectorAll('.tab-content').forEach((content, i) => content.classList.toggle('active', i === tabIndex));
             updateOutputs();
         }
 
         function updateOutputs() {
             document.querySelectorAll('.tab-content').forEach((tab, tabIndex) => {
                 const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
-                
                 ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
                     const counter = tab.querySelector(`[data-type="${type}"]`).previousElementSibling;
                     const valueLength = getValue(type).length;
                     if(counter) counter.textContent = `${valueLength}/${tabsConfig[tabIndex].limits[type]}`;
                 });
-
                 const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG Poste https://tgposte.poste.it`;
                 tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
-
                 const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
                 tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
             });
@@ -266,150 +259,144 @@
 
         function copyContent(button) {
             const outputField = button.previousElementSibling;
-            const textToCopy = outputField.textContent;
-            
-            navigator.clipboard.writeText(textToCopy)
+            navigator.clipboard.writeText(outputField.textContent)
                 .then(() => {
                     button.classList.add('copied');
                     button.textContent = 'Copiato!';
                     setTimeout(() => {
                         button.classList.remove('copied');
-                        button.textContent = button.previousElementSibling.dataset.type === 'waOutput' 
-                            ? 'Copia Contenuto WA' 
-                            : 'Copia Contenuto Social';
+                        button.textContent = button.previousElementSibling.dataset.type === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
                     }, 2000);
-                })
-                .catch(err => {
-                    console.error('Errore nella copia:', err);
-                    alert('Errore durante la copia. Assicurati di concedere i permessi necessari.');
                 });
         }
 
         function saveData(tabIndex) {
             const tab = document.querySelector(`[data-tab-index="${tabIndex}"]`);
-            const inputs = tab.querySelectorAll('textarea');
+            const saveButton = tab.querySelector('button[onclick^="saveData"]');
+            
             const dataToSave = {};
-
-            inputs.forEach(input => {
-                dataToSave[input.dataset.type] = input.value;
-            });
-
+            tab.querySelectorAll('textarea').forEach(input => dataToSave[input.dataset.type] = input.value);
             localStorage.setItem(`posteTab${tabIndex}`, JSON.stringify(dataToSave));
             
-            const saveButton = tab.querySelector('button[onclick^="saveData"]');
+            // Aggiungi feedback visivo
             saveButton.classList.add('copied');
-            const originalText = saveButton.textContent;
-            saveButton.textContent = 'Contenuto salvato!';
-            
+            saveButton.textContent = 'Salvato!';
             setTimeout(() => {
                 saveButton.classList.remove('copied');
-                saveButton.textContent = originalText;
+                saveButton.textContent = 'Salva';
             }, 2000);
         }
 
         function clearAll(tabIndex) {
             if(confirm("Stai cancellando tutto il testo. Sei sicuro?")) {
                 const tab = document.querySelector(`[data-tab-index="${tabIndex}"]`);
-                tab.querySelectorAll('textarea').forEach(textarea => {
-                    textarea.value = '';
-                });
+                tab.querySelectorAll('textarea').forEach(textarea => textarea.value = '');
                 updateOutputs();
             }
         }
 
         function copyAllTabsContent() {
-            let output = '';
+            const copyAllButton = document.querySelector('.copy-all-btn');
             
+            let output = '';
             for(let i = 0; i < 3; i++) {
                 const tab = document.querySelector(`[data-tab-index="${i}"]`);
-                if(!tab) continue;
+                const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value.trim() || '=';
+                output += `NEWS ${i + 1}\nContenuto WA: ${getValue('wa')}\nTitolo Youtube: ${getValue('ytTitle')}\nContenuto social: ${getValue('ytDesc')}\n\n`;
+            }
+            navigator.clipboard.writeText(output.trim());
+            
+            // Aggiungi feedback visivo
+            copyAllButton.classList.add('copied');
+            copyAllButton.textContent = 'Copiato!';
+            setTimeout(() => {
+                copyAllButton.classList.remove('copied');
+                copyAllButton.textContent = 'Contenuto completo';
+            }, 2000);
+        }
+
+        async function importFromExcel(file) {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // Mappa valori colonna A -> data-type
+            const fieldMap = {
+                'Testo descrittivo news Canale WA': 'wa',
+                'Titolo YouTube': 'ytTitle',
+                'Copy post e descrizione YT': 'ytDesc',
+                'Link YouTube': 'ytLink',
+                'Link TG Poste': 'tgLink'
+            };
+
+            rows.slice(1).forEach(row => {
+                const rawField = row[0]?.trim();
+                const fieldType = fieldMap[rawField];
+                if (fieldType) {
+                    for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+                        const tab = document.querySelector(`[data-tab-index="${tabIndex}"]`);
+                        const value = row[tabIndex + 1];
+                        const field = tab.querySelector(`[data-type="${fieldType}"]`);
+                        if (field) {
+                            field.value = value !== undefined ? value : '';
+                        }
+                    }
+                }
+            });
+            updateOutputs();
+        }
+
+        function exportToExcel() {
+            // Ottieni la data corrente nel formato AAAA-MM-GG
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const fileName = `copyWA_${year}-${month}-${day}.xlsx`;
+
+            // Crea un array di dati nello stesso formato del file Excel di esempio
+            const excelData = [
+                ["", "News 1", "News 2", "News 3"],
+                ["Testo descrittivo news Canale WA", "", "", ""],
+                ["Titolo YouTube", "", "", ""],
+                ["Copy post e descrizione YT", "", "", ""],
+                ["Link YouTube", "", "", ""],
+                ["Link TG Poste", "", "", ""]
+            ];
+
+            // Popola l'array con i dati dai campi
+            for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+                const tab = document.querySelector(`[data-tab-index="${tabIndex}"]`);
                 
-                const getValue = type => {
-                    const field = tab.querySelector(`[data-type="${type}"]`);
-                    return field?.value.trim() || '=';
+                // Mappa i data-type alle righe corrispondenti nell'array excelData
+                const fieldMap = {
+                    'wa': 1,
+                    'ytTitle': 2,
+                    'ytDesc': 3,
+                    'ytLink': 4,
+                    'tgLink': 5
                 };
 
-                output += `NEWS ${i + 1}\n`;
-                output += `Contenuto WA: ${getValue('wa')}\n`;
-                output += `Titolo Youtube: ${getValue('ytTitle')}\n`;
-                output += `Contenuto social: ${getValue('ytDesc')}\n\n`;
+                tab.querySelectorAll('textarea').forEach(textarea => {
+                    const fieldType = textarea.dataset.type;
+                    const rowIndex = fieldMap[fieldType];
+                    if (rowIndex !== undefined) {
+                        excelData[rowIndex][tabIndex + 1] = textarea.value;
+                    }
+                });
             }
 
-            navigator.clipboard.writeText(output.trim())
-                .then(() => {
-                    const buttons = document.querySelectorAll('.copy-all-btn');
-                    buttons.forEach(button => {
-                        button.classList.add('copied');
-                        button.textContent = 'Copiato!';
-                        setTimeout(() => {
-                            button.classList.remove('copied');
-                            button.textContent = 'Contenuto completo';
-                        }, 2000);
-                    });
-                })
-                .catch(err => {
-                    console.error('Errore nella copia:', err);
-                    alert('Errore durante la copia. Assicurati di concedere i permessi necessari.');
-                });
+            // Crea il workbook e il foglio di lavoro
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
+
+            // Genera il file Excel e lo scarica con il nuovo nome
+            XLSX.writeFile(wb, fileName);
         }
 
         window.onload = initializeApp;
-    
-
-// --- Inizio codice CSV ---
-
-function exportCsv() {
-  const header = ['tabIndex','wa','ytTitle','ytDesc','ytLink','tgLink'];
-  const rows = tabsConfig.map((_, i) => {
-    const data = JSON.parse(localStorage.getItem(`posteTab${i}`) || '{}');
-    return header.map(h => `"${(data[h]||'').replace(/"/g, '""')}"`).join(',');
-  });
-  const csv = [header.join(','), ...rows].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'posteData.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function parseCsv(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(h => h.replace(/^"|"$/g, ''));
-  return lines.slice(1).map(line => {
-    const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
-    const obj = {};
-    headers.forEach((h, idx) => obj[h] = cols[idx] || '');
-    return obj;
-  });
-}
-
-function importCsv(file) {
-  const r = new FileReader();
-  r.onload = e => {
-    const recs = parseCsv(e.target.result);
-    recs.forEach(r => localStorage.setItem(`posteTab${r.tabIndex}`, JSON.stringify(r)));
-    initializeApp();
-    alert('Importazione CSV completata!');
-  };
-  r.readAsText(file);
-}
-
-// Attacco listener
-document.getElementById('exportCsv').addEventListener('click', exportCsv);
-const importBtn = document.getElementById('importButton');
-const fileInput = document.getElementById('importCsvInput');
-importBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => {
-  if (e.target.files.length) {
-    importCsv(e.target.files[0]);
-    e.target.value = '';
-  }
-});
-
-// --- Fine codice CSV ---
-
-</script>
+    </script>
 </body>
 </html>
