@@ -157,6 +157,11 @@
         <div class="tab" onclick="switchTab(2)">News 3</div>
     </div>
 
+    <div class="csv-buttons" style="margin: 1em 0;">
+        <button id="exportCsv">Esporta CSV</button>
+        <button id="importButton">Importa CSV</button>
+        <input type="file" id="importCsvInput" accept=".csv" style="display:none" />
+    </div>
     <div id="tabContents"></div>
 
     <script>
@@ -349,6 +354,62 @@
         }
 
         window.onload = initializeApp;
-    </script>
+    
+
+// --- Inizio codice CSV ---
+
+function exportCsv() {
+  const header = ['tabIndex','wa','ytTitle','ytDesc','ytLink','tgLink'];
+  const rows = tabsConfig.map((_, i) => {
+    const data = JSON.parse(localStorage.getItem(`posteTab${i}`) || '{}');
+    return header.map(h => `"${(data[h]||'').replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [header.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'posteData.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function parseCsv(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(h => h.replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
+    const obj = {};
+    headers.forEach((h, idx) => obj[h] = cols[idx] || '');
+    return obj;
+  });
+}
+
+function importCsv(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    const recs = parseCsv(e.target.result);
+    recs.forEach(r => localStorage.setItem(`posteTab${r.tabIndex}`, JSON.stringify(r)));
+    initializeApp();
+    alert('Importazione CSV completata!');
+  };
+  r.readAsText(file);
+}
+
+// Attacco listener
+document.getElementById('exportCsv').addEventListener('click', exportCsv);
+const importBtn = document.getElementById('importButton');
+const fileInput = document.getElementById('importCsvInput');
+importBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) {
+    importCsv(e.target.files[0]);
+    e.target.value = '';
+  }
+});
+
+// --- Fine codice CSV ---
+
+</script>
 </body>
 </html>
