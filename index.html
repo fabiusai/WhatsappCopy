@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poste Italiane - Contatore Caratteri</title>
+    <title>Social Network - Contatore Caratteri</title>
  <link rel="icon" href="favicon.ico">
     <style>
         :root {
@@ -159,7 +159,7 @@
 <body>
     <div class="header">
         <div>
-            <span class="title-main">Poste Italiane</span>
+            <span class="title-main">Social Network</span>
             <span class="title-sub">Contatore caratteri</span>
         </div>
     </div>
@@ -251,7 +251,7 @@
                     const valueLength = getValue(type).length;
                     if(counter) counter.textContent = `${valueLength}/${tabsConfig[tabIndex].limits[type]}`;
                 });
-                const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG Poste https://tgposte.poste.it`;
+                const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG Poste https://tgposte.poste.it/tgposte/`;
                 tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
                 const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
                 tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
