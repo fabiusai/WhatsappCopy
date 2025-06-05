@@ -51,7 +51,7 @@
       background-color: #fff;
       color: #333;
       line-height: 1.5;
-      padding: 0 15px; /* Manteniamo un po’ di margine orizzontale per tutto il body */
+      padding: 0 15px;
     }
 
     a {
@@ -59,28 +59,32 @@
       color: inherit;
     }
 
-    /* HEADER ESTESO ALL'INTERNO DEL BODY (rispettando il padding di 15px) */
+    /* HEADER AGGIORNATO: meno alto, meno spazio tra righe, sottotitolo non in grassetto e stesso colore del titolo */
     .header {
       background-color: var(--poste-yellow);
-      padding: 20px;
-      /* RIMOSSI max-width e margin: auto */
-      /* border-radius rimane se vuoi mantenere gli angoli arrotondati */
+      /* Ridotto il padding verticale per rendere la testata meno alta */
+      padding: 10px 0;
+      /* Rimosso max-width e margin auto: header si estende all'interno del body */
+      margin: 10px 0;
       border-radius: 6px;
       text-align: center;
-      margin: 20px 0; /* solo margine verticale, niente auto orizzontale */
-      /* Se vuoi spingere il giallo fino al bordo del body (senza tener conto del padding di 15px), basta mettere margin: 20px -15px; e width: calc(100% + 30px) */
-      /* Esempio (opzionale):
-         width: calc(100% + 30px);
-         margin: 20px -15px;
-         border-radius: 0;  (se vuoi togliere gli arrotondamenti ai bordi esterni)
-      */
     }
 
     .header h1 {
-      font-size: 2em;
+      font-size: 1.8em;
       font-weight: bold;
       color: var(--poste-blue);
-      margin-bottom: 5px;
+      /* Ridotto margine inferiore per avvicinare subtitle */
+      margin: 0 0 4px 0;
+      line-height: 1.2;
+    }
+
+    .header h2 {
+      font-size: 1.2em;
+      font-weight: normal;           /* non in grassetto */
+      color: var(--poste-blue);      /* stesso colore del titolo */
+      margin: 0;                     /* nessun margine aggiuntivo */
+      line-height: 1.2;
     }
 
     /* CONTENITORE PRINCIPALE */
