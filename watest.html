@@ -317,9 +317,9 @@
   <div class="container">
     <!-- TABS -->
     <div class="tabs">
-      <div class="tab active" data-tab-index="0">News&nbsp;1</div>
-      <div class="tab" data-tab-index="1">News&nbsp;2</div>
-      <div class="tab" data-tab-index="2">News&nbsp;3</div>
+      <div class="tab active" data-tab-index="0">News 1</div>
+      <div class="tab" data-tab-index="1">News 2</div>
+      <div class="tab" data-tab-index="2">News 3</div>
     </div>
 
     <!-- Import da Excel -->
@@ -528,7 +528,8 @@
       updateOutputs();
     }
 
-    // Gestisce le trasformazioni del testo
+    // --- MODIFICA CHIAVE QUI ---
+    // Gestisce le trasformazioni del testo applicandole alla selezione
     function handleTextTransform(event) {
         const button = event.target.closest('.text-tools button');
         if (!button) return;
@@ -539,28 +540,52 @@
         const inputGroup = button.closest('.input-group');
         const textarea = inputGroup.querySelector('textarea');
 
-        const currentText = textarea.value;
-        let newText = '';
+        // L'azione "revert" si applica sempre all'intero campo
+        if (transformType === 'revert') {
+            textarea.value = textarea.dataset.originalText || '';
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+        }
 
+        // Ottiene i dettagli della selezione
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+
+        // Se non c'è testo selezionato, non fa nulla
+        if (selectedText.length === 0) {
+            // alert("Seleziona del testo per applicare la formattazione."); // Messaggio opzionale
+            return;
+        }
+
+        let transformedSelection = '';
         switch (transformType) {
             case 'lower':
-                newText = currentText.toLowerCase();
+                transformedSelection = selectedText.toLowerCase();
                 break;
             case 'upper':
-                newText = currentText.toUpperCase();
+                transformedSelection = selectedText.toUpperCase();
                 break;
             case 'title':
-                newText = currentText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase());
-                break;
-            case 'revert':
-                newText = textarea.dataset.originalText || '';
+                // Questa regex funziona bene anche su una porzione di testo
+                transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase());
                 break;
         }
 
+        // Ricostruisce il testo completo con la porzione trasformata
+        const fullText = textarea.value;
+        const newText = fullText.substring(0, start) + transformedSelection + fullText.substring(end);
+        
         textarea.value = newText;
+        
+        // Mantiene la selezione sul testo appena modificato
+        textarea.focus();
+        textarea.setSelectionRange(start, start + transformedSelection.length);
+
+        // Scatena l'evento 'input' per aggiornare contatori e anteprime
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
-
+    // --- FINE MODIFICA ---
 
     // Cambia tab visibile
     function switchTab(tabIndex) {
