@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Social Network – Contatore Caratteri</title>
-  
   <link rel="icon" href="favicon.ico" />
 
   <!-- Importa il font “Inter” ottimizzato per Windows (ClearType) e fallback per Segoe UI, ecc. -->
@@ -173,6 +172,35 @@
       color: var(--poste-light-blue);
     }
 
+    /* --- AGGIORNATO: Stili per la barra degli strumenti di testo --- */
+    .text-tools {
+      display: flex;
+      flex-wrap: wrap; /* Permette ai pulsanti di andare a capo su schermi piccoli */
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .text-tools button {
+      display: inline-flex; /* Allinea icona e testo */
+      align-items: center;  /* Allinea verticalmente */
+      gap: 6px;             /* Spazio tra icona e testo */
+      background-color: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 10px; /* Aumentato padding orizzontale */
+      cursor: pointer;
+      color: var(--poste-blue);
+      transition: background-color 0.2s, border-color 0.2s;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+
+    .text-tools button:hover {
+      background-color: var(--poste-gray);
+      border-color: var(--poste-light-blue);
+    }
+    /* --- FINE AGGIORNAMENTO --- */
+
     textarea {
       width: 100%;
       padding: 10px;
@@ -316,8 +344,22 @@
       fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
     }));
 
-    // Funzione per creare l'HTML di ogni tab
+    // AGGIORNATO: Funzione helper per creare la barra degli strumenti di testo con etichette
+    function createTextTools() {
+      return `
+      <div class="text-tools">
+        <button type="button" data-transform="lower" title="Converti testo in minuscolo"><i class="fas fa-arrow-down-a-z"></i> minuscolo</button>
+        <button type="button" data-transform="title" title="Converti testo con Iniziali Maiuscole"><i class="fas fa-heading"></i> Iniziali</button>
+        <button type="button" data-transform="upper" title="Converti testo in MAIUSCOLO"><i class="fas fa-arrow-up-a-z"></i> MAIUSCOLO</button>
+        <button type="button" data-transform="revert" title="Ripristina testo originale"><i class="fas fa-rotate-left"></i> Ripristina</button>
+      </div>`;
+    }
+
+    // Funzione per creare l'HTML di ogni tab (nessuna altra modifica qui)
     function createTabContent(tabIndex) {
+      const fieldsWithTools = ['wa', 'ytTitle', 'ytDesc'];
+      const textToolsHTML = createTextTools();
+
       return `
       <div class="tab-content${tabIndex === 0 ? ' active' : ''}" data-tab-index="${tabIndex}">
         <div class="card">
@@ -325,12 +367,14 @@
           <div class="input-group">
             <label class="field-label" for="wa-${tabIndex}">Testo descrittivo news Canale WA</label>
             <span class="counter" id="counter-wa-${tabIndex}">0/${tabsConfig[tabIndex].limits.wa}</span>
+            ${fieldsWithTools.includes('wa') ? textToolsHTML : ''}
             <textarea id="wa-${tabIndex}" data-type="wa" rows="2"></textarea>
           </div>
           <!-- Input Titolo YouTube -->
           <div class="input-group">
             <label class="field-label" for="ytTitle-${tabIndex}">Titolo YouTube</label>
             <span class="counter" id="counter-ytTitle-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytTitle}</span>
+            ${fieldsWithTools.includes('ytTitle') ? textToolsHTML : ''}
             <textarea id="ytTitle-${tabIndex}" data-type="ytTitle" rows="2"></textarea>
             <!-- Pulsante Copia Titolo YouTube -->
             <button class="btn outline btn-copy-ytTitle" data-type="ytTitle">
@@ -342,6 +386,7 @@
           <div class="input-group">
             <label class="field-label" for="ytDesc-${tabIndex}">Copy post e descrizione YT</label>
             <span class="counter" id="counter-ytDesc-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytDesc}</span>
+            ${fieldsWithTools.includes('ytDesc') ? textToolsHTML : ''}
             <textarea id="ytDesc-${tabIndex}" data-type="ytDesc" rows="4"></textarea>
           </div>
           <!-- Input Link YouTube -->
@@ -394,6 +439,13 @@
       </div>`;
     }
 
+    // Funzione per memorizzare il valore originale di tutti i textarea
+    function storeAllOriginalValues() {
+        document.querySelectorAll('.tab-content textarea').forEach(textarea => {
+            textarea.dataset.originalText = textarea.value;
+        });
+    }
+
     // Inizializza l'applicazione: inserisce le tabs, legge localStorage, aggiunge event listener
     function initializeApp() {
       const tabContents = document.getElementById('tabContents');
@@ -413,6 +465,12 @@
           });
         }
       });
+
+      // Memorizza i valori originali dopo il caricamento
+      storeAllOriginalValues();
+
+      // Aggiungi listener per la trasformazione del testo (usando event delegation)
+      tabContents.addEventListener('click', handleTextTransform);
 
       // Aggiungi listener per input e contatori
       document.querySelectorAll('textarea').forEach(textarea => {
@@ -470,6 +528,40 @@
       updateOutputs();
     }
 
+    // Gestisce le trasformazioni del testo
+    function handleTextTransform(event) {
+        const button = event.target.closest('.text-tools button');
+        if (!button) return;
+
+        event.preventDefault();
+
+        const transformType = button.dataset.transform;
+        const inputGroup = button.closest('.input-group');
+        const textarea = inputGroup.querySelector('textarea');
+
+        const currentText = textarea.value;
+        let newText = '';
+
+        switch (transformType) {
+            case 'lower':
+                newText = currentText.toLowerCase();
+                break;
+            case 'upper':
+                newText = currentText.toUpperCase();
+                break;
+            case 'title':
+                newText = currentText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase());
+                break;
+            case 'revert':
+                newText = textarea.dataset.originalText || '';
+                break;
+        }
+
+        textarea.value = newText;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+
     // Cambia tab visibile
     function switchTab(tabIndex) {
       document.querySelectorAll('.tab').forEach((tab, i) => {
@@ -493,89 +585,77 @@
           const valueLength = textarea.value.length;
           const maxLen = tabsConfig[tabIndex].limits[type];
           counter.textContent = `${valueLength}/${maxLen}`;
-          // Cambia colore del contatore se si supera il limite
           counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
         });
 
-        // Componi output WA (mantiene il link TG interno)
+        // Componi output WA
         const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
         tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
 
-        // Componi output Social (rimuove #PosteItaliane)
+        // Componi output Social
         const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
         tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
       });
     }
 
-    // Copia il contenuto di un campo di output (WA o Social) e mostra feedback nel bottone
+    // Copia il contenuto di un campo di output (WA o Social)
     function copyContent(event) {
       const button = event.currentTarget;
       const outputType = button.dataset.type;
       const tab = button.closest('.tab-content');
       const outputField = tab.querySelector(`[data-type="${outputType}"]`);
 
-      // Stato iniziale: mostra icona loading
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
 
       navigator.clipboard.writeText(outputField.textContent).then(() => {
-        // Dopo copia, mostra "Fatto!"
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
         }, 300);
 
-        // Ripristina stato iniziale dopo 2 secondi
         setTimeout(() => {
-          const iconClass = 'fa-copy';
           const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
-          button.innerHTML = `<i class="fas ${iconClass}"></i> ${label}`;
+          button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
           button.disabled = false;
         }, 2000);
       }).catch(() => {
-        // In caso di errore, ripristina subito
-        const iconClass = 'fa-copy';
         const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
-        button.innerHTML = `<i class="fas ${iconClass}"></i> ${label}`;
+        button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
         button.disabled = false;
       });
     }
 
-    // Copia il contenuto del Titolo YouTube e mostra feedback
+    // Copia il contenuto del Titolo YouTube
     function copyTitle(event) {
       const button = event.currentTarget;
       const tab = button.closest('.tab-content');
       const textarea = tab.querySelector(`[data-type="ytTitle"]`);
       const textToCopy = textarea.value;
 
-      // Stato iniziale: mostra icona loading
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
 
       navigator.clipboard.writeText(textToCopy).then(() => {
-        // Dopo copia, mostra "Fatto!"
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
         }, 300);
 
-        // Ripristina stato iniziale dopo 2 secondi
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
           button.disabled = false;
         }, 2000);
       }).catch(() => {
-        // In caso di errore, ripristina subito
         button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
         button.disabled = false;
       });
     }
 
-    // Salva i dati della tab corrente nel localStorage e mostra feedback
+    // Salva i dati della tab corrente nel localStorage
     function saveData(event) {
       const button = event.currentTarget;
       const tabIndex = parseInt(button.dataset.tabIndex);
       const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
 
-      // Stato iniziale: Caricamento
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Caricamento in corso...`;
       button.disabled = true;
 
@@ -585,41 +665,38 @@
       });
       localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
 
-      // Feedback "Fatto!"
+      storeAllOriginalValues();
+
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
       }, 300);
 
-      // Ripristina stato iniziale dopo 2 secondi
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-save"></i> Salva`;
         button.disabled = false;
       }, 2000);
     }
 
-    // Cancella tutti i campi della tab e mostra feedback
+    // Cancella tutti i campi della tab
     function clearAll(event) {
       const button = event.currentTarget;
       const tabIndex = parseInt(button.dataset.tabIndex);
       const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
 
       if (confirm("Stai cancellando tutto il testo. Sei sicuro?")) {
-        // Stato iniziale: Cancellazione
         button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cancellazione in corso...`;
         button.disabled = true;
 
-        // Svuota tutti i textarea
         tab.querySelectorAll('textarea').forEach(textarea => {
           textarea.value = '';
+          textarea.dataset.originalText = '';
         });
         updateOutputs();
 
-        // Feedback "Fatto!"
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
         }, 300);
 
-        // Ripristina stato iniziale dopo 2 secondi
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-trash"></i> Cancella tutto`;
           button.disabled = false;
@@ -627,11 +704,9 @@
       }
     }
 
-    // Copia il contenuto di tutte le tab in un unico output
+    // Copia il contenuto di tutte le tab
     function copyAllTabsContent(event) {
       const button = event.currentTarget;
-
-      // Stato iniziale: Copiando
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
 
@@ -646,39 +721,29 @@
       }
 
       navigator.clipboard.writeText(output.trim()).then(() => {
-        // Feedback "Fatto!"
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
         }, 300);
 
-        // Ripristina stato iniziale dopo 2 secondi
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
           button.disabled = false;
         }, 2000);
       }).catch(() => {
-        // In caso di errore, ripristina subito
         button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
         button.disabled = false;
       });
     }
 
-    // Esporta tutti i dati in un file Excel e mostra feedback
+    // Esporta tutti i dati in un file Excel
     function exportToExcel(event) {
       const button = event.currentTarget;
-
-      // Stato iniziale: Esportazione
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione in corso...`;
       button.disabled = true;
 
-      // Genera nome file con data odierna
       const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      const fileName = `copyWA_${year}-${month}-${day}.xlsx`;
+      const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
 
-      // Crea array per Excel
       const excelData = [
         ["", "News 1", "News 2", "News 3"],
         ["Testo descrittivo news Canale WA", "", "", ""],
@@ -688,45 +753,34 @@
         ["Link TG Poste", "", "", ""]
       ];
 
-      // Mappa data-type a righe
-      const fieldMap = {
-        'wa': 1,
-        'ytTitle': 2,
-        'ytDesc': 3,
-        'ytLink': 4,
-        'tgLink': 5
-      };
+      const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
 
       for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
         const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
         tab.querySelectorAll('textarea').forEach(textarea => {
-          const fieldType = textarea.dataset.type;
-          const rowIndex = fieldMap[fieldType];
+          const rowIndex = fieldMap[textarea.dataset.type];
           if (rowIndex !== undefined) {
             excelData[rowIndex][tabIndex + 1] = textarea.value;
           }
         });
       }
 
-      // Crea workbook e scarica file
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
       XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
       XLSX.writeFile(wb, fileName);
 
-      // Feedback "Fatto!"
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
       }, 300);
 
-      // Ripristina stato iniziale dopo 2 secondi
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-file-export"></i> Esporta in Excel`;
         button.disabled = false;
       }, 2000);
     }
 
-    // Importa dati da file Excel nelle tab
+    // Importa dati da file Excel
     async function importFromExcel(file) {
       if (!file) return;
 
@@ -735,7 +789,6 @@
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      // Mappa colonna A ai data-type
       const fieldMap = {
         'Testo descrittivo news Canale WA': 'wa',
         'Titolo YouTube': 'ytTitle',
@@ -745,23 +798,23 @@
       };
 
       rows.slice(1).forEach(row => {
-        const rawField = row[0]?.trim();
-        const fieldType = fieldMap[rawField];
+        const fieldType = fieldMap[row[0]?.trim()];
         if (fieldType) {
           for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
             const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-            const value = row[tabIndex + 1];
             const field = tab.querySelector(`[data-type="${fieldType}"]`);
             if (field) {
-              field.value = value !== undefined ? value : '';
+              field.value = row[tabIndex + 1] !== undefined ? row[tabIndex + 1] : '';
             }
           }
         }
       });
+      
+      storeAllOriginalValues();
       updateOutputs();
     }
 
-    // Avvia l'app al caricamento pagina
+    // Avvia l'app
     window.addEventListener('DOMContentLoaded', initializeApp);
   </script>
 </body>
