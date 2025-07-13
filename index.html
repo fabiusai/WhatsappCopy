@@ -338,7 +338,6 @@
   </div>
 
   <script>
-    // --- NUOVA SEZIONE: GESTIONE LISTA DINAMICA ---
     let masterList = [];
 
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
@@ -362,7 +361,6 @@
         return [];
       }
     }
-    // --- FINE SEZIONE ---
 
     const tabsConfig = Array.from({ length: 3 }, () => ({
       limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
@@ -455,36 +453,35 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- LOGICA DI FORMATTAZIONE AUTO AGGIORNATA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
         let text = textarea.value;
 
-        // 1. Converte tutto in minuscolo
         text = text.toLowerCase();
-
-        // Ordina la masterList per lunghezza decrescente per gestire correttamente le frasi
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
 
-        // 2. Capitalizza le parole/frasi dalla lista esterna
         sortedMasterList.forEach(phrase => {
             const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'gi');
             text = text.replace(regex, phrase);
         });
 
-        // 3. Capitalizza la prima lettera del testo se non è già maiuscola
         if (text.length > 0) {
             text = text.charAt(0).toUpperCase() + text.slice(1);
         }
-        
-        // 4. Capitalizza dopo i punti di fine frase (. ! ?), preservando gli a capo.
-        // Usa una lookbehind per trovare la lettera da modificare senza alterare gli spazi.
-        text = text.replace(/(?<=[.?!]\s*)\p{L}/gu, letter => letter.toUpperCase());
-        
-        // 5. Capitalizza dopo le virgolette a inizio frase o dopo un punto.
-        // Anche qui, una lookbehind per modificare solo la lettera.
-        text = text.replace(/(?<=(^|[.?!]\s*)")\p{L}/gu, letter => letter.toUpperCase());
 
+        text = text.replace(/([.?!])\s*(\p{L})/gu, (match, punctuation, letter) => {
+            return `${punctuation} ${letter.toUpperCase()}`;
+        });
+        
+        text = text.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
+            return `${preceding}${quote}${letter.toUpperCase()}`;
+        });
+
+        // --- NUOVA REGOLA: Forzare URL in minuscolo ---
+        text = text.replace(/(https?:\/\/|www\.)[^\s]+/g, (url) => {
+            return url.toLowerCase();
+        });
+        
         textarea.value = text;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
