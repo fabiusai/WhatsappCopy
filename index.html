@@ -338,7 +338,6 @@
   </div>
 
   <script>
-    // --- NUOVA SEZIONE: ELENCO PAROLE CHIAVE ---
     const masterList = [
       'Abruzzo', 'Acilia', 'Aci Catena', 'Acireale', 'Acquaviva Platani', 'Acs', 'Adige',
       'Agcom', 'Agenzia delle Entrate', 'Agesci', 'Agorà del Futuro', 'Agrigento', 'Aia', 'Aido', 'Aifa',
@@ -811,6 +810,12 @@
       text = text.replace(/([.?!])\s*(\p{L})/gu, (match, punctuation, letter) => {
           return `${punctuation} ${letter.toUpperCase()}`;
       });
+
+      // --- 5. NUOVA REGOLA: Capitalizza dopo le virgolette a inizio frase ---
+      text = text.replace(/(^|[.?!]\s*)"(\p{L})/gu, (match, preceding, letter) => {
+        return `${preceding}"${letter.toUpperCase()}`;
+      });
+      // --- FINE NUOVA REGOLA ---
 
       textarea.value = text;
       textarea.dispatchEvent(new Event('input', { bubbles: true }));
