@@ -453,36 +453,53 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // --- LOGICA DI FORMATTAZIONE AUTO AGGIORNATA E CORRETTA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
+
         let text = textarea.value;
+        const urls = [];
+        const urlRegex = /(https?:\/\/|www\.)[^\s]+/g;
 
-        text = text.toLowerCase();
+        // 1. Isola e "protegge" gli URL sostituendoli con un segnaposto
+        text = text.replace(urlRegex, (url) => {
+            const placeholder = `__URL_${urls.length}__`;
+            urls.push(url);
+            return placeholder;
+        });
+
+        // 2. Applica le regole di formattazione al testo "pulito" (senza URL)
+        let formattedText = text.toLowerCase();
+
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
-
         sortedMasterList.forEach(phrase => {
             const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'gi');
-            text = text.replace(regex, phrase);
+            formattedText = formattedText.replace(regex, phrase);
         });
 
-        if (text.length > 0) {
-            text = text.charAt(0).toUpperCase() + text.slice(1);
+        // Capitalizza la prima lettera del testo (e solo quella)
+        if (formattedText.length > 0) {
+            formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
 
-        text = text.replace(/([.?!])\s*(\p{L})/gu, (match, punctuation, letter) => {
-            return `${punctuation} ${letter.toUpperCase()}`;
+        // Capitalizza dopo un punto, punto esclamativo o interrogativo, gestendo gli spazi.
+        formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
+            return `${punctuationAndSpaces}${letter.toUpperCase()}`;
         });
         
-        text = text.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
+        // Capitalizza dopo le virgolette a inizio frase o dopo un punto
+        formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // --- NUOVA REGOLA: Forzare URL in minuscolo ---
-        text = text.replace(/(https?:\/\/|www\.)[^\s]+/g, (url) => {
-            return url.toLowerCase();
+        // 3. Reinserisce gli URL originali, che sono rimasti intatti
+        urls.forEach((url, index) => {
+            const placeholder = `__URL_${index}__`;
+            formattedText = formattedText.replace(placeholder, url);
         });
-        
-        textarea.value = text;
+
+        // 4. Aggiorna la textarea
+        textarea.value = formattedText;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
