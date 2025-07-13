@@ -338,361 +338,37 @@
   </div>
 
   <script>
-    const masterList = [
-      'Abruzzo', 'Acilia', 'Aci Catena', 'Acireale', 'Acquaviva Platani', 'Acs', 'Adige',
-      'Agcom', 'Agenzia delle Entrate', 'Agesci', 'Agorà del Futuro', 'Agrigento', 'Aia', 'Aido', 'Aifa',
-      'AIIA', 'Aism', 'AI for Inclusion', 'Al Lavoro Sustainability Challenge', 'Ala Bianca', 'Alanno', 'Alba',
-      'Albachiara', 'Alberto Alpago Novello', 'Alberto', 'Alessandria', 'Alessandro Cruto', 'Alessandro Marchesini',
-      'Alessandro Scoppa', 'Alessia', 'Alfredo', 'Alghero', 'ALI', 'Allianz MiCo', 'AlmaLaurea', 'Altan',
-      'Altea di Vallenberg', 'Altamura', 'Amalfi', 'Amaro Lucano', 'Amazon', 'Amelia', 'Ames', 'Amministratore Delegato',
-      'Anacapri', 'Andrea Micalizzi', 'Andrea Novelli', 'Andrea Pezzi', 'Andrea Ricci', 'Andrea Varnier', 'Andrea',
-      'Angelo Di Livio', 'Angelo Lippi', 'Angelo Raffaele Cagnazzo', 'Angiolo Mazzoni', 'Annalisa Berti', 'Annalisa',
-      'Anna Magnani', 'Anna Maria', 'Anni Ottanta', 'Ansaldo Energia', 'Antitrust', 'Antonella', 'Antonello da Messina',
-      'Antonio De Curtis', 'Antonio Meucci', 'Antonio Romano', 'Antonio', 'Antonimina', 'Anzio', 'Anoia', 'App Bancoposta',
-      'Appennino', 'Appennino Bike Tour', 'Apple', 'Apple Store', 'APPuntamento', 'App Ufficio Postale', 'Aprile',
-      'Aq', 'Aquila', 'Arbëreshë', 'Archivio Storico', 'Ardara', 'Arezzo', 'Arena di Verona', 'Argenta', 'Arma dei Carabinieri',
-      'Arma', 'Arnaldo Pomodoro', 'Arsenale', 'Art', 'Arte', 'Artificial Intelligence Hub', 'Arturo Toscanini',
-      'Arzignano', 'Ascoli Piceno', 'Asia', 'Asiago', 'Associazione Filatelica Numismatica Scaligera',
-      'Associazione Guide e Scouts Cattolici', 'Associazione Italiana Sclerosi Multipla',
-      'Associazione Marchi Storici d’Italia', 'Associazione Nazionale Artiglieri d’Italia',
-      'Associazione Nazionale Bersaglieri Presidenza Nazionale', 'Associazione Nazionale Funzionari Amministrazione Civile Interno',
-      'Associazione Progetto Oasi APS', 'Associazione Volontari Ospedalieri', 'Assonime', 'Asti', 'Atene', 'Ateneo',
-      'Atri', 'Attualità', 'Auditorium della Tecnica', 'Aurora', 'Australia', 'Austrian Ocean Racing', 'Authority',
-      'Auto e Moto d’Epoca', 'Avellino', 'Avvento', 'AVO', 'B2C', 'Babaco Market', 'Babbo Natale', 'Baggio', 'Bagheria',
-      'Bagni di Lucca', 'Bagnoli Irpino', 'Bagnoregio', 'Baia Domizia', 'Baldassarri', 'Balsorano', 'Baltimora',
-      'Balma, Capoduri & C', 'Banco Alimentare Onlus', 'BancoPosta Fondi SGR', 'BancoPosta', 'Banca d’Italia',
-      'Banca Europea per gli Investimenti', 'Bank of America', 'Barbie', 'Bari', 'Barletta', 'Bartali', 'Basaltina',
-      'Basilicata', 'Bassano del Grappa', 'Bayer Italia', 'Beach Like A Deejay', 'BEI', 'Belluno', 'Belve',
-      'Benedetta Cappa Marinetti', 'Benedetto Cairoli', 'Benedetto', 'Benevento', 'Bergamo', 'Besana', 'Besenzone',
-      'BEST Conference Day', 'BEST Rome Tor Vergata', 'Best Movie Comics and Games', 'Betlemme', 'Bialetti', 'Bibione',
-      'Bicinicco', 'Bitcoin', 'Bivio Milano', 'Black Friday', 'Bloom', 'Bocconi Career Services', 'Bocconi',
-      'Boeing', 'Bologna Children’s Book Fair', 'Bologna', 'Bolzano', 'Bonelli', 'Bonifico Istantaneo', 'Bordighera',
-      'Borgo diVino', 'Borgo Pio', 'Borghi', 'Bormio', 'Borsellino Spedizioni', 'Botticelli', 'Bove', 'Boxless',
-      'Branded Content & Entertainment Festival', 'Bramante', 'Bravi', 'Brembate di Sopra', 'Brescia', 'Brianza',
-      'Brisighella', 'Brunelleschi', 'Bruxelles', 'BTP Più', 'BTPValore', 'BTP', 'Buca delle Fate', 'Buon 2 Giugno',
-      'Buon Anno', 'Buon Natale', 'Buona Epifania', 'Buona Pasqua', 'Buone Feste', 'Buoni Fruttiferi Postali', 'Buoni',
-      'Burgio', 'Busto Arsizio', 'Business Unit Energia PostePay', 'Ca’ Granda Ospedale Maggiore Policlinico', 'Cadore',
-      'Cagliari', 'Calabria', 'Caltanissetta', 'Calitri', 'Call for Solution', 'Call for Solutions',
-      'Camera dei Deputati', 'Camera con vista', 'Camillo Carrara', 'Camillo Golgi', 'Camillo Greco', 'Campania',
-      'Campidoglio', "Campione d'Italia", 'Campo dei Fiori', 'Campobasso', 'Camposanpiero', 'Campus Biomedico',
-      'Campus Italia', 'Campus LUISS', 'Campus Luiss', 'Canada', 'Candia Lomellina', 'Canicattì',
-      'Canosa Sannita', 'Cantalupo nel Sannio', 'Cantù', 'Capitanerie di Porto', 'Capo della Polizia', 'Capodichino',
-      'Capri', 'Carabinieri', 'Caravaggio', 'Carbon Neutrality', 'Career Day', 'Career Mentoring', 'Career Service',
-      'Career Service Sapienza', 'Caritas di Roma', 'Caritas', 'Carlo Alberto', 'Carlo Conti', 'Carlo Di Cicco',
-      'Carlo Melograni', 'Carlo Monticelli', 'Carloforte', 'Carmagnola', 'Carnevale', 'Carnera', 'Carpi', 'Carrara',
-      'Carrello', 'Carta Postepay Evolution', 'Carta Postepay', 'Cartalana', 'Cartiere Paolo Pigna', 'Cartoomics',
-      'Carugo', 'Casalanguida', 'Casalguidi', 'Casalnuovo', 'Casargo', 'Casavatore', 'Cascia', 'Caselle Landi',
-      'Caserta', 'Casina di Poste Italiane', 'Casina Poste', 'Cassa Depositi e Prestiti S.p.A.',
-      'Cassa Depositi e Prestiti', 'Castel del Piano', 'Castel di Sangro', 'Castel Fusano Melodica',
-      'Castellafiume', 'Castellamare di Stabia', 'Castelli', 'Casteltermini', 'Castrofilippo', 'Catania', 'Catanzaro',
-      'Caterpillar Radio2', 'Cava de’ Tirreni', 'Cavarzere', 'Cavriago', 'CDP Cassa Depositi e Prestiti', 'CDP',
-      'CEB', 'Cefalonia', 'Center of Excellence for Stability Police Units', 'Centro di Distribuzione',
-      'Centro di Distribuzione San Bonifacio Verona', 'Centro di Meccanizzazione Postale di Roserio',
-      'Centro di smistamento', 'Centro estivo', 'Centro Meccanizzato Postale', 'Centro Socio-Educativo Peter Pan',
-      'Centro', 'Cepagatti', 'Cermenate', 'Cernobbio', 'Cert', 'Cesenatico', 'Cesop HR Consulting Company',
-      'CFO', 'Chapman', 'Cheremule', 'Chiatamone', 'Chieti', 'Chiesi Farmaceutici', 'Chiara', 'Chioggia', 'Cina',
-      'Cinecittà', 'Cinisello Balsamo', 'Cinisello', 'Cinquecento', 'Cinto Euganeo', 'Ciociaria', 'Cipriano',
-      'Circuito', 'CISL Poste', 'CISL', 'Cittadella', 'Città Alta', 'Città del Vaticano', 'Città Metropolitana',
-      'Città nuova', 'Città Universitaria', 'Civita Castellana', 'Civitaquana', 'Claudio Chappe', 'Clearbox AI',
-      'CNEL', 'CNR IBE Institute of Bioeconomy', 'CNR', 'Co.Re.Com', 'Codemotion', 'Codice Etico', 'Codice Postepay',
-      'Codogno', 'CoESPU', 'Cogne', 'Colceresa', 'Coldiretti', 'Colle Oppio', 'Collegio Carlo Alberto', 'Collepietro',
-      'Collezione Blu', 'Collezione del Senato della Repubblica Italiana', 'Collezione Manzoni',
-      'Collezione Posta Prioritaria', 'Colli a Volturno', 'Colosseo', 'Comacchio', 'Comitato Amur', 'Comitato Edufin',
-      'Comitato Nazionale', 'Comitato Organizzatore', 'Commissione Europea',
-      'Commissione Nazionale per le Società e la Borsa', 'Commissione Trasporti', 'Como Gallio', 'Como Lake',
-      'Como San Gottardo', 'Como', 'Company Tour', 'Comprend', 'Comune di Bergamo', 'Comune di Trieste', 'Comune',
-      'Confindustria', 'Connecting Platform', 'Connettere', 'Conselve', 'Conservatorio Lorenzo Perosi',
-      'Consiglio di Amministrazione', 'Consiglio Nazionale delle Ricerche', 'Consorzio Elis', 'Consorzio Netcomm',
-      'Consumers’ Forum', 'Conto BancoPosta Start Giovani', 'Conto BancoPosta', 'Conversation', 'Coop',
-      'Cooperativa Ceramica d’Imola', 'Copersito Cilento', 'Corbetto', 'Corfino', 'Corfù', 'Corriere Adriatico',
-      'Corriere della Sera', 'Corriere di Rieti', 'Corriere', 'Corsa del Titolo', 'Cortina d’Ampezzo', 'Cortina',
-      'Corvetto', 'Cosenza', 'Costiera Amalfitana', 'Costituzione Italiana', 'Costituzione', 'Cotec', 'Coverciano',
-      'Crema', 'Cremnago', 'Cremona', 'Cresco Award', 'Cristiana', 'Cristiano', 'Crocetta', 'Crotone', 'Cuba',
-      'Cucciago', 'Cuggiono', 'Cuneo', 'Cyber Monday', 'CyberSecMonth', 'D&I', 'Dada Editore', 'Dalila', 'Damiani',
-      'Daniela', 'Daniele Mencarelli', 'Daniele', 'Dante Alighieri', 'Dante', 'Dario Neri', 'Dario', 'Data Grow',
-      'Davide Fantozzi', 'Davide', 'DC4EU', 'De Gasperi', 'Debito Postepay', 'Delibera', 'Deloitte', 'Delos', 'Dem',
-      'Denise', 'Deposito Supersmart Open', 'Deposito Supersmart Premium', 'Deposito Supersmart Young', 'Deposito',
-      'Design Thinking', 'Deutsche Post', 'Diabolik', 'Dialoghi Sinfonici', 'Dialoghi', 'Diana', 'Diano Marina',
-      'Didacta Italia', 'Digital assessment', 'Digital Credentials For Europe', 'Digital HR Community',
-      'Digital Recruiting Week', 'Digital Talent Day', 'Digital Talent Fair', 'Digital Transformation',
-      'Digitiamo', 'Dipartimento di Management', 'Dipartimento di Pubblica Sicurezza', 'Direttore Generale',
-      'Direzione Generale', 'Direzione Provinciale di Milano', 'Distretto Italia', 'Diversity & Inclusion',
-      'Do you speak OLA', 'Dogana', 'Dolomiti for Duchenne', 'Dolomiti', 'Domenica In', 'Domenico', 'Don Camillo',
-      'Don Giovanni Minzoni', 'Don Giovanni', 'Donato Bramante', 'Donatella Di Pietrantonio',
-      'Donatori di sangue Postelegrafonici', 'Dopolavoro', 'Dori Ghezzi', 'Dow Jones Sustainability Index Europe',
-      'Dow Jones Sustainability Index World', 'Dow Jones Sustainability Index', 'Dow Jones', 'DTO', 'Ducati', 'Duomo',
-      'Duomo di Firenze', 'Duomo di San Giorgio', 'Durlindana', 'E-Commerce', 'EarthHour2024',
-      'Eccellenze del Patrimonio culturale', 'Eccellenze del sistema produttivo ed economico',
-      'Eccellenze del sistema produttivo', 'Ecommerce', 'Edoardo Gellner', 'EduFin', 'Edufintour',
-      'Educazione Digitale', 'Educazione Finanziaria', 'EducazioneFinanziaria', 'Ega', 'Egadi', 'Egeo', 'Egitto',
-      'EIB', 'Elena Gianini Belotti', 'Elena', 'Eletta Savarino', 'Elettra', 'ELIS Innovation Hub', 'Elis',
-      'Elisabetta II', 'Elisabetta', 'Elisa', 'Eli Lilly Italia', 'Eluisa', 'Emilia Romagna', 'Emilia', 'Emilio',
-      'Emily Dickinson', 'Empoli', 'Empower Girls STEM', 'Empower Young Women', 'Enel', 'Eni Live', 'Eni', 'Enna',
-      'Enna Baronessa', 'Ennio Arba', 'Ennio Flaiano', 'Enrico De Nicola', 'Enrico Prampolini', 'Enrico Sarcinelli',
-      'Enza', 'Enzo Cerusico', 'Enzo Jannacci', 'Epifania', 'Equestrian Centre', 'Ercole Baldini', 'Ercole',
-      'Eredità', 'Eridania Italia', 'Erika', 'Ernestina Paper', 'Eros Donnini', 'Ernesto Che Guevara', 'ESG ICI',
-      'ESG Global Score', 'ESG', 'Esoscheletri', 'Esposizione Universale', 'Espresso', 'ESTATE25', 'Estate', 'Etna',
-      'Etna Comics', 'EU', 'EUDigitalWallet', 'EurCulture', 'Eur', 'Euronext', 'Europa 2024', 'Europa Incanto',
-      'Europa', 'European Athletics Championships Roma', 'European Golden boy – Absolute Best',
-      'European Investment Bank', 'European University Institute', 'Euro 2024', 'Euro', 'Eurovision', 'Eurosport',
-      'EY Risk Transformation Awards', 'Fabrizio', 'Fabro', 'FAI', 'Faenza', 'Fanpage', 'Fano', 'FAO',
-      'Fatturazione Elettronica', 'Favara', 'Favignana', 'Federcalcio', 'Federazione delle Capitali Europee',
-      'Federazione Europea della Comunicazione Interna', 'Federazione Italiana Giuoco Calcio',
-      'Federazione Italiana Rugby', 'Federico Gatti', 'Federico', 'FEIEA Gran Prix', 'Felice Gimondi', 'Fendi',
-      'Ferpi', 'Ferragosto', 'Ferrara', 'Ferrovie dello Stato', 'Festival della Canzone italiana',
-      'Festival dei Due Mondi', 'Festival dello Sport', 'Festa del Papà', 'Festa della Mamma',
-      'Festa della Repubblica', 'Fiamme Gialle', 'Fiera del Levante', 'Fiera di Roma', 'Fiera', 'Filago',
-      'Filatelia', 'Fillìa', 'Financial Times', 'FinanzaSostenibile', 'Finanza', 'Fiocco Giallo', 'Fiorello',
-      "Fiorenzuola d'Arda", 'Firenze', 'Firma Digitale Remota', 'FISU World University Games Winter', 'Flash',
-      'Flavia', 'Foce', 'Foggia', 'Foligno', 'Fondazione AILA', 'Fondazione Banco Alimentare',
-      'Fondazione Cariplo', 'Fondazione CDP', 'Fondazione COTEC', 'Fondazione Milano Cortina',
-      'Fondazione Unipolis', 'Fondazione Venezia per la Ricerca sulla Pace', 'Fondazione Vialli e Mauro Golf Cup',
-      'Fonderia Campane Marinelli', 'Fondi', 'Fontecchio', 'Foppolo', 'Forabetterworldofwork', 'Forlì-Cesena',
-      'Forlì', 'Foro Buonaparte', 'Foro Italico di Roma', 'Foro Italico', 'Forum di Cernobbio',
-      'Forum Internazionale del Turismo', 'Forum Multi Stakeholder', 'Forum Terzo settore', 'Forum',
-      'Fossacesia Marina', 'Francesco Bove', 'Francesco Cancellato', 'Francesco Cognetti', 'Francesco Di Pasquale',
-      'Francesco Tullio Altan', 'Francesco', 'Franca Florio', 'Francia', 'Francobolli', 'Francobollo', 'Francoforte',
-      'Franco Basaglia', 'Francoprovenzale', 'Frankenstein', 'Freight Leaders Council', 'French Tech Italy',
-      'Frosinone', 'FS', 'Fulvio', 'Futurismo', 'G7', 'Gabriele Cappellini', 'Gabriele Gravina', 'Gaia', 'Gagarin',
-      'Galep', 'Galileo Galilei', 'Gallarate', 'Galleria degli Udomini', 'Galleria Omodeo', 'Gallura', 'Gangi',
-      'Gardacon', 'Gardaland Resort', 'Gardaland', 'Garlasco', 'Garofalo', 'Gaspare', 'Gazzetta del Sud',
-      'Gazzetta d’Alba', 'GDF', 'Gelsomina Vigliotti', 'Generazione EF', 'Genio', 'Genova 54', 'Genova Pra’',
-      'Genova', 'Gentile', 'GeoEconomy Talk', 'Germania', 'Gessopalena', 'Gessopalina', 'Ghetto Ebraico',
-      'Ghirlandaio', 'Giacinto Bosco', 'Giacomo Leopardi', 'Giacomo Matteotti', 'Giacomo Puccini', 'Giada',
-      'Giallo', 'Gian Carlo Blangiardo', 'Gian Ludovico Rapaccini', 'Gianni Boncompagni', 'Gianni Maimeri',
-      'Gianni', 'Giano', 'Giappone', 'Giardino', 'Giffoni Film Festival', 'Giga', 'Gino Franzi', 'Gino Morici',
-      'Gioacchino', 'Gioconda', 'Giorno', 'Giorgia Distefano', 'Giorgia Meloni', 'Giorgia', 'Giorgio Grassi Damiani',
-      'Giorgio Napolitano', 'Giotto', 'Giovanni Caselli', 'Giovanni Domenico Cassini', 'Giovanni Gentile',
-      'Giovanni Gronchi', 'Giovanni Minzoni', 'Giovanni Muzio', 'Giovanni Paolo II',
-      'Giovanni Pierluigi da Palestrina', 'Giovanni Spadolini', 'Giovanni', 'Giro d’Italia',
-      'Giulia Falletti di Barolo', 'Giulia', 'Giuliano Vangi', 'Giulio Coniglio', 'Giulio Pediconi',
-      'Giuseppe Baldassarri', 'Giuseppe Di Taranto', 'Giuseppe Fucsia', 'Giuseppe Garibaldi', 'Giuseppe Lasco',
-      'Giuseppe Mazzini', 'Giuseppe', 'Giusi', 'Giustizia', 'Glovo', 'GNCA', 'Goffredo Mameli', 'Golden Boy',
-      'Goldrake', 'Golfo del Tigullio', 'Gorizia', 'Gosaldo', 'Governatore della Banca d’Italia', 'Governatore',
-      'Governo', 'Graffignano', 'Grande Guerra', 'Grande Partita', 'Green & Blue', 'Green Day', 'Green Index',
-      'Green Postal Day', 'GreenLog', 'Greta Galli', 'Gretta', 'Gressoney-La-Trinité', 'Grosseto', 'Gruppo',
-      'Gruppo Cassa Depositi e Prestiti', 'Gruppo Poste Italiane', 'Gruppo Sciatori delle Fiamme Gialle',
-      'Guardiagrele', 'Guardia di Finanza', 'Guarene', 'Gubbio', 'Guggenheim', 'Guglielmo Marconi',
-      'Guida Monaci', 'Guspini', 'H-Farm', 'Hale-Bopp', 'Harry Heusser', 'Hello Kitty', 'Hiroshima', 'Hub',
-      'Hub Logistico', 'Hub SDA', 'Huffingtonpost', 'Hughes', 'Iacopo', 'IAB Forum', 'Ibm', 'Ibn Hamdis', 'ICI',
-      'Icom', 'Ict', 'Id', 'Ied', 'Ieos', 'IF! Italians Festival', 'IFEL Campania', 'IFEL', 'Igi',
-      'Ignazio La Russa', 'Il Foglio', 'Il Gazzettino', 'Il Giornale', 'Il Messaggero', 'Il Milione', 'Il Postino',
-      'Il Resto del Carlino', 'Il Risparmio che fa Scuola', 'Il Secolo XIX', 'Il Sole 24 Ore', 'Ilaria', 'Imola',
-      'Impact', 'Imperia', 'Imprese', 'IMQ', 'Inail', 'Inclusione', 'Inclusion Job Day', 'India',
-      'Indici Dow Jones Sustainability', 'Industrial Liaison Program Day', 'Informateen', 'Ingegneria',
-      'Inghilterra', 'Inoxlm', 'Inps', 'INSIEME Connecting Ideas', 'INSIEME24SI', 'Insieme on the road',
-      'Instagram', 'Institute For Transformative Innovation Research', 'Instituto Cervantes',
-      'Instrumenta Traslationum', 'Insurance Day', 'Insurance', 'Intelligenza Artificiale', 'Inter',
-      'Intergovernmental Panel on Climate Change', 'Internal Auditor', 'International Council of Museum',
-      'International Post Corporation', 'Internet of things', 'Interporto', 'Intesa Sanpaolo',
-      'Intranet Italia Champions', 'Investor Day', 'Investor Relations', 'Invitalia', 'Ionio', 'IoT', 'Ipc', 'Iper',
-      'Iperbole', 'Ippodromo', 'Istat', 'Istituto Comprensivo Statale', 'Istituto di Moneta Elettronica',
-      'Istituto Europeo di Design', 'Istituto Poligrafico e Zecca dello Stato', 'Istituto Superiore di Sanità',
-      'Istituto Superiore per le Industrie Artistiche', 'Istituto Tecnico Economico per il Turismo',
-      'Istituto Postelegrafonici', 'Italia Informa', 'Italia', 'Italics', 'Italo Calvino', 'Italicus', 'Itet',
-      'ITIR', 'Iuliana Olivia', 'Ivano', 'Ivrea', 'Jacovitti', 'Jane Austen', 'Jazz Cascade', 'Jeeg Robot', 'Jeep',
-      'Jeep Renegade', 'Jennifer', 'Jesolo', 'Jobteaser', 'John Keats', 'Jp Morgan', 'Jugoslavia',
-      'Junior Real Estate Engineers', 'Juventus', 'Karl Lagerfeld', 'Katia', 'Kennedy', 'KissKissWay', 'Koinètica',
-      'Kpmg', 'Kyoto', 'La Nuvola', 'La Posta', 'La Provincia', 'La Repubblica', 'La Russa', 'La Spezia', 'La Stampa',
-      'Laborability', 'Lady Oscar', 'Lago di Garda', 'Lago Maggiore', 'Lamezia Terme', 'Lanciano', 'Landriano',
-      'Lanificio Fratelli Tallia di Delfino', 'L’Aquila', 'Lazio Museum', 'Lazio', 'Lazzaro', 'Lecce', 'Lecco',
-      'Le Polveri', 'Le Vie dei Tesoi', 'Legambiente', 'Legnano', 'Lendinara', 'Leonardo da Vinci', 'Leonardo',
-      'Leone XIV', 'Leone', 'Leopoli', 'Lettere', 'Lezioni di futuro', 'Libero Ferrario', 'Libretti Postali',
-      'Libretti', 'Libretto Smart', 'Lido Tre Archi', 'Lifeed', 'Lina', 'LinkedIn Notizie',
-      'LinkedIn Top Companies', 'LinkedIn', 'Lipari', 'LIS', 'Livigno', 'Livorno', 'Loacker', 'Locker Italia', 'Lodi',
-      'Logistica', 'Lombardia', 'Londra', 'Lorenza', 'Lorenzo Da Ponte', 'Lorenzo Foglio', 'Lorenzo Respighi',
-      'Lottomatica', 'Luana', 'Luca Mameli', 'Luca Perrone', 'Luca', 'Lucca Collezionando',
-      'Lucca Comics&Games', 'Lucca Sicula', 'Luce', 'Lucia', 'Luciano Fontana', 'Luciano Manara', 'Luciano Spalletti',
-      'Lucio Dalla', 'Lucrezia', 'Luigi De’ Servi', 'Luigi Einaudi', 'Luigi', 'Luiss Business School',
-      'Luiss Guido Carli', 'Luiss', 'Lundquist', 'Lusiana Conco', 'Luz', 'Mac', 'Macerata', 'Madre',
-      'Madre Teresa di Calcutta', 'Madrid', 'Maestro d’Arte', 'Maestri del Lavoro', 'Maffeo Pantaleoni',
-      'MaFIRM', 'Magione', 'Magliano Romano', 'Main Distribution Center', 'Main Partner', 'Maimeri',
-      'Maison Damiani', 'Malpensa', 'Malvertising', 'Mamoiada', 'Mamuthone', 'Manchester', 'Mantova', 'Manuela',
-      'Mao', 'Marca Temporale', 'Marca', 'Marcella', 'Marcello Mastroianni', 'Marcello Piacentini', 'Marcello',
-      'Marche', 'Marcianise', 'Marco Giovanazzi', 'Marco Lodoli', 'Marco Marsilio', 'Marco Nicolosino',
-      'Marco Polo', 'Marco', 'Maremma', 'Margherita', 'Maria Arianna', 'Maria Lisa Cinciari Rodano', 'Maria',
-      'Maria Plozner Mentil', 'Marina di Palizzi', 'Marina di Santa Caterina dello Jonio', 'Marineo',
-      'Mario Dondero', 'Mario Panicani', 'Mario Sironi', 'Mario Sossi', 'Marittima', 'Marketing Operativo',
-      'Marketing', 'Marostica', 'Marsala', 'Marsilio Ficino', 'Marta', 'Martin Pescatore', 'Martina',
-      'Martini & Rossi', 'Marzabotto', 'Mas', 'Massa Carrara', 'Massa', 'Massimo Troisi', 'Mastercard',
-      'Mastro Raphaël', 'Matelda', 'Matera', 'Matilde Serao', 'Mattarella', 'Matteo Del Fante',
-      'Matteo Piantedosi', 'Matteo Thorndike Kennedy', 'Matteo', 'Maurizio Ferraris', 'Maurizio', 'Mazzocco',
-      'MEF_GOV', 'MEF', 'Megacon', 'MEMIT', 'Menaggio', 'Mercati di Traiano', 'Mercitalia Logistics', 'Meridione',
-      'Mestre', 'Messaggero', 'Messina Today', 'MessinaToday', 'Messina', 'Meta', 'Metaverso', 'Meteo', 'MI', 'Mib',
-      'Michela', 'Michele Gordigiani', 'Michele', 'Microsoft Power BI', 'Microsoft', 'MIFID', 'Mike Bongiorno',
-      'Milano Cortina 2026', 'Milano Cortina', 'Milano Finanza', 'Milano Games Week', 'Milano Pindaro', 'Milano',
-      'Milena', 'Millo', 'Mimit', 'Mind The Bridge', 'Ministero degli Affari Esteri e della Cooperazione',
-      'Ministero degli Esteri', 'Ministero degli Interni', 'Ministero dei Trasporti', 'Ministero del Tesoro',
-      'Ministero dell’Economia e delle Finanze', 'Ministero dell’Economia', 'Ministero dell’Interno',
-      'Ministero della Cultura', 'Ministero delle Comunicazioni',
-      'Ministero delle Imprese e del Made in Italy', 'Ministero delle Imprese', 'Ministro dell’Interno', 'Ministro',
-      'Mino Reitano', 'Mira Soldatini Leonini', 'Mister Di Livio', 'Mister', 'Mitteleuropa', 'Mlk', 'MLK Deliveries',
-      'MLK Fresh', 'Mobilità Sostenibile', 'Modena', 'Modiano', 'Moige', 'Moise', 'Molise', 'Molochio', 'Moltrasio',
-      'Momigno', 'Momusso', 'Monfalcone', 'Monferrato', 'Monica De Gennaro', 'Monica', 'Monsignore', 'Mons',
-      'MontagnaUncem', 'Montalbano Jonico', 'Montalcino', 'Monte Isola', 'Monte San Biagio', 'Monte Soro',
-      'Monte Toc', 'Monte Urano', 'Monte Urpinu', 'Montecchio', 'Montefiascone', 'Montepulciano', 'Monterosso',
-      'Montesilvano', 'Monti', 'Montichiari', 'Montù Beccaria', 'Monza e Brianza', 'Monza', 'Morgan Stanley',
-      'Morterone', 'Morse', 'Most', 'Motta Visconti', 'Movimento Italiano Genitori', 'Movo', 'Movopack', 'Mozart',
-      'MSC', 'MSCI', 'Musica con Vista', 'MyPoste', 'Nazionale di calcio', 'Nazionale Poste', 'Nazionale',
-      'Napoleone Martinuzzi', 'Napoli Città Libro', 'Napoli Meridionale', 'Napoli', 'Napolitaner', 'Narni',
-      'Naruto', 'Natale', 'NATO', 'Nazareno Strampelli', 'Negrar', 'Nello', 'Nel', 'NetComm Forum', 'New York', 'Next',
-      'Next Nuova Economia', 'NFT', 'Nicolina', 'Nicoletta Costa', 'Nicolò Paganini', 'NOBID', 'NoidiPoste', 'Nola', 'Nord Ovest', 'Nord', 'Norma Cossetto', 'Notizie', 'Noto', 'Nove', 'November', 'Novara', 'Novella',
-      'Noviglio', 'Now', 'Novi', 'Nuova Antologia', 'Nuova Zelanda', 'Nuoro', 'Nuvola', 'Obbedisco', 'Oberdan',
-      'OBIS M', 'OCSE', 'Odessa', 'Offlaga', 'Olanda', 'Olimpiadi invernali', 'Olimpiadi', 'Olivetti',
-      'Olgiate Comacino', 'Olgiate Olona', 'Omegna', 'Onu2030', 'Onu', 'OpenAI', 'OpenFinance', 'Open Italy',
-      'OpenCall', 'OpenItalyELIS', 'OperationalExellence', 'Opi', 'Opportunità', 'Oratorio dell’Annunziata',
-      'Oristano', 'Oriolo Romano', 'Orvieto', 'Oscar di Bilancio', 'Oscar', 'Osservatorio Cargo Aereo',
-      'Osservatorio sulle Comunicazioni', 'Osservatorio', 'Ostia Lido', 'Ostia', 'Ottobre', 'Ottocento', 'P2P',
-      'Pact4Future', 'Padova Centro', 'Padova', 'Pagliarelle', 'Pa', 'Paesi Bassi', 'Palazzo Chigi',
-      'Palazzo dei Congressi', 'Palazzo del Quirinale', 'Palazzo della Farnesina', 'Palazzo delle Poste',
-      'Palazzo Ducale', 'Palazzo Giusti', 'Palazzo Marazzino', 'Palazzo Matteotti', 'Palazzo Policardi',
-      'Palazzo San Gervasio', 'Palazzo Spadaro', 'Palazzo Vitelleschi', 'Palermo Comic Convention', 'Palermo',
-      'Palio dei Normanni', 'Palio del Golfo', 'Palio di Asti', 'Palio di Legnano', 'Palio di Siena', 'Palio',
-      'Pallanza', 'Palmi', 'Pamela', 'Panchine Rosse', 'Paola Saluzzi', 'Paola', 'Paolo Benanti', 'Paolo Gencarelli',
-      'Paolo Pagliaro', 'Paolo Uccello', 'Paolo Zangrillo', 'Papa Bonifacio VIII', 'Papa Francesco',
-      'Papa Giovanni XXIII', 'Papa Giulio II', 'Papa Leone XIV', 'Papa Montini', 'Papa Urbano VIII', 'Papa',
-      'Parco degli Acquedotti', 'Parco dei Nebrodi', 'Parco del Pollino', 'Parco Fluviale',
-      'Parco Lombardo della Valle del Ticino', 'Parco Nazionale della Sila', 'Parco Naturale Regionale Porto Venere',
-      'Parigi', 'Parma', 'Pasquale Saraceno', 'Pasquale', 'Pasqua', 'Pavia', 'PEC Postecertifica PLUS', 'PEC',
-      'Pedara', 'Pellegrini', 'Peppone', 'Per Te Hi-Tech', 'Per Te Viaggi', 'Perugia', 'Perugino', 'Pesaro Urbino',
-      'Pesaro', 'Pescara', 'Peschiera Borromeo', 'Peter Pan', 'Petilia Policastro',
-      'Phygital Sustainability Expo', 'Piacenza', 'Pianeta', 'Piantedosi', 'Piastre', 'Piattaforma',
-      'Piazza Armerina', 'Piazza Affari', 'Piazza Dante', 'Piazza del Campo', 'Piazza del Duomo',
-      'Piazza del Popolo', 'Piazza della Loggia', 'Piazza della Transalpina', 'Piazza di Siena',
-      'Piazza Matteotti', 'Piazza Principe di Napoli', 'Piazza San Pietro', 'Piazza San Silvestro',
-      'Piazza Vittorio Emanuele', 'Piazzale Aldo Moro', 'Piazzale Donatori di Sangue', 'Piemonte', 'Piero Angela',
-      'Pietro Bevilacqua', 'Pietro', 'Pieve di Sn Giorgio', 'Pill’e Matta', 'Pimpa', 'Pinerolo', 'Pineider', 'Pio X',
-      'Pisa Centro', 'Pisa', 'Pistoia', 'Pius', 'Plaid', 'PNRR', 'PoC', 'Polis', 'Politecnico di Milano',
-      'Politecnico di Torino', 'Polizia di Stato', 'Polizia Postale', 'Polizia', 'Pollino', 'Polo Giovanile Toti',
-      'Polo Natatorio', 'Ponza', 'Porta Palazzo', 'Portici', 'Porto Ercole', 'Porto San Giorgio', 'Porto Torres',
-      'Porto Venere', 'Porto Viro', 'Porto', 'Portobuffolè', 'Portogallo', 'Portoscuso', 'Postamat', 'Postaonline',
-      'Poste Air Cargo', 'Poste Assicura', 'Poste Centro Medico', 'Poste Delivery Business',
-      'Poste Delivery Express', 'Poste Delivery Web', 'Poste Deliverybox Express', 'Poste Deliverybox Standard',
-      'Poste Deliverybox', 'Poste e Telegrafi', 'Poste e Telecomunicazioni', 'Poste Guidare Sicuri',
-      'Poste Italiane Filatelia', 'Poste Italiane S.p.A.', 'Poste Italiane', 'Poste Mondo Welfare', 'Poste Mondo',
-      'Poste Pedala', 'Poste Storie', 'Poste Vivere Protetti', 'PosteCase Ultraveloce', 'PosteGoFresh', 'PosteID',
-      'PosteID SPID', 'Postel', 'PosteMobile Casa Web', 'PosteMobile', 'Postenews', 'Postenibilità', 'Postepay',
-      'Postepay Connect Back', 'Postepay Digital', 'Postepay Evolution', 'Postepay Green', 'PostePay Spa',
-      'PostePlus', 'Postiglione', 'Potenza', 'Powerupyourself', 'Praga', 'Prampolini', 'Prato', 'Pratosardo',
-      'Premio Bilancio di Sostenibilità', 'Premio Catricalà', 'Premio dei Premi',
-      'Premio Giornalistico TG Poste', 'Premio Impatto', 'Premio Matilde Serao',
-      'Premio Nazionale per l’Innovazione', 'Premio Scirea', 'Premio Strega', 'Presidente del Consiglio',
-      'Presidente del Senato', 'Presidente della Repubblica', 'Presidente', 'Presidenza del Consiglio',
-      'Presidenza Italiana', 'Prevenzione', 'Primavera', 'Priolo', 'Procida', 'Progetto Fotovoltaico', 'Progetto Led',
-      'Progetto Polis', 'Progetto Sophia', 'Prometeia', 'Protezione Civile', 'Provincia di Bolzano', 'Provincia',
-      'Provvidenti', 'Prunetta', 'Pubblica Amministrazione', 'Pubblica Sicurezza', 'Puccini Museum', 'Puglia',
-      'Punti di Facilitazione Digitale', 'Punto Poste Casa & Famiglia', 'Punto Poste', 'PuntoPoste', 'P2P',
-      'QC Terme', 'QFin@Work', 'Quarto', 'Quartucciu', 'Quinto BancoPosta Dipendenti Pubblici',
-      'Quinto BancoPosta Pensionati', 'Quinto BancoPosta', 'Quirinale', 'Raccomandata Online', 'Radio 105',
-      'Radio Deejay', 'Radio Key Award', 'Radio KissKiss', 'Radio Zeta Future Hits Live', 'Radio Zeta',
-      'Raffaele', 'Raffaella Carrà', 'Ragusa', 'Rai Radio2', 'Rai', 'Raimondo d’Inzeo', 'Ramacca', 'Rapunzel',
-      'RDS 100% Grandi Successi', 'RDS Next', 'RDS Summer Festival', 'RDS', 'Re Carlo III', 'Re Carlo',
-      'Real Estate', 'Recanati', 'Recruiting Day Young', 'Recruiting Day', 'Recruiting Match', 'Reggio Calabria',
-      'Reggio Emilia', 'Regie Poste', 'Regina Elisabetta II', 'Regina Elisabetta', 'Regina Vittoria', 'Regina',
-      'Regione Campania', 'Regione Piemonte', 'Regione', 'Regno d’Italia', 'Relazione Finanziaria Annuale',
-      'Renato Brunetta', 'Renazzo', 'Reno', 'Renza Scendrate', 'Repubblica Italiana', 'Repubblica Romana',
-      'Repubblica di San Marino', 'Repubblica', 'Retail', 'Rete Punto Poste', 'Ricarica Automatica',
-      'Riccardo Nunziati', 'Ricolfi', 'Rieti Centro', 'Rieti', 'Rinascimento', 'Rinnovo', 'Rino Gaetano', 'Rio',
-      'Ripatransone', 'Rischiatutto', 'Risorgimento', 'Risparmio Postale', 'Risparmio', 'Rita', 'Ritiro Digitale',
-      'Riviera Romagnola', 'Riviera', 'Robilant', 'Roberto Narducci', 'Roberto Rossellini', 'Roberto',
-      'Rocca di Mezzo', 'Roccella Jonica', 'Rocco Chinnici', 'Roma Capitale', 'Roma Cinema Arena',
-      'Roma Città Aperta', 'Roma Design Experience', 'Roma Eur', 'Roma Nomentano', 'Roma Prati',
-      'Roma San Silvestro', 'Roma', 'Rome Business School', 'Rome', 'RomeWC', 'Romics', 'Roncade', 'Roncoferraro',
-      'Roncà', 'Rosa', 'Rosanna', 'Rosario', 'Roserio', 'Roseto degli Abruzzi', 'Rossella Sobrero', 'Rovellasca',
-      'Rovereto', 'Rovigo', 'RoyalMail', 'Rozzano', 'Sabaudia', 'Sabina Ciuffini', 'Sabina', 'Saccolongo',
-      'Sacra Famiglia', 'Sacrario', 'Safety Academy', 'Saint-Exupéry', 'Sala Comacina', 'Sala del Capitolo',
-      'Sala Plebiscito', 'Salcedo', 'Saldi', 'Salerno', 'Salina', 'Salone dei Pagamenti', 'Salone del Libro',
-      'Salone della CSR', 'Salone Internazionale del Libro', 'Salone SRI', 'Salso', 'Saltrio',
-      'Salvatore Cutuaia', 'Salvatore Luongo', 'Salvo D’Acquisto', 'Samuele', 'San Benedetto Val di Sambro',
-      'San Bonifacio', 'San Donato Milanese', 'San Felice Circeo', 'San Francesco', 'San Fruttuoso', 'San Genesio',
-      'San Giorgio', 'San Giovanni Bosco', 'San Giovanni in Laterano', 'San Giovanni', 'San Gregorio Armeno',
-      'San Lorenzo al Mare', 'San Lorenzo', 'San Marcellino', 'San Marino', 'San Maurizio e Compagni Martiri',
-      'San Nicolò', 'San Paolo', 'San Pellegrino Terme', 'San Pietro in Casale', 'San Pietro', 'San Salvo',
-      'San Silvestro', 'San Valentino', 'San Venanzo', 'San Vito', 'Sanremo', 'Sansepolcro', 'Sant’Agnello',
-      'Sant’Ampelio', 'Sant’Andrea', 'Sant’Angelo all’Esca', 'Sant’Angelo dei Lombardi', 'Sant’Angelo',
-      'Sant’Antioco', 'Sant’Antonio', 'Sant’Egidio alla Vibrata', 'Sant’Omobono Terme', 'Santa Caterina',
-      'Santa Fiora', 'Santa Margherita', 'Santa Maria a Vico', 'Santa Maria Capua Vetere', 'Santa Maria degli Angeli',
-      'Santa Maria del Popolo degli Incurabili', 'Santa Maria di Collemaggio', 'Santa Maria Maggiore',
-      'Santa Maria Novella', 'Santa Maria', 'Sante Zennaro', 'Santi', 'Santo Natale', 'Santo Spirito in Sassia',
-      'Santo Stefano di Sessanio', 'Sapienza Career Days', 'Sapienza Università di Roma', 'Sapienza', 'Saraceno',
-      'Sardegna', 'Saronno', 'Sarpi', 'Sassari', 'Sassia', 'Sassofono', 'Sassuolo', 'Satoshi Nakamoto',
-      'Saverio Tutino', 'Savona', 'Scalapay', 'Scanzano Jonico', 'Sciacca', 'Scicli', 'Scooter', 'Scudetto',
-      'Scuola dei Mestieri Gestione Cantieri', 'Scuola dei Mestieri Software e Reti',
-      'Scuola dei Mestieri', 'Scuola dell’Infanzia Bambi', 'Scuola dell’Infanzia Delfino Blu',
-      'Scuola di Architettura Svizzera di San Gallo', 'Scuola Elementare Ciro Papale', 'Scuola Elementare Manzoni',
-      'Scuola Grande di San Marco', 'Scuola Primaria Clinica Pediatrica IC Ardigò',
-      'Scuola Superiore di Specializzazione in Telecomunicazioni', 'SDA Express Courier', 'SDA', 'Second Hand',
-      'Seconda Guerra Mondiale', 'Secondigliano', 'Security Day', 'Segesta', 'Seguimi', 'Selena', 'Senato',
-      'Senato della Repubblica', 'Senigallia', 'SEO', 'Senis', 'Sengi Express', 'Seo', 'SERMAS', 'Serramazzona',
-      'Serramazzoni', 'Serravalle', 'Sersale', 'Service Design', 'Sestri Levante', 'Sesto Fiorentino',
-      'Settecento', 'Shape', 'ShenZhen', 'Sicilia', 'SID', 'Siena', 'Sila', 'Siliana', 'Siliqua',
-      'Silvia Campanella', 'Silvia Maria Rovere', 'Silvia Rovere', 'Silvia', 'Silvio Berlusconi', 'Simone Inzaghi',
-      'Simone', 'Sinopoli', 'Siracusa Panagia', 'Siracusa', 'Sirio', 'SkyTg24', 'SLA', 'Smart Buildings',
-      'Smart Label', 'Smart POS', 'Smart Screening', 'Snam', 'Social Impact Agenda', 'Società Edison',
-      'Società di Studi Fiumani', 'Società', 'Soldini', 'Sole', 'Solfagnano', 'Sondrio', 'Sorrento', 'Sostenibilità',
-      'Sovrano Militare Ordine di Malta', 'Spagna', 'Spazio Filatelia Verona', 'Spazio Filatelia', 'Spazio',
-      'Spazi per l’Italia', 'Spediggioco', 'SPES Academy', 'Spid', 'SportAgers', 'Sprayliz', 'Sprint', 'S&P Global',
-      'S&P', 'SSCNapoli', 'Stadio del Ghiaccio', 'Stadio Briamasco', 'Standard&Poor’s Global',
-      'Start Hub Consulting', 'Stati Uniti', 'Stato Città del Vaticano', 'Stato', 'Stazione Centrale',
-      'Stazione Ferroviaria', 'Stelle al Merito del Lavoro', 'Stelle al Merito', 'STEMGirls', 'STEM',
-      'Stefania Battistini', 'Stefania', 'Stefano D’Orazio', 'Stefano Fumi', 'Stefano Oppo', 'Stefano', 'Stella',
-      'Stellantis', 'Stige', 'Stilo', 'Stipendi', 'Stoccolma', 'Stradella', 'Strasburgo', 'Stresa',
-      'Striscia la notizia', 'Strona', 'Subito', 'Sud', 'SUMMER25', 'Summer', 'SuperApp', 'Superstudio Più',
-      'Supply Chain', 'Susy', 'SVIMEZ', 'Svizzera', 'System', 'T-Voice', 'Taglio di Po', 'Talarico',
-      'Talent Garden', 'TalentDay', 'Taranto', 'Tarquinia', 'Taskforce on Nature-related Financial Disclosures',
-      'Tato', 'Taurano', 'Tavola Rotonda', 'Teatro Carignano', 'Teatro degli Stati', 'Teatro Regio',
-      'Teatro Serpente Aureo', 'Teatro Toniolo', 'Teatro', 'Techno Fantasy', 'Tecnopolo Roma', 'Tecnopolo', 'Ted',
-      'Telegrafi', 'Telegrafo Elettrico', 'Telegrafo Ottico', 'Telegrafo', 'Tel Aviv', 'Temu', 'Tennis&Friends',
-      'Teo Luzi', 'Teramo Centro', 'Teramo', 'Terni', 'Terracina', 'Terrasini', 'Terrazzano', 'Tesoro',
-      'Tex Willer', 'The Connecting Platform', 'The Ocean Race', 'The State of the Union', 'Tigullio', 'Tim',
-      'Tione di Trento', 'Tirano', 'Tirreno', 'Tirocini', 'Titolo', 'Tiziana Morandi', 'Tiziana', 'TNFD',
-      'TNFD Early Adopter', 'To Good To Go', 'Tommaso', 'Tommy', 'Too Good To Go', 'Top Employer',
-      'Top Employers Institute', 'Top Post', 'Topolino', 'Torino Comics&Games', 'Torino Comics', 'Torino-Nizza',
-      'Torino', 'Torpignattara', 'Torre di Pisa', 'Torre di Torre Tagle', 'Torre', 'Torricelli', 'Tosca',
-      'Toscolano Maderno', 'Touchpoint Award', 'Tour de France', 'TPay', 'Trasanni', 'Trasferimento',
-      'Trastevere', 'Trattato di Maastricht', 'Trentino Alto Adige', 'Trentino', 'Trento', 'Trentola Ducenta',
-      'Treviso', 'Trezzano sul Naviglio', 'Trieste', 'Triggiano', 'Trinità dei Monti',
-      'Trinità d’Agultu e Vignola', 'Trinità', 'Trissino', 'Troisi', 'Tropea', 'Turchia', 'Tuscia', 'Tuscolano',
-      'Tutorial', 'TV', 'Twitter', 'Tyto Alba', 'Ubi', 'Ue',
-      'Ufficiale delle Poste Albo Nazionale uffici locali', 'Ufficio Postale di Roma San Silvestro',
-      'Ufficio Postale', 'Uffici Postali', 'Ufficio', 'Uffizi', 'Ugl', 'Ugo', 'UIL', 'Ucraina', 'Ucraino',
-      'Ultimo miglio', 'Umbria', 'UmbriaCon', 'Umbria Jazz', 'Underwood', 'Unesco', 'Unicredit',
-      'Unione Europea', 'Unione Generale del Lavoro', 'Unione Nazionale Comuni, Comunità, Enti Montani',
-      'Unione Postale del Mediterraneo', 'Unione Postale Universale', 'Unione Sarda', 'Università Bocconi',
-      'Università Ca’ Foscari Venezia', 'Università Cattolica del Sacro Cuore',
-      'Università degli Studi di Bari Aldo Moro', 'Università degli Studi di Firenze',
-      'Università degli Studi di Napoli Federico II', 'Università degli Studi di Padova',
-      'Università degli Studi di Parma', 'Università degli Studi di Roma Tor Vergata',
-      'Università degli Studi Roma Tre', 'Università degli Studi Trieste', 'Università di Pavia', 'Università LUMSA',
-      'Università', 'Universo', 'Unrra', 'UPuglia', 'UPU', 'Ururi', 'Usa', 'UsoProSPID20', 'Ussita', 'Ustica',
-      'Val Camonica', 'Val di Sole', 'Valdemone Festival', 'Valdastico', 'Valencia', 'Valentina Sani', 'Valentina',
-      'Valentino', 'Valeria', 'Valle d’Aosta', 'Valle Peligna', 'Valori Ritrovati', 'Varese Belforte',
-      'Varese Centro', 'Varese', 'Vasco Live', 'Vasco Rossi', 'Vastophil', 'Vaticano', 'Vedetta', 'Vejano',
-      'Venezia', 'Veneto', 'Ventotene', 'Verdi', 'Veronafil', 'Verona', 'Veronica Stigliani', 'Veronica', 'Verrès',
-      'Verso', 'Vespa Club d’Italia', 'Vespa', 'Vespucci', 'Vetto', 'Viale dello Scalo S. Lorenzo',
-      'Viale Romania', 'Vibo Valentia', 'Vicenza', 'Vico', 'Vienna', 'Vietri', 'Vigilanza', 'Vigliotti', 'Villa',
-      'Villa Arconati', 'Villa Blanc', 'Villa d’Este', 'Villa Glori', 'Villa Lagarina', 'Villa Marina',
-      'Villa Minozzo', 'Villaperuccio', 'Viminale - Ministero dell\'Interno', 'Viminale', 'Vincenzo Dona',
-      'Vincenzo', 'Virgola', 'Virginia', 'Virtus', 'Viterbo', 'Vittoria', 'Vittorio Adorni', 'Vittorio Emanuele',
-      'Vittorio Pisani', 'Viva Rai 2', 'Vivendi', 'Vizzolo Predabissi', 'Voghera', 'Voidless', 'Volontariato',
-      'Volterra', 'Vostok', 'Wallapop', 'Walt Disney', 'Walter', 'Warner Bros', 'Washington', 'Webinar',
-      'Webranking', 'WEF', 'Welfare Italia Forum', 'Welfare', 'WhatsApp', 'Who Cares Wins', 'Wikipedia',
-      'William Austin Burt', 'Winx Club', 'Winx', 'Wireless', 'Wmf', 'WordLift', 'World Cleanup Day',
-      'World Economic Forum', 'World Mail Express Europe', 'World Meeting Human Fraternity', 'World Post Day',
-      'World Triathlon Cup', 'WOW DAYS', 'WOW WEEKEND', 'WYSD', 'Xmas Comics&Games', 'XR', 'YellowBox',
-      'Yuri Gagarin', 'YouTube', 'Zagor', 'Zennaro', 'ZeDay', 'ZeroEmissionDay', 'Zeta', 'Zingarelli', 'Zodiaco',
-      'Zogno', 'Zovencedo', 'Zuppi', 'Zurigo'
-    ];
+    // --- NUOVA SEZIONE: GESTIONE LISTA DINAMICA ---
+    let masterList = [];
+
+    const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
+
+    async function getMasterListFromGoogleSheet() {
+      if (!googleSheetURL || googleSheetURL.includes('INCOLLA_QUI')) {
+        console.warn("URL del file CSV non impostato. La formattazione 'Auto' non userà una lista personalizzata.");
+        return [];
+      }
+      try {
+        const url = `${googleSheetURL}?t=${new Date().getTime()}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Errore di rete nel caricamento del foglio CSV.');
+        }
+        const csvText = await response.text();
+        return csvText.split('\n').map(item => item.trim().replace(/\r$/, '')).filter(Boolean);
+      } catch (error) {
+        console.error("Impossibile caricare l'elenco dal file CSV:", error);
+        alert("Attenzione: non è stato possibile caricare l'elenco personalizzato dal file CSV. La formattazione 'Auto' potrebbe non funzionare correttamente.");
+        return [];
+      }
+    }
     // --- FINE SEZIONE ---
 
-
-    // Configurazione limiti e tipi di campo per ciascuna tab
     const tabsConfig = Array.from({ length: 3 }, () => ({
       limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
       fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
     }));
 
-    // --- NUOVA SEZIONE ---
     function createTextTools() {
       return `
       <div class="text-tools">
@@ -703,7 +379,6 @@
         <button type="button" data-transform="auto" title="Formatta automaticamente il testo"><i class="fas fa-wand-magic-sparkles"></i> Auto</button>
       </div>`;
     }
-    // --- FINE SEZIONE ---
 
     function createTabContent(tabIndex) {
       const fieldsWithTools = ['wa', 'ytTitle', 'ytDesc'];
@@ -776,65 +451,58 @@
       </div>`;
     }
 
-    // --- NUOVA SEZIONE: LOGICA DI FORMATTAZIONE "AUTO" ---
-
-    // Funzione di utility per "escapare" i caratteri speciali per le regex
     function escapeRegex(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // Funzione principale per la formattazione automatica
+    // --- LOGICA DI FORMATTAZIONE AUTO AGGIORNATA ---
     function applyAutoFormatting(textarea) {
-      if (!textarea) return;
-      let text = textarea.value;
+        if (!textarea) return;
+        let text = textarea.value;
 
-      // 1. Converte tutto in minuscolo
-      text = text.toLowerCase();
+        // 1. Converte tutto in minuscolo
+        text = text.toLowerCase();
 
-      // Ordina la masterList dalla più lunga alla più corta per evitare sovrapposizioni
-      const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
+        // Ordina la masterList per lunghezza decrescente per gestire correttamente le frasi
+        const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
 
-      // 2. Capitalizza le parole/frasi della master list
-      sortedMasterList.forEach(phrase => {
-        const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'gi');
-        text = text.replace(regex, phrase); // Usa la versione originale con maiuscole
-      });
+        // 2. Capitalizza le parole/frasi dalla lista esterna
+        sortedMasterList.forEach(phrase => {
+            const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'gi');
+            text = text.replace(regex, phrase);
+        });
 
-      // 3. Capitalizza la prima lettera del testo
-      if (text.length > 0) {
-        text = text.charAt(0).toUpperCase() + text.slice(1);
-      }
-      
-      // 4. Capitalizza dopo i punti di fine frase (. ! ?)
-      text = text.replace(/([.?!])\s*(\p{L})/gu, (match, punctuation, letter) => {
-          return `${punctuation} ${letter.toUpperCase()}`;
-      });
+        // 3. Capitalizza la prima lettera del testo se non è già maiuscola
+        if (text.length > 0) {
+            text = text.charAt(0).toUpperCase() + text.slice(1);
+        }
+        
+        // 4. Capitalizza dopo i punti di fine frase (. ! ?), preservando gli a capo.
+        // Usa una lookbehind per trovare la lettera da modificare senza alterare gli spazi.
+        text = text.replace(/(?<=[.?!]\s*)\p{L}/gu, letter => letter.toUpperCase());
+        
+        // 5. Capitalizza dopo le virgolette a inizio frase o dopo un punto.
+        // Anche qui, una lookbehind per modificare solo la lettera.
+        text = text.replace(/(?<=(^|[.?!]\s*)")\p{L}/gu, letter => letter.toUpperCase());
 
-      // --- 5. NUOVA REGOLA: Capitalizza dopo le virgolette a inizio frase ---
-      text = text.replace(/(^|[.?!]\s*)"(\p{L})/gu, (match, preceding, letter) => {
-        return `${preceding}"${letter.toUpperCase()}`;
-      });
-      // --- FINE NUOVA REGOLA ---
-
-      textarea.value = text;
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.value = text;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
-
-    // --- FINE SEZIONE ---
-
+    
     function storeAllOriginalValues() {
         document.querySelectorAll('.tab-content textarea').forEach(textarea => {
             textarea.dataset.originalText = textarea.value;
         });
     }
     
-    function initializeApp() {
+    async function initializeApp() {
+      masterList = await getMasterListFromGoogleSheet();
+
       const tabContents = document.getElementById('tabContents');
       tabContents.innerHTML = tabsConfig
         .map((_, i) => createTabContent(i))
         .join('');
 
-      // Ripristina dati salvati da localStorage
       tabsConfig.forEach((_, index) => {
         const savedData = localStorage.getItem(`tabData${index}`);
         if (savedData) {
@@ -884,76 +552,49 @@
       updateOutputs();
     }
     
-    // --- AGGIORNATA LA FUNZIONE DI GESTIONE ---
     function handleTextTransform(event) {
         const button = event.target.closest('.text-tools button');
         if (!button) return;
-
         event.preventDefault();
-
         const transformType = button.dataset.transform;
         const inputGroup = button.closest('.input-group');
         const textarea = inputGroup.querySelector('textarea');
-
-        // Azione "revert" sull'intero campo
         if (transformType === 'revert') {
             textarea.value = textarea.dataset.originalText || '';
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
             return;
         }
-
-        // --- NUOVO: Gestisce il pulsante "Auto" ---
         if (transformType === 'auto') {
             applyAutoFormatting(textarea);
             return;
         }
-        
-        // Logica esistente per la trasformazione della SELEZIONE
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selectedText = textarea.value.substring(start, end);
-
-        if (selectedText.length === 0) {
-            return;
-        }
-
+        if (selectedText.length === 0) return;
         let transformedSelection = '';
         switch (transformType) {
-            case 'lower':
-                transformedSelection = selectedText.toLowerCase();
-                break;
-            case 'upper':
-                transformedSelection = selectedText.toUpperCase();
-                break;
-            case 'title':
-                transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase());
-                break;
+            case 'lower': transformedSelection = selectedText.toLowerCase(); break;
+            case 'upper': transformedSelection = selectedText.toUpperCase(); break;
+            case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
         }
-
         const fullText = textarea.value;
         const newText = fullText.substring(0, start) + transformedSelection + fullText.substring(end);
-        
         textarea.value = newText;
         textarea.focus();
         textarea.setSelectionRange(start, start + transformedSelection.length);
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    // --- FINE AGGIORNAMENTO ---
     
     function switchTab(tabIndex) {
-      document.querySelectorAll('.tab').forEach((tab, i) => {
-        tab.classList.toggle('active', i === tabIndex);
-      });
-      document.querySelectorAll('.tab-content').forEach((content, i) => {
-        content.classList.toggle('active', i === tabIndex);
-      });
+      document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === tabIndex));
+      document.querySelectorAll('.tab-content').forEach((content, i) => content.classList.toggle('active', i === tabIndex));
       updateOutputs();
     }
 
     function updateOutputs() {
       document.querySelectorAll('.tab-content').forEach((tab, tabIndex) => {
         const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
-
         ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
           const textarea = tab.querySelector(`[data-type="${type}"]`);
           const counter = document.getElementById(`counter-${type}-${tabIndex}`);
@@ -962,10 +603,8 @@
           counter.textContent = `${valueLength}/${maxLen}`;
           counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
         });
-
         const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
         tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
-
         const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
         tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
       });
@@ -976,15 +615,10 @@
       const outputType = button.dataset.type;
       const tab = button.closest('.tab-content');
       const outputField = tab.querySelector(`[data-type="${outputType}"]`);
-
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
-
       navigator.clipboard.writeText(outputField.textContent).then(() => {
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-        }, 300);
-
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
         setTimeout(() => {
           const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
           button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
@@ -1002,15 +636,10 @@
       const tab = button.closest('.tab-content');
       const textarea = tab.querySelector(`[data-type="ytTitle"]`);
       const textToCopy = textarea.value;
-
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
-
       navigator.clipboard.writeText(textToCopy).then(() => {
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-        }, 300);
-
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
           button.disabled = false;
@@ -1025,22 +654,15 @@
       const button = event.currentTarget;
       const tabIndex = parseInt(button.dataset.tabIndex);
       const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Caricamento in corso...`;
       button.disabled = true;
-
       const dataToSave = {};
       tab.querySelectorAll('textarea').forEach(input => {
         dataToSave[input.dataset.type] = input.value;
       });
       localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
-
       storeAllOriginalValues();
-
-      setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-      }, 300);
-
+      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-save"></i> Salva`;
         button.disabled = false;
@@ -1051,21 +673,15 @@
       const button = event.currentTarget;
       const tabIndex = parseInt(button.dataset.tabIndex);
       const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-
       if (confirm("Stai cancellando tutto il testo. Sei sicuro?")) {
         button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cancellazione in corso...`;
         button.disabled = true;
-
         tab.querySelectorAll('textarea').forEach(textarea => {
           textarea.value = '';
           textarea.dataset.originalText = '';
         });
         updateOutputs();
-
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-        }, 300);
-
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-trash"></i> Cancella tutto`;
           button.disabled = false;
@@ -1077,7 +693,6 @@
       const button = event.currentTarget;
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
       button.disabled = true;
-
       let output = '';
       for (let i = 0; i < 3; i++) {
         const tab = document.querySelector(`.tab-content[data-tab-index="${i}"]`);
@@ -1087,12 +702,8 @@
           `Titolo YouTube: ${getValue('ytTitle')}\n` +
           `Contenuto social: ${getValue('ytDesc')}\n\n`;
       }
-
       navigator.clipboard.writeText(output.trim()).then(() => {
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-        }, 300);
-
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
           button.disabled = false;
@@ -1107,10 +718,8 @@
       const button = event.currentTarget;
       button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione in corso...`;
       button.disabled = true;
-
       const today = new Date();
       const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
-
       const excelData = [
         ["", "News 1", "News 2", "News 3"],
         ["Testo descrittivo news Canale WA", "", "", ""],
@@ -1119,9 +728,7 @@
         ["Link YouTube", "", "", ""],
         ["Link TG Poste", "", "", ""]
       ];
-
       const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
-
       for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
         const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
         tab.querySelectorAll('textarea').forEach(textarea => {
@@ -1131,16 +738,11 @@
           }
         });
       }
-
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(excelData);
       XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
       XLSX.writeFile(wb, fileName);
-
-      setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-check"></i> Fatto!`;
-      }, 300);
-
+      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-file-export"></i> Esporta in Excel`;
         button.disabled = false;
@@ -1149,12 +751,10 @@
 
     async function importFromExcel(file) {
       if (!file) return;
-
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
       const fieldMap = {
         'Testo descrittivo news Canale WA': 'wa',
         'Titolo YouTube': 'ytTitle',
@@ -1162,7 +762,6 @@
         'Link YouTube': 'ytLink',
         'Link TG Poste': 'tgLink'
       };
-
       rows.slice(1).forEach(row => {
         const fieldType = fieldMap[row[0]?.trim()];
         if (fieldType) {
@@ -1175,7 +774,6 @@
           }
         }
       });
-      
       storeAllOriginalValues();
       updateOutputs();
     }
