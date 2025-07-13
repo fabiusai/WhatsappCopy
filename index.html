@@ -339,7 +339,6 @@
 
   <script>
     let masterList = [];
-
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
 
     async function getMasterListFromGoogleSheet() {
@@ -350,14 +349,12 @@
       try {
         const url = `${googleSheetURL}?t=${new Date().getTime()}`;
         const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Errore di rete nel caricamento del foglio CSV.');
-        }
+        if (!response.ok) throw new Error('Errore di rete nel caricamento del foglio CSV.');
         const csvText = await response.text();
         return csvText.split('\n').map(item => item.trim().replace(/\r$/, '')).filter(Boolean);
       } catch (error) {
         console.error("Impossibile caricare l'elenco dal file CSV:", error);
-        alert("Attenzione: non è stato possibile caricare l'elenco personalizzato dal file CSV. La formattazione 'Auto' potrebbe non funzionare correttamente.");
+        alert("Attenzione: non è stato possibile caricare l'elenco personalizzato dal file CSV.");
         return [];
       }
     }
@@ -381,7 +378,6 @@
     function createTabContent(tabIndex) {
       const fieldsWithTools = ['wa', 'ytTitle', 'ytDesc'];
       const textToolsHTML = createTextTools();
-
       return `
       <div class="tab-content${tabIndex === 0 ? ' active' : ''}" data-tab-index="${tabIndex}">
         <div class="card">
@@ -397,8 +393,7 @@
             ${fieldsWithTools.includes('ytTitle') ? textToolsHTML : ''}
             <textarea id="ytTitle-${tabIndex}" data-type="ytTitle" rows="2"></textarea>
             <button class="btn outline btn-copy-ytTitle" data-type="ytTitle">
-              <i class="fas fa-copy"></i>
-              Copia Titolo YouTube
+              <i class="fas fa-copy"></i> Copia Titolo YouTube
             </button>
           </div>
           <div class="input-group">
@@ -418,31 +413,25 @@
           <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto WA</div>
           <div class="output-field" data-type="waOutput"></div>
           <button class="btn outline btn-copy-wa" data-type="waOutput">
-            <i class="fas fa-copy"></i>
-            Copia Contenuto WA
+            <i class="fas fa-copy"></i> Copia Contenuto WA
           </button>
           <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto Social</div>
           <div class="output-field" data-type="socialOutput"></div>
           <button class="btn outline btn-copy-social" data-type="socialOutput">
-            <i class="fas fa-copy"></i>
-            Copia Contenuto Social
+            <i class="fas fa-copy"></i> Copia Contenuto Social
           </button>
           <div class="button-group" style="margin-top: 30px;">
             <button class="btn btn-save" data-tab-index="${tabIndex}">
-              <i class="fas fa-save"></i>
-              Salva
+              <i class="fas fa-save"></i> Salva
             </button>
             <button class="btn btn-clear" data-tab-index="${tabIndex}">
-              <i class="fas fa-trash"></i>
-              Cancella tutto
+              <i class="fas fa-trash"></i> Cancella tutto
             </button>
             <button class="btn btn-copy-all">
-              <i class="fas fa-copy"></i>
-              Contenuto completo
+              <i class="fas fa-copy"></i> Contenuto completo
             </button>
             <button class="btn btn-export">
-              <i class="fas fa-file-export"></i>
-              Esporta in Excel
+              <i class="fas fa-file-export"></i> Esporta in Excel
             </button>
           </div>
         </div>
@@ -453,23 +442,23 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- LOGICA DI FORMATTAZIONE AUTO AGGIORNATA E CORRETTA ---
+    // --- NUOVA LOGICA DI FORMATTAZIONE ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
-        let text = textarea.value;
+        let originalText = textarea.value;
         const urls = [];
-        const urlRegex = /(https?:\/\/|www\.)[^\s]+/g;
+        const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
 
-        // 1. Isola e "protegge" gli URL sostituendoli con un segnaposto
-        text = text.replace(urlRegex, (url) => {
+        // 1. Isola e protegge gli URL
+        let textToFormat = originalText.replace(urlRegex, (url) => {
             const placeholder = `__URL_${urls.length}__`;
             urls.push(url);
             return placeholder;
         });
 
-        // 2. Applica le regole di formattazione al testo "pulito" (senza URL)
-        let formattedText = text.toLowerCase();
+        // 2. Applica le regole di formattazione al testo senza URL
+        let formattedText = textToFormat.toLowerCase();
 
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
@@ -477,25 +466,22 @@
             formattedText = formattedText.replace(regex, phrase);
         });
 
-        // Capitalizza la prima lettera del testo (e solo quella)
         if (formattedText.length > 0) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
 
-        // Capitalizza dopo un punto, punto esclamativo o interrogativo, gestendo gli spazi.
-        formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
-            return `${punctuationAndSpaces}${letter.toUpperCase()}`;
-        });
-        
-        // Capitalizza dopo le virgolette a inizio frase o dopo un punto
-        formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
-            return `${preceding}${quote}${letter.toUpperCase()}`;
+        formattedText = formattedText.replace(/(?<=[.?!])(\s*)(\p{L})/gu, (match, spaces, letter) => {
+            return `${spaces}${letter.toUpperCase()}`;
         });
 
-        // 3. Reinserisce gli URL originali, che sono rimasti intatti
+        formattedText = formattedText.replace(/(?<=^|([.?!]\s*))(")(\p{L})/gu, (match, preceding, quote, letter) => {
+            return `${quote}${letter.toUpperCase()}`;
+        });
+
+        // 3. Reinserisce gli URL originali, convertendoli in minuscolo
         urls.forEach((url, index) => {
             const placeholder = `__URL_${index}__`;
-            formattedText = formattedText.replace(placeholder, url);
+            formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
         // 4. Aggiorna la textarea
@@ -511,12 +497,8 @@
     
     async function initializeApp() {
       masterList = await getMasterListFromGoogleSheet();
-
       const tabContents = document.getElementById('tabContents');
-      tabContents.innerHTML = tabsConfig
-        .map((_, i) => createTabContent(i))
-        .join('');
-
+      tabContents.innerHTML = tabsConfig.map((_, i) => createTabContent(i)).join('');
       tabsConfig.forEach((_, index) => {
         const savedData = localStorage.getItem(`tabData${index}`);
         if (savedData) {
@@ -528,41 +510,18 @@
           });
         }
       });
-      
       storeAllOriginalValues();
       tabContents.addEventListener('click', handleTextTransform);
-      document.querySelectorAll('textarea').forEach(textarea => {
-        textarea.addEventListener('input', updateOutputs);
-      });
-      document.querySelectorAll('.btn-copy-wa').forEach(btn => {
-        btn.addEventListener('click', copyContent);
-      });
-      document.querySelectorAll('.btn-copy-social').forEach(btn => {
-        btn.addEventListener('click', copyContent);
-      });
-      document.querySelectorAll('.btn-copy-ytTitle').forEach(btn => {
-        btn.addEventListener('click', copyTitle);
-      });
-      document.querySelectorAll('.btn-save').forEach(btn => {
-        btn.addEventListener('click', saveData);
-      });
-      document.querySelectorAll('.btn-clear').forEach(btn => {
-        btn.addEventListener('click', clearAll);
-      });
-      document.querySelectorAll('.btn-copy-all').forEach(btn => {
-        btn.addEventListener('click', copyAllTabsContent);
-      });
-      document.querySelectorAll('.btn-export').forEach(btn => {
-        btn.addEventListener('click', exportToExcel);
-      });
-      document.getElementById('excelInput').addEventListener('change', function () {
-        importFromExcel(this.files[0]);
-      });
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          switchTab(parseInt(tab.dataset.tabIndex));
-        });
-      });
+      document.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', updateOutputs));
+      document.querySelectorAll('.btn-copy-wa').forEach(btn => btn.addEventListener('click', copyContent));
+      document.querySelectorAll('.btn-copy-social').forEach(btn => btn.addEventListener('click', copyContent));
+      document.querySelectorAll('.btn-copy-ytTitle').forEach(btn => btn.addEventListener('click', copyTitle));
+      document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', saveData));
+      document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', clearAll));
+      document.querySelectorAll('.btn-copy-all').forEach(btn => btn.addEventListener('click', copyAllTabsContent));
+      document.querySelectorAll('.btn-export').forEach(btn => btn.addEventListener('click', exportToExcel));
+      document.getElementById('excelInput').addEventListener('change', function () { importFromExcel(this.files[0]); });
+      document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(parseInt(tab.dataset.tabIndex))));
       updateOutputs();
     }
     
