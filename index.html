@@ -286,7 +286,6 @@
       fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
     }));
 
-    // --- MODIFICA 1: Riorganizzato il layout dei pulsanti e aggiunto il titolo a "Ripristina" ---
     function createTextTools() {
       return `
       <div class="text-tools">
@@ -365,8 +364,7 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- MODIFICA 2: NUOVA LOGICA DI FORMATTAZIONE AUTOMATICA ---
-    // Questa funzione ora segue regole più complesse per un risultato più intelligente.
+    // --- LOGICA DI FORMATTAZIONE AUTOMATICA CORRETTA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -384,30 +382,29 @@
         // 2. Normalizza il testo in minuscolo per creare una base di partenza pulita.
         let formattedText = textToFormat.toLowerCase();
 
-        // 3. Applica la casistica dal CSV. Ordina per lunghezza per evitare sovrapposizioni (es. "Poste" vs "Poste Italiane").
+        // 3. Applica la casistica dal CSV. Ordina per lunghezza per evitare sovrapposizioni.
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
             const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'g');
             formattedText = formattedText.replace(regex, phrase);
         });
 
-        // 4. Applica le regole grammaticali (che hanno la precedenza sulla casistica del CSV, come richiesto).
-        // Capitalizza la prima lettera del testo (e solo quella).
+        // 4. Applica le regole grammaticali.
         if (formattedText.length > 0) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
-        // Capitalizza dopo un punto, punto esclamativo o interrogativo seguito da spazio.
         formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
             return `${punctuationAndSpaces}${letter.toUpperCase()}`;
         });
-        // Capitalizza dopo le virgolette a inizio frase o dopo un punto.
         formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Reinserisce gli URL originali, convertendoli sempre in minuscolo come richiesto.
+        // 5. Reinserisce gli URL originali, convertendoli sempre in minuscolo.
+        // --- QUI LA CORREZIONE ---
+        // Ora cerca il segnaposto in versione minuscola, che è quello presente nel testo.
         urls.forEach((url, index) => {
-            const placeholder = `__URL_PLACEHOLDER_${index}__`;
+            const placeholder = `__url_placeholder_${index}__`; // CORRETTO
             formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
@@ -416,8 +413,6 @@
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
-    // --- MODIFICA 3: Funzione per memorizzare lo stato "originale" dei campi di testo ---
-    // Usata per la nuova funzione "Ripristina"
     function storeAllOriginalValues() {
         document.querySelectorAll('.tab-content textarea').forEach(textarea => {
             textarea.dataset.originalText = textarea.value;
@@ -439,7 +434,6 @@
           });
         }
       });
-      // Memorizza i valori caricati come "originali"
       storeAllOriginalValues();
       tabContents.addEventListener('click', handleTextTransform);
       document.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', updateOutputs));
@@ -455,7 +449,6 @@
       updateOutputs();
     }
     
-    // --- MODIFICA 4: Gestore eventi aggiornato per la nuova logica di "Ripristina" e "Auto" ---
     function handleTextTransform(event) {
         const button = event.target.closest('.text-tools button');
         if (!button) return;
@@ -465,24 +458,21 @@
         const inputGroup = button.closest('.input-group');
         const textarea = inputGroup.querySelector('textarea');
         
-        // Nuova logica per il pulsante "Ripristina"
         if (transformType === 'revert') {
             textarea.value = textarea.dataset.originalText || '';
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
             return;
         }
 
-        // Usa la nuova funzione di formattazione per "Auto"
         if (transformType === 'auto') {
             applyAutoFormatting(textarea);
             return;
         }
         
-        // Logica per le altre trasformazioni (applicata solo al testo selezionato)
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selectedText = textarea.value.substring(start, end);
-        if (selectedText.length === 0) { // Se non c'è selezione, applica a tutto il testo
+        if (selectedText.length === 0) {
             let newText = '';
             switch (transformType) {
                 case 'lower': newText = textarea.value.toLowerCase(); break;
@@ -490,7 +480,7 @@
                 case 'title': newText = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
             }
             textarea.value = newText;
-        } else { // Se c'è selezione, applica solo a quella
+        } else {
             let transformedSelection = '';
             switch (transformType) {
                 case 'lower': transformedSelection = selectedText.toLowerCase(); break;
@@ -571,7 +561,6 @@
       });
     }
 
-    // --- MODIFICA 5: La funzione Salva ora aggiorna lo stato "originale" per il ripristino ---
     function saveData(event) {
       const button = event.currentTarget;
       const tabIndex = parseInt(button.dataset.tabIndex);
@@ -583,7 +572,6 @@
         dataToSave[input.dataset.type] = input.value;
       });
       localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
-      // Dopo aver salvato, il testo corrente diventa il nuovo "originale"
       storeAllOriginalValues(); 
       setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
       setTimeout(() => {
@@ -601,7 +589,7 @@
         button.disabled = true;
         tab.querySelectorAll('textarea').forEach(textarea => {
           textarea.value = '';
-          textarea.dataset.originalText = ''; // Pulisce anche lo stato originale
+          textarea.dataset.originalText = '';
         });
         updateOutputs();
         setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
@@ -672,7 +660,6 @@
       }, 2000);
     }
     
-    // --- MODIFICA 6: L'import da Excel aggiorna lo stato "originale" per il ripristino ---
     async function importFromExcel(file) {
       if (!file) return;
       const data = await file.arrayBuffer();
@@ -698,7 +685,6 @@
           }
         }
       });
-      // Dopo aver importato, il testo corrente diventa il nuovo "originale"
       storeAllOriginalValues(); 
       updateOutputs();
     }
