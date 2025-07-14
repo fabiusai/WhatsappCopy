@@ -364,71 +364,66 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- NUOVA FUNZIONE HELPER PER CREARE LA REGEX CORRETTA ---
     function createCaseInsensitiveRegex(phrase) {
-        const wordCharRegex = /^\w|^\p{L}/u; // Controlla se una stringa inizia con un carattere di parola
-        const endsWithWordCharRegex = /\w$|\p{L}$/u; // Controlla se una stringa finisce con un carattere di parola
-
+        const wordCharRegex = /^\w|^\p{L}/u;
+        const endsWithWordCharRegex = /\w$|\p{L}$/u;
         let pattern = escapeRegex(phrase);
-
-        // Aggiungi \b all'inizio solo se la frase inizia con un carattere di parola
         if (wordCharRegex.test(phrase)) {
             pattern = `\\b` + pattern;
         }
-
-        // Aggiungi \b alla fine solo se la frase finisce con un carattere di parola
         if (endsWithWordCharRegex.test(phrase)) {
             pattern = pattern + `\\b`;
         }
-
         return new RegExp(pattern, 'gi');
     }
 
+    // --- LOGICA AUTO DEFINITIVA CON PROTEZIONE PUNTI SIGLE ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
         const originalText = textarea.value;
         const urls = [];
         const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
+        const DOT_PLACEHOLDER = '__ACRONYM_DOT__';
 
-        // 1. Isola URL e mettili da parte
+        // 1. Isola URL
         let textToFormat = originalText.replace(urlRegex, (url) => {
             const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
             urls.push(url);
             return placeholder;
         });
-        
-        // 2. Itera sulla masterlist per applicare le sostituzioni
+
+        // 2. Sostituisci le parole del CSV, neutralizzando i loro punti interni
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
             const regex = createCaseInsensitiveRegex(phrase);
-            textToFormat = textToFormat.replace(regex, phrase);
+            const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER); // Neutralizza i punti
+            textToFormat = textToFormat.replace(regex, protectedPhrase);
         });
-
-        // 3. Normalizza in minuscolo SOLO il testo che non è stato matchato.
-        // Questa parte è complessa, un approccio più semplice e robusto è applicare le regole grammaticali dopo.
+        
+        // 3. Applica le regole grammaticali sul testo "sicuro"
         let formattedText = textToFormat;
-
-        // 4. Applica le regole grammaticali come tocco finale
-        // Capitalizza la prima lettera del testo (se non è un URL protetto)
+        // Capitalizza la prima lettera del testo
         if (formattedText.length > 0 && !formattedText.startsWith('__URL_')) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
-        // Capitalizza dopo punteggiatura
+        // Capitalizza dopo punteggiatura VERA (i punti delle sigle sono protetti)
         formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
             return `${punctuationAndSpaces}${letter.toUpperCase()}`;
         });
-        // Capitalizza dopo virgolette a inizio frase o dopo un punto
+        // Capitalizza dopo virgolette
         formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Reinserisci gli URL
+        // 4. Ripristina gli URL
         urls.forEach((url, index) => {
             const placeholder = `__URL_PLACEHOLDER_${index}__`;
-            // Non convertiamo più a minuscolo qui, l'utente potrebbe voler mantenere il case dell'URL
             formattedText = formattedText.replace(placeholder, url);
         });
+
+        // 5. Ripristina i punti nelle sigle come ultimissimo passo
+        formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
 
         // 6. Aggiorna la textarea
         textarea.value = formattedText;
