@@ -364,6 +364,7 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // --- LOGICA "AUTO" DEFINITIVA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -371,49 +372,67 @@
         const urls = [];
         const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
 
+        // 1. Isola URL e mettili da parte
         let textToFormat = originalText.replace(urlRegex, (url) => {
             const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
             urls.push(url);
             return placeholder;
         });
-        
+
+        // 2. Normalizza tutto in minuscolo come base
         let formattedText = textToFormat.toLowerCase();
 
+        // 3. Applica le regole del CSV sul testo minuscolo
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
             const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'g');
             formattedText = formattedText.replace(regex, phrase);
         });
 
+        // 4. Applica le regole grammaticali come tocco finale
+        // Capitalizza la prima lettera del testo
         if (formattedText.length > 0) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
+        // Capitalizza dopo punteggiatura
         formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
             return `${punctuationAndSpaces}${letter.toUpperCase()}`;
         });
+        // Capitalizza dopo virgolette a inizio frase o dopo un punto
         formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
+        // 5. Reinserisci gli URL (già protetti dalle trasformazioni)
         urls.forEach((url, index) => {
+            // Cerca il placeholder minuscolo, perché tutto il testo è stato abbassato di case
             const placeholder = `__url_placeholder_${index}__`;
             formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
+        // 6. Aggiorna la textarea
         textarea.value = formattedText;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
-    function storeAllOriginalValues() {
-        document.querySelectorAll('.tab-content textarea').forEach(textarea => {
-            textarea.dataset.originalText = textarea.value;
-        });
+    function storeOriginalValue(textarea) {
+        if (textarea) {
+          textarea.dataset.originalText = textarea.value;
+        }
     }
     
     async function initializeApp() {
       masterList = await getMasterListFromGoogleSheet();
       const tabContents = document.getElementById('tabContents');
       tabContents.innerHTML = tabsConfig.map((_, i) => createTabContent(i)).join('');
+      
+      document.querySelectorAll('textarea').forEach(textarea => {
+          storeOriginalValue(textarea);
+          textarea.addEventListener('input', updateOutputs);
+          textarea.addEventListener('focus', () => storeOriginalValue(textarea));
+          textarea.addEventListener('change', () => storeOriginalValue(textarea));
+      });
+
       tabsConfig.forEach((_, index) => {
         const savedData = localStorage.getItem(`tabData${index}`);
         if (savedData) {
@@ -421,13 +440,16 @@
           const tab = document.querySelector(`.tab-content[data-tab-index="${index}"]`);
           Object.entries(data).forEach(([type, value]) => {
             const field = tab.querySelector(`[data-type="${type}"]`);
-            if (field) field.value = value;
+            if (field) {
+                field.value = value;
+                storeOriginalValue(field);
+            }
           });
         }
       });
-      storeAllOriginalValues();
+      
       tabContents.addEventListener('click', handleTextTransform);
-      document.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', updateOutputs));
+
       document.querySelectorAll('.btn-copy-wa').forEach(btn => btn.addEventListener('click', copyContent));
       document.querySelectorAll('.btn-copy-social').forEach(btn => btn.addEventListener('click', copyContent));
       document.querySelectorAll('.btn-copy-ytTitle').forEach(btn => btn.addEventListener('click', copyTitle));
@@ -449,24 +471,29 @@
         const inputGroup = button.closest('.input-group');
         const textarea = inputGroup.querySelector('textarea');
         if (!textarea) return;
+        
+        // Salva lo stato attuale PRIMA di qualsiasi trasformazione (tranne che per revert)
+        if (transformType !== 'revert') {
+            storeOriginalValue(textarea);
+        }
 
         if (transformType === 'revert') {
             textarea.value = textarea.dataset.originalText || '';
         } else if (transformType === 'auto') {
             applyAutoFormatting(textarea);
-            // Non serve altro, la funzione scatena già l'evento 'input'
             return; 
         } else {
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
+            const hasSelection = start !== end;
 
-            if (start === end) { // Nessuna selezione, applica a tutto il testo
+            if (!hasSelection) { // Nessuna selezione
                 switch (transformType) {
                     case 'lower': textarea.value = textarea.value.toLowerCase(); break;
                     case 'upper': textarea.value = textarea.value.toUpperCase(); break;
                     case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
                 }
-            } else { // Applica solo al testo selezionato
+            } else { // Testo selezionato
                 const selectedText = textarea.value.substring(start, end);
                 let transformedSelection = '';
                 switch (transformType) {
@@ -480,7 +507,6 @@
             }
         }
         
-        // Scatena l'evento per aggiornare contatori e anteprime
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
@@ -495,11 +521,13 @@
         const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
         ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
           const textarea = tab.querySelector(`[data-type="${type}"]`);
-          const counter = document.getElementById(`counter-${type}-${tabIndex}`);
-          const valueLength = textarea.value.length;
-          const maxLen = tabsConfig[tabIndex].limits[type];
-          counter.textContent = `${valueLength}/${maxLen}`;
-          counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
+          if (textarea) {
+            const counter = document.getElementById(`counter-${type}-${tabIndex}`);
+            const valueLength = textarea.value.length;
+            const maxLen = tabsConfig[tabIndex].limits[type];
+            counter.textContent = `${valueLength}/${maxLen}`;
+            counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
+          }
         });
         const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
         tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
@@ -557,9 +585,10 @@
       const dataToSave = {};
       tab.querySelectorAll('textarea').forEach(input => {
         dataToSave[input.dataset.type] = input.value;
+        storeOriginalValue(input);
       });
       localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
-      storeAllOriginalValues(); 
+      
       setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
       setTimeout(() => {
         button.innerHTML = `<i class="fas fa-save"></i> Salva`;
@@ -576,9 +605,10 @@
         button.disabled = true;
         tab.querySelectorAll('textarea').forEach(textarea => {
           textarea.value = '';
-          textarea.dataset.originalText = '';
+          storeOriginalValue(textarea);
+          textarea.dispatchEvent(new Event('input', { bubbles: true }));
         });
-        updateOutputs();
+        
         setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
         setTimeout(() => {
           button.innerHTML = `<i class="fas fa-trash"></i> Cancella tutto`;
@@ -668,11 +698,11 @@
             const field = tab.querySelector(`[data-type="${fieldType}"]`);
             if (field) {
               field.value = row[tabIndex + 1] !== undefined ? row[tabIndex + 1] : '';
+              storeOriginalValue(field);
             }
           }
         }
       });
-      storeAllOriginalValues(); 
       updateOutputs();
     }
     
