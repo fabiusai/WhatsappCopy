@@ -364,7 +364,6 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- LOGICA DI FORMATTAZIONE AUTOMATICA CORRETTA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -372,24 +371,20 @@
         const urls = [];
         const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
 
-        // 1. Isola e protegge gli URL, sostituendoli con un segnaposto unico.
         let textToFormat = originalText.replace(urlRegex, (url) => {
             const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
             urls.push(url);
             return placeholder;
         });
         
-        // 2. Normalizza il testo in minuscolo per creare una base di partenza pulita.
         let formattedText = textToFormat.toLowerCase();
 
-        // 3. Applica la casistica dal CSV. Ordina per lunghezza per evitare sovrapposizioni.
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
             const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'g');
             formattedText = formattedText.replace(regex, phrase);
         });
 
-        // 4. Applica le regole grammaticali.
         if (formattedText.length > 0) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
@@ -400,15 +395,11 @@
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Reinserisce gli URL originali, convertendoli sempre in minuscolo.
-        // --- QUI LA CORREZIONE ---
-        // Ora cerca il segnaposto in versione minuscola, che è quello presente nel testo.
         urls.forEach((url, index) => {
-            const placeholder = `__url_placeholder_${index}__`; // CORRETTO
+            const placeholder = `__url_placeholder_${index}__`;
             formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
-        // 6. Aggiorna la textarea.
         textarea.value = formattedText;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
@@ -457,43 +448,39 @@
         const transformType = button.dataset.transform;
         const inputGroup = button.closest('.input-group');
         const textarea = inputGroup.querySelector('textarea');
-        
+        if (!textarea) return;
+
         if (transformType === 'revert') {
             textarea.value = textarea.dataset.originalText || '';
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
-            return;
-        }
-
-        if (transformType === 'auto') {
+        } else if (transformType === 'auto') {
             applyAutoFormatting(textarea);
-            return;
-        }
-        
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-        if (selectedText.length === 0) {
-            let newText = '';
-            switch (transformType) {
-                case 'lower': newText = textarea.value.toLowerCase(); break;
-                case 'upper': newText = textarea.value.toUpperCase(); break;
-                case 'title': newText = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
-            }
-            textarea.value = newText;
+            // Non serve altro, la funzione scatena già l'evento 'input'
+            return; 
         } else {
-            let transformedSelection = '';
-            switch (transformType) {
-                case 'lower': transformedSelection = selectedText.toLowerCase(); break;
-                case 'upper': transformedSelection = selectedText.toUpperCase(); break;
-                case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            if (start === end) { // Nessuna selezione, applica a tutto il testo
+                switch (transformType) {
+                    case 'lower': textarea.value = textarea.value.toLowerCase(); break;
+                    case 'upper': textarea.value = textarea.value.toUpperCase(); break;
+                    case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                }
+            } else { // Applica solo al testo selezionato
+                const selectedText = textarea.value.substring(start, end);
+                let transformedSelection = '';
+                switch (transformType) {
+                    case 'lower': transformedSelection = selectedText.toLowerCase(); break;
+                    case 'upper': transformedSelection = selectedText.toUpperCase(); break;
+                    case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                }
+                textarea.value = textarea.value.substring(0, start) + transformedSelection + textarea.value.substring(end);
+                textarea.focus();
+                textarea.setSelectionRange(start, start + transformedSelection.length);
             }
-            const fullText = textarea.value;
-            const newText = fullText.substring(0, start) + transformedSelection + fullText.substring(end);
-            textarea.value = newText;
-            textarea.focus();
-            textarea.setSelectionRange(start, start + transformedSelection.length);
         }
         
+        // Scatena l'evento per aggiornare contatori e anteprime
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
