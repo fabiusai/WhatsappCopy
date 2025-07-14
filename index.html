@@ -364,7 +364,26 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // --- LOGICA "AUTO" DEFINITIVA ---
+    // --- NUOVA FUNZIONE HELPER PER CREARE LA REGEX CORRETTA ---
+    function createCaseInsensitiveRegex(phrase) {
+        const wordCharRegex = /^\w|^\p{L}/u; // Controlla se una stringa inizia con un carattere di parola
+        const endsWithWordCharRegex = /\w$|\p{L}$/u; // Controlla se una stringa finisce con un carattere di parola
+
+        let pattern = escapeRegex(phrase);
+
+        // Aggiungi \b all'inizio solo se la frase inizia con un carattere di parola
+        if (wordCharRegex.test(phrase)) {
+            pattern = `\\b` + pattern;
+        }
+
+        // Aggiungi \b alla fine solo se la frase finisce con un carattere di parola
+        if (endsWithWordCharRegex.test(phrase)) {
+            pattern = pattern + `\\b`;
+        }
+
+        return new RegExp(pattern, 'gi');
+    }
+
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -378,20 +397,21 @@
             urls.push(url);
             return placeholder;
         });
-
-        // 2. Normalizza tutto in minuscolo come base
-        let formattedText = textToFormat.toLowerCase();
-
-        // 3. Applica le regole del CSV sul testo minuscolo
+        
+        // 2. Itera sulla masterlist per applicare le sostituzioni
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
-            const regex = new RegExp('\\b' + escapeRegex(phrase.toLowerCase()) + '\\b', 'g');
-            formattedText = formattedText.replace(regex, phrase);
+            const regex = createCaseInsensitiveRegex(phrase);
+            textToFormat = textToFormat.replace(regex, phrase);
         });
 
+        // 3. Normalizza in minuscolo SOLO il testo che non è stato matchato.
+        // Questa parte è complessa, un approccio più semplice e robusto è applicare le regole grammaticali dopo.
+        let formattedText = textToFormat;
+
         // 4. Applica le regole grammaticali come tocco finale
-        // Capitalizza la prima lettera del testo
-        if (formattedText.length > 0) {
+        // Capitalizza la prima lettera del testo (se non è un URL protetto)
+        if (formattedText.length > 0 && !formattedText.startsWith('__URL_')) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
         // Capitalizza dopo punteggiatura
@@ -403,11 +423,11 @@
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Reinserisci gli URL (già protetti dalle trasformazioni)
+        // 5. Reinserisci gli URL
         urls.forEach((url, index) => {
-            // Cerca il placeholder minuscolo, perché tutto il testo è stato abbassato di case
-            const placeholder = `__url_placeholder_${index}__`;
-            formattedText = formattedText.replace(placeholder, url.toLowerCase());
+            const placeholder = `__URL_PLACEHOLDER_${index}__`;
+            // Non convertiamo più a minuscolo qui, l'utente potrebbe voler mantenere il case dell'URL
+            formattedText = formattedText.replace(placeholder, url);
         });
 
         // 6. Aggiorna la textarea
@@ -472,7 +492,6 @@
         const textarea = inputGroup.querySelector('textarea');
         if (!textarea) return;
         
-        // Salva lo stato attuale PRIMA di qualsiasi trasformazione (tranne che per revert)
         if (transformType !== 'revert') {
             storeOriginalValue(textarea);
         }
@@ -487,13 +506,13 @@
             const end = textarea.selectionEnd;
             const hasSelection = start !== end;
 
-            if (!hasSelection) { // Nessuna selezione
+            if (!hasSelection) {
                 switch (transformType) {
                     case 'lower': textarea.value = textarea.value.toLowerCase(); break;
                     case 'upper': textarea.value = textarea.value.toUpperCase(); break;
                     case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
                 }
-            } else { // Testo selezionato
+            } else {
                 const selectedText = textarea.value.substring(start, end);
                 let transformedSelection = '';
                 switch (transformType) {
