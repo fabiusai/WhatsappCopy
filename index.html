@@ -374,10 +374,11 @@
         if (endsWithWordCharRegex.test(phrase)) {
             pattern = pattern + `\\b`;
         }
-        return new RegExp(pattern, 'gi');
+        // Crea la regex solo per la versione minuscola, perché opereremo su una stringa già normalizzata
+        return new RegExp(pattern, 'g');
     }
 
-    // --- LOGICA AUTO DEFINITIVA CON PROTEZIONE PUNTI SIGLE ---
+    // --- LOGICA AUTO DEFINITIVA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -392,40 +393,42 @@
             urls.push(url);
             return placeholder;
         });
+        
+        // 2. NORMALIZZA a minuscolo. Questo è il passo chiave mancante.
+        textToFormat = textToFormat.toLowerCase();
 
-        // 2. Sostituisci le parole del CSV, neutralizzando i loro punti interni
+        // 3. Sostituisci le parole del CSV, neutralizzando i loro punti interni
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
-            const regex = createCaseInsensitiveRegex(phrase);
-            const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER); // Neutralizza i punti
+            // Cerca la versione minuscola della frase nel testo
+            const regex = createCaseInsensitiveRegex(phrase.toLowerCase());
+            // Sostituisci con la versione corretta dal CSV, ma con i punti protetti
+            const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER);
             textToFormat = textToFormat.replace(regex, protectedPhrase);
         });
         
-        // 3. Applica le regole grammaticali sul testo "sicuro"
+        // 4. Applica le regole grammaticali sul testo "sicuro"
         let formattedText = textToFormat;
-        // Capitalizza la prima lettera del testo
-        if (formattedText.length > 0 && !formattedText.startsWith('__URL_')) {
+        if (formattedText.length > 0 && !formattedText.startsWith('__url_')) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
         }
-        // Capitalizza dopo punteggiatura VERA (i punti delle sigle sono protetti)
         formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
             return `${punctuationAndSpaces}${letter.toUpperCase()}`;
         });
-        // Capitalizza dopo virgolette
         formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 4. Ripristina gli URL
+        // 5. Ripristina gli URL
         urls.forEach((url, index) => {
-            const placeholder = `__URL_PLACEHOLDER_${index}__`;
+            const placeholder = `__url_placeholder_${index}__`; // Cerca la versione minuscola
             formattedText = formattedText.replace(placeholder, url);
         });
 
-        // 5. Ripristina i punti nelle sigle come ultimissimo passo
+        // 6. Ripristina i punti nelle sigle come ultimissimo passo
         formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
 
-        // 6. Aggiorna la textarea
+        // 7. Aggiorna la textarea
         textarea.value = formattedText;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
