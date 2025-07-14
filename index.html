@@ -374,11 +374,9 @@
         if (endsWithWordCharRegex.test(phrase)) {
             pattern = pattern + `\\b`;
         }
-        // Crea la regex solo per la versione minuscola, perché opereremo su una stringa già normalizzata
         return new RegExp(pattern, 'g');
     }
 
-    // --- LOGICA AUTO DEFINITIVA ---
     function applyAutoFormatting(textarea) {
         if (!textarea) return;
 
@@ -394,20 +392,18 @@
             return placeholder;
         });
         
-        // 2. NORMALIZZA a minuscolo. Questo è il passo chiave mancante.
+        // 2. NORMALIZZA a minuscolo.
         textToFormat = textToFormat.toLowerCase();
 
         // 3. Sostituisci le parole del CSV, neutralizzando i loro punti interni
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
-            // Cerca la versione minuscola della frase nel testo
             const regex = createCaseInsensitiveRegex(phrase.toLowerCase());
-            // Sostituisci con la versione corretta dal CSV, ma con i punti protetti
             const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER);
             textToFormat = textToFormat.replace(regex, protectedPhrase);
         });
         
-        // 4. Applica le regole grammaticali sul testo "sicuro"
+        // 4. Applica le regole grammaticali
         let formattedText = textToFormat;
         if (formattedText.length > 0 && !formattedText.startsWith('__url_')) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
@@ -419,13 +415,14 @@
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Ripristina gli URL
+        // 5. Ripristina gli URL, forzandoli a minuscolo
         urls.forEach((url, index) => {
-            const placeholder = `__url_placeholder_${index}__`; // Cerca la versione minuscola
-            formattedText = formattedText.replace(placeholder, url);
+            const placeholder = `__url_placeholder_${index}__`;
+            // QUI LA CORREZIONE: reinserito .toLowerCase()
+            formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
-        // 6. Ripristina i punti nelle sigle come ultimissimo passo
+        // 6. Ripristina i punti nelle sigle
         formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
 
         // 7. Aggiorna la textarea
