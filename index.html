@@ -134,6 +134,36 @@
       color: var(--poste-blue);
       margin-bottom: 8px;
     }
+    /* NEW: Styles for label group and date shortcuts */
+    .field-label-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .field-label-group .field-label {
+      margin-bottom: 0; /* Remove bottom margin as it's handled by the group */
+    }
+    .date-shortcuts {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-date-shortcut {
+      background-color: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      color: var(--poste-light-blue);
+      font-size: 0.8em;
+      font-weight: 500;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .btn-date-shortcut:hover {
+      background-color: var(--poste-gray);
+      border-color: var(--poste-blue);
+    }
+    /* END NEW */
     .counter {
       position: absolute;
       top: 0;
@@ -329,7 +359,15 @@
             <textarea id="ytLink-${tabIndex}" data-type="ytLink" rows="1"></textarea>
           </div>
           <div class="input-group">
-            <label class="field-label" for="tgLink-${tabIndex}">Link TG Poste</label>
+            <!-- MODIFIED: Wrapped label and added buttons -->
+            <div class="field-label-group">
+              <label class="field-label" for="tgLink-${tabIndex}">Link TG Poste</label>
+              <div class="date-shortcuts">
+                <button type="button" class="btn-date-shortcut" data-day="today" title="Inserisci link con data di oggi">Oggi</button>
+                <button type="button" class="btn-date-shortcut" data-day="yesterday" title="Inserisci link con data di ieri">Ieri</button>
+              </div>
+            </div>
+            <!-- END MODIFICATION -->
             <textarea id="tgLink-${tabIndex}" data-type="tgLink" rows="1"></textarea>
           </div>
           <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto WA</div>
@@ -385,17 +423,14 @@
         const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
         const DOT_PLACEHOLDER = '__ACRONYM_DOT__';
 
-        // 1. Isola URL
         let textToFormat = originalText.replace(urlRegex, (url) => {
             const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
             urls.push(url);
             return placeholder;
         });
         
-        // 2. NORMALIZZA a minuscolo.
         textToFormat = textToFormat.toLowerCase();
 
-        // 3. Sostituisci le parole del CSV, neutralizzando i loro punti interni
         const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
         sortedMasterList.forEach(phrase => {
             const regex = createCaseInsensitiveRegex(phrase.toLowerCase());
@@ -403,7 +438,6 @@
             textToFormat = textToFormat.replace(regex, protectedPhrase);
         });
         
-        // 4. Applica le regole grammaticali
         let formattedText = textToFormat;
         if (formattedText.length > 0 && !formattedText.startsWith('__url_')) {
             formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
@@ -415,17 +449,12 @@
             return `${preceding}${quote}${letter.toUpperCase()}`;
         });
 
-        // 5. Ripristina gli URL, forzandoli a minuscolo
         urls.forEach((url, index) => {
             const placeholder = `__url_placeholder_${index}__`;
-            // QUI LA CORREZIONE: reinserito .toLowerCase()
             formattedText = formattedText.replace(placeholder, url.toLowerCase());
         });
 
-        // 6. Ripristina i punti nelle sigle
         formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
-
-        // 7. Aggiorna la textarea
         textarea.value = formattedText;
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
@@ -436,6 +465,18 @@
         }
     }
     
+    // NEW: Function to generate the TG link
+    function generateTgLink(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        const italianMonths = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+        const monthName = italianMonths[date.getMonth()];
+
+        return `https://tgposte.poste.it/tgposte/${year}/${month}/${day}/tg-poste-del-${day}-${monthName}-${year}/`;
+    }
+
     async function initializeApp() {
       masterList = await getMasterListFromGoogleSheet();
       const tabContents = document.getElementById('tabContents');
@@ -463,7 +504,8 @@
         }
       });
       
-      tabContents.addEventListener('click', handleTextTransform);
+      // MODIFIED: Renamed function to handle more click types
+      tabContents.addEventListener('click', handleTabContentClicks);
 
       document.querySelectorAll('.btn-copy-wa').forEach(btn => btn.addEventListener('click', copyContent));
       document.querySelectorAll('.btn-copy-social').forEach(btn => btn.addEventListener('click', copyContent));
@@ -477,51 +519,73 @@
       updateOutputs();
     }
     
-    function handleTextTransform(event) {
-        const button = event.target.closest('.text-tools button');
-        if (!button) return;
-        event.preventDefault();
+    // MODIFIED: This function now handles both text transformations and date shortcuts
+    function handleTabContentClicks(event) {
+        // Handle text transformation buttons
+        const transformButton = event.target.closest('.text-tools button');
+        if (transformButton) {
+            event.preventDefault();
 
-        const transformType = button.dataset.transform;
-        const inputGroup = button.closest('.input-group');
-        const textarea = inputGroup.querySelector('textarea');
-        if (!textarea) return;
-        
-        if (transformType !== 'revert') {
-            storeOriginalValue(textarea);
+            const transformType = transformButton.dataset.transform;
+            const inputGroup = transformButton.closest('.input-group');
+            const textarea = inputGroup.querySelector('textarea');
+            if (!textarea) return;
+            
+            if (transformType !== 'revert') {
+                storeOriginalValue(textarea);
+            }
+
+            if (transformType === 'revert') {
+                textarea.value = textarea.dataset.originalText || '';
+            } else if (transformType === 'auto') {
+                applyAutoFormatting(textarea);
+                return; 
+            } else {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const hasSelection = start !== end;
+
+                if (!hasSelection) {
+                    switch (transformType) {
+                        case 'lower': textarea.value = textarea.value.toLowerCase(); break;
+                        case 'upper': textarea.value = textarea.value.toUpperCase(); break;
+                        case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                    }
+                } else {
+                    const selectedText = textarea.value.substring(start, end);
+                    let transformedSelection = '';
+                    switch (transformType) {
+                        case 'lower': transformedSelection = selectedText.toLowerCase(); break;
+                        case 'upper': transformedSelection = selectedText.toUpperCase(); break;
+                        case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                    }
+                    textarea.value = textarea.value.substring(0, start) + transformedSelection + textarea.value.substring(end);
+                    textarea.focus();
+                    textarea.setSelectionRange(start, start + transformedSelection.length);
+                }
+            }
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            return; // Stop processing after handling the click
         }
 
-        if (transformType === 'revert') {
-            textarea.value = textarea.dataset.originalText || '';
-        } else if (transformType === 'auto') {
-            applyAutoFormatting(textarea);
-            return; 
-        } else {
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const hasSelection = start !== end;
+        // NEW: Handle date shortcut buttons
+        const dateShortcutButton = event.target.closest('.btn-date-shortcut');
+        if (dateShortcutButton) {
+            event.preventDefault();
+            const dayType = dateShortcutButton.dataset.day;
+            const tab = dateShortcutButton.closest('.tab-content');
+            const tgLinkTextarea = tab.querySelector('[data-type="tgLink"]');
 
-            if (!hasSelection) {
-                switch (transformType) {
-                    case 'lower': textarea.value = textarea.value.toLowerCase(); break;
-                    case 'upper': textarea.value = textarea.value.toUpperCase(); break;
-                    case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+            if (tgLinkTextarea) {
+                const date = new Date();
+                if (dayType === 'yesterday') {
+                    date.setDate(date.getDate() - 1);
                 }
-            } else {
-                const selectedText = textarea.value.substring(start, end);
-                let transformedSelection = '';
-                switch (transformType) {
-                    case 'lower': transformedSelection = selectedText.toLowerCase(); break;
-                    case 'upper': transformedSelection = selectedText.toUpperCase(); break;
-                    case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
-                }
-                textarea.value = textarea.value.substring(0, start) + transformedSelection + textarea.value.substring(end);
-                textarea.focus();
-                textarea.setSelectionRange(start, start + transformedSelection.length);
+                tgLinkTextarea.value = generateTgLink(date);
+                // Trigger input event to ensure any dependent logic is run
+                tgLinkTextarea.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
-        
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
     function switchTab(tabIndex) {
