@@ -1013,31 +1013,60 @@
                 'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
             };
 
-            // Decide if the first row is a header by checking if the first cell is NOT a known field name.
             const firstRowColumns = parseCsvRow(rows[0]);
             const isHeaderPresent = !fieldMap.hasOwnProperty(firstRowColumns[0]?.trim());
-            
             const dataRows = isHeaderPresent ? rows.slice(1) : rows;
+            
+            if(dataRows.length === 0) {
+                 alert('Il file CSV non contiene righe di dati valide.');
+                 return;
+            }
 
-            dataRows.forEach(row => {
-                const columns = parseCsvRow(row);
-                const fieldType = fieldMap[columns[0]?.trim()];
-                if (fieldType) {
-                    // The number of tabs to update should not exceed the number of data columns available.
-                    const numberOfDataColumns = columns.length - 1;
-                    for (let tabIndex = 0; tabIndex < numberOfDataColumns; tabIndex++) {
-                        const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-                        if (!tab) continue; // Skip if tab doesn't exist for some reason
+            const firstDataRowCols = parseCsvRow(dataRows[0]);
+            const numberOfDataColumns = firstDataRowCols.length - 1;
+
+            if (numberOfDataColumns === 1) {
+                // SINGLE NEWS ITEM: Target the currently active tab.
+                const activeTabElement = document.querySelector('.tab.active');
+                const targetTabIndex = activeTabElement ? parseInt(activeTabElement.dataset.tabIndex) : 0;
+                
+                dataRows.forEach(row => {
+                    const columns = parseCsvRow(row);
+                    const fieldType = fieldMap[columns[0]?.trim()];
+                    if (fieldType) {
+                        const tab = document.querySelector(`.tab-content[data-tab-index="${targetTabIndex}"]`);
+                        if (!tab) return; 
 
                         const field = tab.querySelector(`[data-type="${fieldType}"]`);
                         if (field) {
-                            const value = columns[tabIndex + 1];
+                            const value = columns[1];
                             field.value = value !== undefined ? value : '';
                             storeOriginalValue(field);
                         }
                     }
-                }
-            });
+                });
+
+            } else {
+                // MULTIPLE NEWS ITEMS: Original behavior, start from tab 0.
+                dataRows.forEach(row => {
+                    const columns = parseCsvRow(row);
+                    const fieldType = fieldMap[columns[0]?.trim()];
+                    if (fieldType) {
+                        const effectiveDataColumns = columns.length - 1;
+                        for (let tabIndex = 0; tabIndex < effectiveDataColumns; tabIndex++) {
+                            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+                            if (!tab) continue;
+
+                            const field = tab.querySelector(`[data-type="${fieldType}"]`);
+                            if (field) {
+                                const value = columns[tabIndex + 1];
+                                field.value = value !== undefined ? value : '';
+                                storeOriginalValue(field);
+                            }
+                        }
+                    }
+                });
+            }
 
             updateOutputs();
             alert('Dati CSV importati con successo!');
@@ -1078,3 +1107,4 @@
   </script>
 </body>
 </html>
+
