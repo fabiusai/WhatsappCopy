@@ -27,7 +27,7 @@
       --poste-blue: #0047bb;
       --poste-yellow: #eedc00;
       --poste-light-blue: #0066cc;
-      --poste-gray: #f5f5f5;
+      --poste-gray: #f5ff5;
       --poste-green: #4caf50;
       --bianco: #ffffff;
       --ombra-leggera: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -981,28 +981,54 @@
         }
     }
 
-    function parseCsvRow(row) {
-        const result = [];
-        let current = '';
+    /**
+     * Parses a CSV string into an array of arrays.
+     * Handles quoted fields with commas and newlines.
+     * @param {string} csvText The CSV string to parse.
+     * @returns {string[][]} A 2D array of strings.
+     */
+    function parseCsvText(csvText) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = '';
         let inQuotes = false;
-        for (let i = 0; i < row.length; i++) {
-            const char = row[i];
-            if (char === '"' && (i === 0 || row[i-1] !== '"')) { // Basic quote handling
-                inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-                result.push(current);
-                current = '';
+        const text = csvText.trim().replace(/\r\n/g, '\n') + '\n';
+
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            if (inQuotes) {
+                if (char === '"') {
+                    if (text[i + 1] === '"') {
+                        currentField += '"';
+                        i++; // Skip next quote
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    currentField += char;
+                }
             } else {
-                current += char;
+                if (char === '"') {
+                    inQuotes = true;
+                } else if (char === ',') {
+                    currentRow.push(currentField);
+                    currentField = '';
+                } else if (char === '\n') {
+                    currentRow.push(currentField);
+                    rows.push(currentRow);
+                    currentRow = [];
+                    currentField = '';
+                } else {
+                    currentField += char;
+                }
             }
         }
-        result.push(current);
-        return result.map(val => val.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+        return rows.filter(row => row.some(cell => cell.trim() !== ''));
     }
 
     function importFromCsvText(csvText) {
         try {
-            const rows = csvText.trim().replace(/\r\n/g, '\n').split('\n').filter(row => row.trim() !== '');
+            const rows = parseCsvText(csvText);
             if (rows.length === 0) {
                 alert('Nessun dato da importare.');
                 return;
@@ -1013,7 +1039,7 @@
                 'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
             };
 
-            const firstRowColumns = parseCsvRow(rows[0]);
+            const firstRowColumns = rows[0];
             const isHeaderPresent = !fieldMap.hasOwnProperty(firstRowColumns[0]?.trim());
             const dataRows = isHeaderPresent ? rows.slice(1) : rows;
             
@@ -1022,45 +1048,41 @@
                  return;
             }
 
-            const firstDataRowCols = parseCsvRow(dataRows[0]);
+            const firstDataRowCols = dataRows[0];
             const numberOfDataColumns = firstDataRowCols.length - 1;
 
             if (numberOfDataColumns === 1) {
-                // SINGLE NEWS ITEM: Target the currently active tab.
                 const activeTabElement = document.querySelector('.tab.active');
                 const targetTabIndex = activeTabElement ? parseInt(activeTabElement.dataset.tabIndex) : 0;
                 
                 dataRows.forEach(row => {
-                    const columns = parseCsvRow(row);
-                    const fieldType = fieldMap[columns[0]?.trim()];
+                    const fieldType = fieldMap[row[0]?.trim()];
                     if (fieldType) {
                         const tab = document.querySelector(`.tab-content[data-tab-index="${targetTabIndex}"]`);
                         if (!tab) return; 
 
                         const field = tab.querySelector(`[data-type="${fieldType}"]`);
                         if (field) {
-                            const value = columns[1];
-                            field.value = value !== undefined ? value : '';
+                            const value = row[1];
+                            field.value = value !== undefined ? value.replace(/""/g, '"') : '';
                             storeOriginalValue(field);
                         }
                     }
                 });
 
             } else {
-                // MULTIPLE NEWS ITEMS: Original behavior, start from tab 0.
                 dataRows.forEach(row => {
-                    const columns = parseCsvRow(row);
-                    const fieldType = fieldMap[columns[0]?.trim()];
+                    const fieldType = fieldMap[row[0]?.trim()];
                     if (fieldType) {
-                        const effectiveDataColumns = columns.length - 1;
+                        const effectiveDataColumns = row.length - 1;
                         for (let tabIndex = 0; tabIndex < effectiveDataColumns; tabIndex++) {
                             const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
                             if (!tab) continue;
 
                             const field = tab.querySelector(`[data-type="${fieldType}"]`);
                             if (field) {
-                                const value = columns[tabIndex + 1];
-                                field.value = value !== undefined ? value : '';
+                                const value = row[tabIndex + 1];
+                                field.value = value !== undefined ? value.replace(/""/g, '"') : '';
                                 storeOriginalValue(field);
                             }
                         }
