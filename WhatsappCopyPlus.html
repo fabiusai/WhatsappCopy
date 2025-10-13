@@ -15,7 +15,7 @@
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
+    xintegrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
@@ -245,16 +245,20 @@
     .btn i { font-size: 1em; }
     .btn:hover { background-color: var(--poste-light-blue); }
     .btn:active { transform: scale(0.98); }
-    .import-excel {
-      text-align: center;
+    .import-export-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
       margin-bottom: 30px;
     }
-    .import-excel input[type="file"] { display: none; }
-    .import-excel label {
+    .import-export-section input[type="file"] { display: none; }
+    .import-export-section label {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background-color: var(--poste-blue);
+      background-color: var(--poste-green);
       color: #fff;
       padding: 12px 20px;
       border-radius: 6px;
@@ -262,7 +266,9 @@
       font-size: 1em;
       transition: background-color 0.3s;
     }
-    .import-excel label:hover { background-color: var(--poste-light-blue); }
+    .import-export-section label:hover { background-color: #45a049; }
+    .import-export-section .btn { background-color: var(--poste-green); }
+    .import-export-section .btn:hover { background-color: #45a049; }
 
     /* --- STILI PER GENERATORE AI --- */
     .sezione-generatore {
@@ -353,9 +359,10 @@
       <div class="tab" data-tab-index="1">News 2</div>
       <div class="tab" data-tab-index="2">News 3</div>
     </div>
-    <div class="import-excel">
-      <label for="excelInput"><i class="fas fa-file-excel"></i> Importa da Excel</label>
-      <input type="file" id="excelInput" accept=".xlsx" />
+    <div class="import-export-section">
+      <label for="fileInput"><i class="fas fa-file-import"></i> Importa da File (Excel/CSV)</label>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" />
+      <button id="pasteCsvButton" class="btn"><i class="fas fa-paste"></i> Incolla CSV da Appunti</button>
     </div>
     <div id="tabContents"></div>
   </div>
@@ -470,9 +477,15 @@
             <button class="btn btn-copy-all">
               <i class="fas fa-copy"></i> Contenuto completo
             </button>
-            <button class="btn btn-export">
-              <i class="fas fa-file-export"></i> Esporta in Excel
+            <button class="btn btn-export-excel">
+              <i class="fas fa-file-excel"></i> Esporta in Excel
             </button>
+            <button class="btn btn-export-csv">
+                <i class="fas fa-file-csv"></i> Esporta in CSV
+            </button>
+            <a href="promptGemini.html" target="_blank" class="btn">
+                <i class="fas fa-lightbulb"></i> Genera prompt per Gemini
+            </a>
           </div>
         </div>
       </div>`;
@@ -583,8 +596,10 @@
       document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', saveData));
       document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', clearAll));
       document.querySelectorAll('.btn-copy-all').forEach(btn => btn.addEventListener('click', copyAllTabsContent));
-      document.querySelectorAll('.btn-export').forEach(btn => btn.addEventListener('click', exportToExcel));
-      document.getElementById('excelInput').addEventListener('change', function () { importFromExcel(this.files[0]); });
+      document.querySelectorAll('.btn-export-excel').forEach(btn => btn.addEventListener('click', exportToExcel));
+      document.querySelectorAll('.btn-export-csv').forEach(btn => btn.addEventListener('click', exportToCsv));
+      document.getElementById('fileInput').addEventListener('change', handleFileInput);
+      document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
       document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(parseInt(tab.dataset.tabIndex))));
       updateOutputs();
     }
@@ -648,7 +663,6 @@
             }
         }
         
-        // --- NUOVA LOGICA PER GESTIRE IL CLICK SUL BOTTONE DI GENERAZIONE AI ---
         const generateButton = event.target.closest('.bottone-genera');
         if(generateButton) {
             handleGenerateClick(generateButton);
@@ -683,7 +697,6 @@
             }
             const data = await response.json();
             
-            // Popola i campi della tab corrente
             const currentTab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
             const waField = currentTab.querySelector('[data-type="wa"]');
             const ytTitleField = currentTab.querySelector('[data-type="ytTitle"]');
@@ -693,10 +706,9 @@
             if(ytTitleField) ytTitleField.value = data.youtube;
             if(ytDescField) ytDescField.value = data.facebook_linkedin;
 
-            // Simula l'input per aggiornare contatori e anteprime
             [waField, ytTitleField, ytDescField].forEach(field => {
                 if(field) {
-                    storeOriginalValue(field); // Salva il nuovo valore come "originale"
+                    storeOriginalValue(field);
                     field.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
@@ -852,13 +864,18 @@
       const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
       const excelData = [
         ["", "News 1", "News 2", "News 3"],
-        ["Testo descrittivo news Canale WA", "", "", ""],
-        ["Titolo YouTube", "", "", ""],
-        ["Copy post e descrizione YT", "", "", ""],
-        ["Link YouTube", "", "", ""],
-        ["Link TG Poste", "", "", ""]
+        ["Testo descrittivo news Canale WA"],
+        ["Titolo YouTube"],
+        ["Copy post e descrizione YT"],
+        ["Link YouTube"],
+        ["Link TG Poste"]
       ];
       const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
+      for (let i=0; i<excelData.length; i++) {
+        for(let j=0; j<4; j++) {
+          if (!excelData[i][j]) excelData[i][j] = '';
+        }
+      }
       for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
         const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
         tab.querySelectorAll('textarea').forEach(textarea => {
@@ -874,9 +891,144 @@
       XLSX.writeFile(wb, fileName);
       setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
       setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-file-export"></i> Esporta in Excel`;
+        button.innerHTML = `<i class="fas fa-file-excel"></i> Esporta in Excel`;
         button.disabled = false;
       }, 2000);
+    }
+    
+    function exportToCsv(event) {
+        const button = event.currentTarget;
+        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione...`;
+        button.disabled = true;
+        
+        const data = [
+            ["", "News 1", "News 2", "News 3"],
+            ["Testo descrittivo news Canale WA"], ["Titolo YouTube"], ["Copy post e descrizione YT"],
+            ["Link YouTube"], ["Link TG Poste"]
+        ];
+        const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
+
+        for (let i = 0; i < data.length; i++) {
+            for (let j = 0; j < 4; j++) { if (!data[i][j]) data[i][j] = ''; }
+        }
+
+        for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+            tab.querySelectorAll('textarea').forEach(textarea => {
+                const rowIndex = fieldMap[textarea.dataset.type];
+                if (rowIndex !== undefined) {
+                    data[rowIndex][tabIndex + 1] = textarea.value;
+                }
+            });
+        }
+
+        const csvContent = data.map(row =>
+            row.map(cell => {
+                const strCell = String(cell);
+                return strCell.includes(',') || strCell.includes('"') || strCell.includes('\n')
+                    ? `"${strCell.replace(/"/g, '""')}"`
+                    : strCell;
+            }).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        const today = new Date();
+        const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.csv`;
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+            button.innerHTML = `<i class="fas fa-file-csv"></i> Esporta in CSV`;
+            button.disabled = false;
+        }, 2000);
+    }
+
+    async function handleFileInput(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const fileName = file.name.toLowerCase();
+        if (fileName.endsWith('.xlsx')) {
+            importFromExcel(file);
+        } else if (fileName.endsWith('.csv')) {
+            const reader = new FileReader();
+            reader.onload = e => importFromCsvText(e.target.result);
+            reader.onerror = () => alert('Errore durante la lettura del file CSV.');
+            reader.readAsText(file);
+        } else {
+            alert('Formato file non supportato. Selezionare un file .xlsx o .csv');
+        }
+        event.target.value = '';
+    }
+
+    async function handlePasteCsv() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                importFromCsvText(text);
+            } else {
+                alert('Nessun testo trovato negli appunti.');
+            }
+        } catch (error) {
+            console.error('Errore durante la lettura dagli appunti:', error);
+            alert("Impossibile leggere dagli appunti. Assicurati di aver concesso i permessi necessari.");
+        }
+    }
+
+    function parseCsvRow(row) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+            if (char === '"' && (i === 0 || row[i-1] !== '"')) { // Basic quote handling
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        result.push(current);
+        return result.map(val => val.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+    }
+
+    function importFromCsvText(csvText) {
+        try {
+            const rows = csvText.trim().replace(/\r\n/g, '\n').split('\n');
+            const fieldMap = {
+                'Testo descrittivo news Canale WA': 'wa', 'Titolo YouTube': 'ytTitle',
+                'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
+            };
+            rows.slice(1).forEach(row => {
+                if (!row.trim()) return;
+                const columns = parseCsvRow(row);
+                const fieldType = fieldMap[columns[0]?.trim()];
+                if (fieldType) {
+                    for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+                        const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+                        const field = tab.querySelector(`[data-type="${fieldType}"]`);
+                        if (field) {
+                            const value = columns[tabIndex + 1];
+                            field.value = value !== undefined ? value : '';
+                            storeOriginalValue(field);
+                        }
+                    }
+                }
+            });
+            updateOutputs();
+            alert('Dati CSV importati con successo!');
+        } catch (error) {
+            console.error("Errore durante l'importazione da CSV:", error);
+            alert("Si è verificato un errore durante l'importazione dei dati CSV. Controlla il formato e riprova.");
+        }
     }
     
     async function importFromExcel(file) {
@@ -886,11 +1038,8 @@
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
       const fieldMap = {
-        'Testo descrittivo news Canale WA': 'wa',
-        'Titolo YouTube': 'ytTitle',
-        'Copy post e descrizione YT': 'ytDesc',
-        'Link YouTube': 'ytLink',
-        'Link TG Poste': 'tgLink'
+        'Testo descrittivo news Canale WA': 'wa', 'Titolo YouTube': 'ytTitle',
+        'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
       };
       rows.slice(1).forEach(row => {
         const fieldType = fieldMap[row[0]?.trim()];
@@ -906,6 +1055,7 @@
         }
       });
       updateOutputs();
+      alert('Dati Excel importati con successo!');
     }
     
     window.addEventListener('DOMContentLoaded', initializeApp);
