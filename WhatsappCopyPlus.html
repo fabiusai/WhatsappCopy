@@ -15,7 +15,7 @@
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    xintegrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
+    integrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
@@ -27,7 +27,7 @@
       --poste-blue: #0047bb;
       --poste-yellow: #eedc00;
       --poste-light-blue: #0066cc;
-      --poste-gray: #f5ff5;
+      --poste-gray: #f5f5f5;
       --poste-green: #4caf50;
       --bianco: #ffffff;
       --ombra-leggera: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -339,7 +339,6 @@
       margin-top: 20px;
       display: none;
     }
-
 
     @media (max-width: 600px) {
       .button-group { flex-direction: column; }
@@ -735,6 +734,8 @@
     function updateOutputs() {
       document.querySelectorAll('.tab-content').forEach((tab, tabIndex) => {
         const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
+        
+        // Aggiorna contatori
         ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
           const textarea = tab.querySelector(`[data-type="${type}"]`);
           if (textarea) {
@@ -745,9 +746,31 @@
             counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
           }
         });
+
+        // Output Whatsapp (Invariato)
         const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
         tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
-        const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
+
+        // Output Social (Modificato secondo le specifiche)
+        let ytDescText = getValue('ytDesc').trim();
+        let movedHashtags = '';
+
+        // Trova hashtag SOLO alla fine del testo
+        const trailingHashtagRegex = /(\s*#[^\s]+)+$/;
+        const match = ytDescText.match(trailingHashtagRegex);
+
+        if (match) {
+            movedHashtags = match[0].trim();
+            ytDescText = ytDescText.replace(trailingHashtagRegex, '').trim();
+        }
+
+        const baseHashtags = "#TGPoste #PosteItaliane";
+        const finalHashtags = movedHashtags ? `${baseHashtags} ${movedHashtags}` : baseHashtags;
+        const tgLink = getValue('tgLink');
+
+        // Formatta: Testo pulito -> Riga vuota -> Link Freccia -> Riga vuota -> Hashtags
+        const socialOutput = `${ytDescText}\n\n➡️ ${tgLink}\n\n${finalHashtags}`;
+        
         tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
       });
     }
@@ -981,12 +1004,6 @@
         }
     }
 
-    /**
-     * Parses a CSV string into an array of arrays.
-     * Handles quoted fields with commas and newlines.
-     * @param {string} csvText The CSV string to parse.
-     * @returns {string[][]} A 2D array of strings.
-     */
     function parseCsvText(csvText) {
         const rows = [];
         let currentRow = [];
@@ -1129,4 +1146,3 @@
   </script>
 </body>
 </html>
-
