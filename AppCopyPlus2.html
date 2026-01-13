@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta name="robots" content="noindex">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Network – Contatore Caratteri Plus</title>
+  <link rel="icon" href="faviconAI.ico" />
+
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --poste-blue: #0047bb;
+      --poste-yellow: #eedc00;
+      --poste-light-blue: #0066cc;
+      --poste-gray: #f5f5f5;
+      --poste-green: #4caf50;
+      --bianco: #ffffff;
+      --ombra-leggera: 0 4px 15px rgba(0, 0, 0, 0.08);
+      --font-family-base:
+        'Inter',
+        'Segoe UI',
+        Tahoma,
+        Geneva,
+        Verdana,
+        'Helvetica Neue',
+        Arial,
+        sans-serif;
+    }
+    body {
+      font-family: var(--font-family-base);
+      -webkit-font-smoothing: subpixel-antialiased;
+      text-rendering: optimizeLegibility;
+      background-color: var(--poste-gray);
+      color: #333;
+      line-height: 1.5;
+      padding: 0 15px;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .header {
+      background-color: var(--poste-yellow);
+      padding: 10px 0;
+      margin: 10px 0;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: var(--poste-blue);
+      margin: 0 0 4px 0;
+      line-height: 1.2;
+    }
+    .header h2 {
+      font-size: 1.2em;
+      font-weight: normal;
+      color: var(--poste-blue);
+      margin: 0;
+      line-height: 1.2;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto 40px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      background-color: var(--poste-gray);
+      color: var(--poste-blue);
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      position: relative;
+    }
+    .tab.active {
+      background-color: var(--poste-blue);
+      color: #fff;
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--poste-blue);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: var(--ombra-leggera);
+      margin-bottom: 30px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .field-label {
+      display: block;
+      font-size: 1em;
+      font-weight: 600;
+      color: var(--poste-blue);
+      margin-bottom: 8px;
+    }
+    .field-label-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .field-label-group .field-label {
+      margin-bottom: 0;
+    }
+    .date-shortcuts {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-date-shortcut {
+      background-color: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      color: var(--poste-light-blue);
+      font-size: 0.8em;
+      font-weight: 500;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .btn-date-shortcut:hover {
+      background-color: var(--poste-gray);
+      border-color: var(--poste-blue);
+    }
+    .counter {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 0.9em;
+      color: var(--poste-light-blue);
+    }
+    .text-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .text-tools button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: transparent;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+      color: var(--poste-blue);
+      transition: background-color 0.2s, border-color 0.2s;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    .text-tools button:hover {
+      background-color: var(--poste-gray);
+      border-color: var(--poste-light-blue);
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 2px solid var(--poste-light-blue);
+      border-radius: 6px;
+      resize: vertical;
+      min-height: 80px;
+      font-size: 1em;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--poste-blue);
+    }
+    .btn-copy-ytTitle {
+      margin-top: 10px;
+      font-size: 0.95em;
+    }
+    .output-field {
+      background-color: var(--poste-gray);
+      border: 2px dashed var(--poste-blue);
+      border-radius: 6px;
+      padding: 12px;
+      white-space: pre-wrap;
+      min-height: 100px;
+      margin: 15px 0;
+      font-family: var(--font-family-base);
+    }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--poste-blue);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+    }
+    .btn i { font-size: 1em; }
+    .btn:hover { background-color: var(--poste-light-blue); }
+    .btn:active { transform: scale(0.98); }
+    .import-export-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .import-export-section input[type="file"] { display: none; }
+    .import-export-section label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--poste-green);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+    .import-export-section label:hover { background-color: #45a049; }
+    .import-export-section .btn { background-color: var(--poste-green); }
+    .import-export-section .btn:hover { background-color: #45a049; }
+
+    /* --- STILI PER GENERATORE AI --- */
+    .sezione-generatore {
+      padding: 20px;
+      margin-bottom: 30px;
+      background-color: #fdfdfd;
+      border: 1px solid #e0e0e0;
+      border-left: 5px solid var(--poste-yellow);
+      border-radius: 8px;
+    }
+    .sezione-generatore h2 {
+      font-size: 1.3em;
+      color: var(--poste-blue);
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .sezione-generatore textarea {
+      height: 120px;
+      border-width: 1px;
+    }
+    .bottone-genera {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin-top: 15px;
+      background-color: var(--poste-blue);
+      color: var(--bianco);
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      text-align: center;
+    }
+    .bottone-genera:hover:not(:disabled) {
+      background-color: var(--poste-light-blue);
+      transform: translateY(-2px);
+    }
+    .bottone-genera:disabled {
+      background-color: #5d81be;
+      cursor: not-allowed;
+    }
+    .loader {
+      text-align: center;
+      padding: 20px 0;
+      display: none;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: var(--poste-blue);
+      animation: spin 1s ease infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .messaggio-errore {
+      color: #d9534f;
+      background-color: #f2dede;
+      border: 1px solid #ebccd1;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .button-group { flex-direction: column; }
+      .tabs { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Social Network</h1>
+    <h2>Contatore Caratteri Plus <span style="font-size: 0.6em; vertical-align: middle; opacity: 0.8;">v2.2</span></h2>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab-index="0">News 1</div>
+      <div class="tab" data-tab-index="1">News 2</div>
+      <div class="tab" data-tab-index="2">News 3</div>
+    </div>
+    <div class="import-export-section">
+      <label for="fileInput"><i class="fas fa-file-import"></i> Importa da File (Excel/CSV)</label>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" />
+      <button id="pasteCsvButton" class="btn"><i class="fas fa-paste"></i> Incolla CSV da Appunti</button>
+    </div>
+    <div id="tabContents"></div>
+  </div>
+
+  <script>
+    let masterList = [];
+    const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
+    const API_URL = 'https://aipost.onrender.com/generate';
+
+    async function getMasterListFromGoogleSheet() {
+      if (!googleSheetURL || googleSheetURL.includes('INCOLLA_QUI')) {
+        console.warn("URL del file CSV non impostato.");
+        return [];
+      }
+      try {
+        const url = `${googleSheetURL}?t=${new Date().getTime()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Errore di rete nel caricamento del foglio CSV.');
+        const csvText = await response.text();
+        return csvText.split('\n').map(item => item.trim().replace(/\r$/, '')).filter(Boolean);
+      } catch (error) {
+        console.error("Impossibile caricare l'elenco dal file CSV:", error);
+        alert("Attenzione: non è stato possibile caricare l'elenco personalizzato dal file CSV.");
+        return [];
+      }
+    }
+
+    const tabsConfig = Array.from({ length: 3 }, () => ({
+      limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
+      fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
+    }));
+
+    function createTextTools() {
+      return `
+      <div class="text-tools">
+        <button type="button" data-transform="lower" title="Converti testo in minuscolo"><i class="fas fa-arrow-down-a-z"></i> minuscolo</button>
+        <button type="button" data-transform="title" title="Converti testo con Iniziali Maiuscole"><i class="fas fa-heading"></i> Iniziali</button>
+        <button type="button" data-transform="upper" title="Converti testo in MAIUSCOLO"><i class="fas fa-arrow-up-a-z"></i> MAIUSCOLO</button>
+        <button type="button" data-transform="auto" title="Formatta automaticamente il testo"><i class="fas fa-wand-magic-sparkles"></i> Auto</button>
+        <button type="button" data-transform="revert" title="Ripristina testo originale"><i class="fas fa-rotate-left"></i> Ripristina</button>
+      </div>`;
+    }
+
+    function createTabContent(tabIndex) {
+      const fieldsWithTools = ['wa', 'ytTitle', 'ytDesc'];
+      const textToolsHTML = createTextTools();
+      return `
+      <div class="tab-content${tabIndex === 0 ? ' active' : ''}" data-tab-index="${tabIndex}">
+        <div class="card">
+          <section class="sezione-generatore">
+              <h2>✨ Genera Contenuti con AI</h2>
+              <textarea id="input-testo-ai-${tabIndex}" placeholder="Incolla qui il comunicato stampa, l'articolo o le informazioni da cui partire..."></textarea>
+              <button id="bottone-genera-ai-${tabIndex}" class="bottone-genera" data-tab-index="${tabIndex}">Genera Contenuti</button>
+              <div class="loader" id="loader-ai-${tabIndex}">
+                  <div class="spinner"></div>
+                  <p>Elaborazione in corso... Un attimo di pazienza!</p>
+              </div>
+              <div class="messaggio-errore" id="messaggio-errore-ai-${tabIndex}"></div>
+          </section>
+          <div class="input-group">
+            <label class="field-label" for="wa-${tabIndex}">Testo descrittivo news Canale WA</label>
+            <span class="counter" id="counter-wa-${tabIndex}">0/${tabsConfig[tabIndex].limits.wa}</span>
+            ${fieldsWithTools.includes('wa') ? textToolsHTML : ''}
+            <textarea id="wa-${tabIndex}" data-type="wa" rows="2"></textarea>
+          </div>
+          <div class="input-group">
+            <label class="field-label" for="ytTitle-${tabIndex}">Titolo YouTube</label>
+            <span class="counter" id="counter-ytTitle-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytTitle}</span>
+            ${fieldsWithTools.includes('ytTitle') ? textToolsHTML : ''}
+            <textarea id="ytTitle-${tabIndex}" data-type="ytTitle" rows="2"></textarea>
+            <button class="btn outline btn-copy-ytTitle" data-type="ytTitle">
+              <i class="fas fa-copy"></i> Copia Titolo YouTube
+            </button>
+          </div>
+          <div class="input-group">
+            <label class="field-label" for="ytDesc-${tabIndex}">Copy post e descrizione YT</label>
+            <span class="counter" id="counter-ytDesc-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytDesc}</span>
+            ${fieldsWithTools.includes('ytDesc') ? textToolsHTML : ''}
+            <textarea id="ytDesc-${tabIndex}" data-type="ytDesc" rows="4"></textarea>
+          </div>
+          <div class="input-group">
+            <label class="field-label" for="ytLink-${tabIndex}">Link YouTube</label>
+            <textarea id="ytLink-${tabIndex}" data-type="ytLink" rows="1"></textarea>
+          </div>
+          <div class="input-group">
+            <div class="field-label-group">
+              <label class="field-label" for="tgLink-${tabIndex}">Link TG Poste</label>
+              <div class="date-shortcuts">
+                <button type="button" class="btn-date-shortcut" data-day="today" title="Inserisci link con data di oggi">Oggi</button>
+                <button type="button" class="btn-date-shortcut" data-day="yesterday" title="Inserisci link con data di ieri">Ieri</button>
+              </div>
+            </div>
+            <textarea id="tgLink-${tabIndex}" data-type="tgLink" rows="1"></textarea>
+          </div>
+          <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto WA</div>
+          <div class="output-field" data-type="waOutput"></div>
+          <button class="btn outline btn-copy-wa" data-type="waOutput">
+            <i class="fas fa-copy"></i> Copia Contenuto WA
+          </button>
+          <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto Social</div>
+          <div class="output-field" data-type="socialOutput"></div>
+          <button class="btn outline btn-copy-social" data-type="socialOutput">
+            <i class="fas fa-copy"></i> Copia Contenuto Social
+          </button>
+          <div class="button-group" style="margin-top: 30px;">
+            <button class="btn btn-save" data-tab-index="${tabIndex}">
+              <i class="fas fa-save"></i> Salva
+            </button>
+            <button class="btn btn-clear" data-tab-index="${tabIndex}">
+              <i class="fas fa-trash"></i> Cancella tutto
+            </button>
+            <button class="btn btn-copy-all">
+              <i class="fas fa-copy"></i> Contenuto completo
+            </button>
+            <button class="btn btn-export-excel">
+              <i class="fas fa-file-excel"></i> Esporta in Excel
+            </button>
+            <button class="btn btn-export-csv">
+                <i class="fas fa-file-csv"></i> Esporta in CSV
+            </button>
+            <a href="promptGemini.html" target="_blank" class="btn">
+                <i class="fas fa-lightbulb"></i> Genera prompt per Gemini
+            </a>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function createCaseInsensitiveRegex(phrase) {
+        const wordCharRegex = /^\w|^\p{L}/u;
+        const endsWithWordCharRegex = /\w$|\p{L}$/u;
+        let pattern = escapeRegex(phrase);
+        if (wordCharRegex.test(phrase)) {
+            pattern = `\\b` + pattern;
+        }
+        if (endsWithWordCharRegex.test(phrase)) {
+            pattern = pattern + `\\b`;
+        }
+        return new RegExp(pattern, 'g');
+    }
+
+    function applyAutoFormatting(textarea) {
+        if (!textarea) return;
+        const originalText = textarea.value;
+        const urls = [];
+        const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
+        const DOT_PLACEHOLDER = '__ACRONYM_DOT__';
+        let textToFormat = originalText.replace(urlRegex, (url) => {
+            const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
+            urls.push(url);
+            return placeholder;
+        });
+        textToFormat = textToFormat.toLowerCase();
+        const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
+        sortedMasterList.forEach(phrase => {
+            const regex = createCaseInsensitiveRegex(phrase.toLowerCase());
+            const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER);
+            textToFormat = textToFormat.replace(regex, protectedPhrase);
+        });
+        let formattedText = textToFormat;
+        if (formattedText.length > 0 && !formattedText.startsWith('__url_')) {
+            formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+        }
+        formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
+            return `${punctuationAndSpaces}${letter.toUpperCase()}`;
+        });
+        formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
+            return `${preceding}${quote}${letter.toUpperCase()}`;
+        });
+        urls.forEach((url, index) => {
+            const placeholder = `__url_placeholder_${index}__`;
+            formattedText = formattedText.replace(placeholder, url.toLowerCase());
+        });
+        formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
+        textarea.value = formattedText;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    
+    function storeOriginalValue(textarea) {
+        if (textarea) {
+          textarea.dataset.originalText = textarea.value;
+        }
+    }
+    
+    function generateTgLink(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const dayPadded = String(date.getDate()).padStart(2, '0');
+        const dayUnpadded = String(date.getDate());
+        const italianMonths = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+        const monthName = italianMonths[date.getMonth()];
+        return `https://tgposte.poste.it/tgposte/${year}/${month}/${dayPadded}/tg-poste-del-${dayUnpadded}-${monthName}-${year}/`;
+    }
+
+    async function initializeApp() {
+      masterList = await getMasterListFromGoogleSheet();
+      const tabContents = document.getElementById('tabContents');
+      tabContents.innerHTML = tabsConfig.map((_, i) => createTabContent(i)).join('');
+      
+      document.querySelectorAll('textarea').forEach(textarea => {
+          storeOriginalValue(textarea);
+          textarea.addEventListener('input', updateOutputs);
+          textarea.addEventListener('focus', () => storeOriginalValue(textarea));
+          textarea.addEventListener('change', () => storeOriginalValue(textarea));
+      });
+
+      tabsConfig.forEach((_, index) => {
+        const savedData = localStorage.getItem(`tabData${index}`);
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          const tab = document.querySelector(`.tab-content[data-tab-index="${index}"]`);
+          Object.entries(data).forEach(([type, value]) => {
+            const field = tab.querySelector(`[data-type="${type}"]`);
+            if (field) {
+                field.value = value;
+                storeOriginalValue(field);
+            }
+          });
+        }
+      });
+      
+      tabContents.addEventListener('click', handleTabContentClicks);
+
+      document.querySelectorAll('.btn-copy-wa').forEach(btn => btn.addEventListener('click', copyContent));
+      document.querySelectorAll('.btn-copy-social').forEach(btn => btn.addEventListener('click', copyContent));
+      document.querySelectorAll('.btn-copy-ytTitle').forEach(btn => btn.addEventListener('click', copyTitle));
+      document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', saveData));
+      document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', clearAll));
+      document.querySelectorAll('.btn-copy-all').forEach(btn => btn.addEventListener('click', copyAllTabsContent));
+      document.querySelectorAll('.btn-export-excel').forEach(btn => btn.addEventListener('click', exportToExcel));
+      document.querySelectorAll('.btn-export-csv').forEach(btn => btn.addEventListener('click', exportToCsv));
+      document.getElementById('fileInput').addEventListener('change', handleFileInput);
+      document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
+      document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(parseInt(tab.dataset.tabIndex))));
+      updateOutputs();
+    }
+    
+    function handleTabContentClicks(event) {
+        const transformButton = event.target.closest('.text-tools button');
+        if (transformButton) {
+            event.preventDefault();
+            const transformType = transformButton.dataset.transform;
+            const inputGroup = transformButton.closest('.input-group');
+            const textarea = inputGroup.querySelector('textarea');
+            if (!textarea) return;
+            if (transformType !== 'revert') {
+                storeOriginalValue(textarea);
+            }
+            if (transformType === 'revert') {
+                textarea.value = textarea.dataset.originalText || '';
+            } else if (transformType === 'auto') {
+                applyAutoFormatting(textarea);
+                return; 
+            } else {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const hasSelection = start !== end;
+                if (!hasSelection) {
+                    switch (transformType) {
+                        case 'lower': textarea.value = textarea.value.toLowerCase(); break;
+                        case 'upper': textarea.value = textarea.value.toUpperCase(); break;
+                        case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                    }
+                } else {
+                    const selectedText = textarea.value.substring(start, end);
+                    let transformedSelection = '';
+                    switch (transformType) {
+                        case 'lower': transformedSelection = selectedText.toLowerCase(); break;
+                        case 'upper': transformedSelection = selectedText.toUpperCase(); break;
+                        case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
+                    }
+                    textarea.value = textarea.value.substring(0, start) + transformedSelection + textarea.value.substring(end);
+                    textarea.focus();
+                    textarea.setSelectionRange(start, start + transformedSelection.length);
+                }
+            }
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+        }
+
+        const dateShortcutButton = event.target.closest('.btn-date-shortcut');
+        if (dateShortcutButton) {
+            event.preventDefault();
+            const dayType = dateShortcutButton.dataset.day;
+            const tab = dateShortcutButton.closest('.tab-content');
+            const tgLinkTextarea = tab.querySelector('[data-type="tgLink"]');
+            if (tgLinkTextarea) {
+                const date = new Date();
+                if (dayType === 'yesterday') {
+                    date.setDate(date.getDate() - 1);
+                }
+                tgLinkTextarea.value = generateTgLink(date);
+                tgLinkTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        
+        const generateButton = event.target.closest('.bottone-genera');
+        if(generateButton) {
+            handleGenerateClick(generateButton);
+        }
+    }
+    
+    async function handleGenerateClick(button) {
+        const tabIndex = button.dataset.tabIndex;
+        const inputTesto = document.getElementById(`input-testo-ai-${tabIndex}`);
+        const loader = document.getElementById(`loader-ai-${tabIndex}`);
+        const messaggioErrore = document.getElementById(`messaggio-errore-ai-${tabIndex}`);
+        
+        const testoUtente = inputTesto.value.trim();
+        if (!testoUtente) {
+            alert("Ehi! Sembra che tu abbia dimenticato di inserire le informazioni. :)");
+            return;
+        }
+
+        button.innerHTML = 'Caricamento in corso...';
+        button.disabled = true;
+        loader.style.display = 'block';
+        messaggioErrore.style.display = 'none';
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inputText: testoUtente }),
+            });
+            if (!response.ok) {
+                throw new Error(`Qualcosa è andato storto! (Errore: ${response.status})`);
+            }
+            const data = await response.json();
+            
+            const currentTab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+            const waField = currentTab.querySelector('[data-type="wa"]');
+            const ytTitleField = currentTab.querySelector('[data-type="ytTitle"]');
+            const ytDescField = currentTab.querySelector('[data-type="ytDesc"]');
+
+            if(waField) waField.value = data.whatsapp;
+            if(ytTitleField) ytTitleField.value = data.youtube;
+            if(ytDescField) ytDescField.value = data.facebook_linkedin;
+
+            [waField, ytTitleField, ytDescField].forEach(field => {
+                if(field) {
+                    storeOriginalValue(field);
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+            
+            button.innerHTML = '🎉 Fatto! Genera ancora';
+
+        } catch (error) {
+            console.error('Errore durante la chiamata API:', error);
+            messaggioErrore.textContent = 'Ops! C\'è stato un problema durante la generazione. Riprova tra poco.';
+            messaggioErrore.style.display = 'block';
+            button.innerHTML = 'Riprova';
+        } finally {
+            loader.style.display = 'none';
+            button.disabled = false;
+        }
+    }
+    
+    function switchTab(tabIndex) {
+      document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === tabIndex));
+      document.querySelectorAll('.tab-content').forEach((content, i) => content.classList.toggle('active', i === tabIndex));
+      updateOutputs();
+    }
+
+    function updateOutputs() {
+      document.querySelectorAll('.tab-content').forEach((tab, tabIndex) => {
+        const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
+        
+        // Aggiorna contatori
+        ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
+          const textarea = tab.querySelector(`[data-type="${type}"]`);
+          if (textarea) {
+            const counter = document.getElementById(`counter-${type}-${tabIndex}`);
+            const valueLength = textarea.value.length;
+            const maxLen = tabsConfig[tabIndex].limits[type];
+            counter.textContent = `${valueLength}/${maxLen}`;
+            counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
+          }
+        });
+
+        // Output Whatsapp (Invariato)
+        const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
+        tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
+
+        // Output Social (Modificato secondo le specifiche)
+        let ytDescText = getValue('ytDesc').trim();
+        let movedHashtags = '';
+
+        // Trova hashtag SOLO alla fine del testo (esclusi quelli che terminano con un punto)
+        const trailingHashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+        const match = ytDescText.match(trailingHashtagRegex);
+
+        if (match) {
+            movedHashtags = match[0].trim();
+            ytDescText = ytDescText.replace(trailingHashtagRegex, '').trim();
+        }
+
+        const baseHashtags = "#TGPoste #PosteItaliane";
+        const finalHashtags = movedHashtags ? `${baseHashtags} ${movedHashtags}` : baseHashtags;
+        const tgLink = getValue('tgLink');
+
+        // Formatta: Testo pulito -> Riga vuota -> Link Freccia -> Riga vuota -> Hashtags
+        const socialOutput = `${ytDescText}\n\n➡️ ${tgLink}\n\n${finalHashtags}`;
+        
+        tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
+      });
+    }
+
+    function copyContent(event) {
+      const button = event.currentTarget;
+      const outputType = button.dataset.type;
+      const tab = button.closest('.tab-content');
+      const outputField = tab.querySelector(`[data-type="${outputType}"]`);
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
+      button.disabled = true;
+      navigator.clipboard.writeText(outputField.textContent).then(() => {
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+          const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
+          button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
+          button.disabled = false;
+        }, 2000);
+      }).catch(() => {
+        const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
+        button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
+        button.disabled = false;
+      });
+    }
+
+    function copyTitle(event) {
+      const button = event.currentTarget;
+      const tab = button.closest('.tab-content');
+      const textarea = tab.querySelector(`[data-type="ytTitle"]`);
+      const textToCopy = textarea.value;
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
+      button.disabled = true;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+          button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
+          button.disabled = false;
+        }, 2000);
+      }).catch(() => {
+        button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
+        button.disabled = false;
+      });
+    }
+
+    function saveData(event) {
+      const button = event.currentTarget;
+      const tabIndex = parseInt(button.dataset.tabIndex);
+      const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Caricamento in corso...`;
+      button.disabled = true;
+      const dataToSave = {};
+      tab.querySelectorAll('textarea').forEach(input => {
+        dataToSave[input.dataset.type] = input.value;
+        storeOriginalValue(input);
+      });
+      localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
+      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+      setTimeout(() => {
+        button.innerHTML = `<i class="fas fa-save"></i> Salva`;
+        button.disabled = false;
+      }, 2000);
+    }
+
+    function clearAll(event) {
+      const button = event.currentTarget;
+      const tabIndex = parseInt(button.dataset.tabIndex);
+      const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+      if (confirm("Stai cancellando tutto il testo. Sei sicuro?")) {
+        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cancellazione in corso...`;
+        button.disabled = true;
+        tab.querySelectorAll('textarea').forEach(textarea => {
+          textarea.value = '';
+          storeOriginalValue(textarea);
+          textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+          button.innerHTML = `<i class="fas fa-trash"></i> Cancella tutto`;
+          button.disabled = false;
+        }, 2000);
+      }
+    }
+
+    function copyAllTabsContent(event) {
+      const button = event.currentTarget;
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
+      button.disabled = true;
+      let output = '';
+      for (let i = 0; i < 3; i++) {
+        const tab = document.querySelector(`.tab-content[data-tab-index="${i}"]`);
+        const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value.trim() || '=';
+        output += `NEWS ${i + 1}\n` +
+          `Contenuto WA: ${getValue('wa')}\n` +
+          `Titolo YouTube: ${getValue('ytTitle')}\n` +
+          `Contenuto social: ${getValue('ytDesc')}\n\n`;
+      }
+      navigator.clipboard.writeText(output.trim()).then(() => {
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+          button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
+          button.disabled = false;
+        }, 2000);
+      }).catch(() => {
+        button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
+        button.disabled = false;
+      });
+    }
+
+    function exportToExcel(event) {
+      const button = event.currentTarget;
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione in corso...`;
+      button.disabled = true;
+      const today = new Date();
+      const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+      const excelData = [
+        ["", "News 1", "News 2", "News 3"],
+        ["Testo descrittivo news Canale WA"],
+        ["Titolo YouTube"],
+        ["Copy post e descrizione YT"],
+        ["Link YouTube"],
+        ["Link TG Poste"]
+      ];
+      const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
+      for (let i=0; i<excelData.length; i++) {
+        for(let j=0; j<4; j++) {
+          if (!excelData[i][j]) excelData[i][j] = '';
+        }
+      }
+      for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+        const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+        tab.querySelectorAll('textarea').forEach(textarea => {
+          const rowIndex = fieldMap[textarea.dataset.type];
+          if (rowIndex !== undefined) {
+            excelData[rowIndex][tabIndex + 1] = textarea.value;
+          }
+        });
+      }
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+      XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
+      XLSX.writeFile(wb, fileName);
+      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+      setTimeout(() => {
+        button.innerHTML = `<i class="fas fa-file-excel"></i> Esporta in Excel`;
+        button.disabled = false;
+      }, 2000);
+    }
+    
+    function exportToCsv(event) {
+        const button = event.currentTarget;
+        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione...`;
+        button.disabled = true;
+        
+        const data = [
+            ["", "News 1", "News 2", "News 3"],
+            ["Testo descrittivo news Canale WA"], ["Titolo YouTube"], ["Copy post e descrizione YT"],
+            ["Link YouTube"], ["Link TG Poste"]
+        ];
+        const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
+
+        for (let i = 0; i < data.length; i++) {
+            for (let j = 0; j < 4; j++) { if (!data[i][j]) data[i][j] = ''; }
+        }
+
+        for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+            tab.querySelectorAll('textarea').forEach(textarea => {
+                const rowIndex = fieldMap[textarea.dataset.type];
+                if (rowIndex !== undefined) {
+                    data[rowIndex][tabIndex + 1] = textarea.value;
+                }
+            });
+        }
+
+        const csvContent = data.map(row =>
+            row.map(cell => {
+                const strCell = String(cell);
+                return strCell.includes(',') || strCell.includes('"') || strCell.includes('\n')
+                    ? `"${strCell.replace(/"/g, '""')}"`
+                    : strCell;
+            }).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        const today = new Date();
+        const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.csv`;
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
+        setTimeout(() => {
+            button.innerHTML = `<i class="fas fa-file-csv"></i> Esporta in CSV`;
+            button.disabled = false;
+        }, 2000);
+    }
+
+    async function handleFileInput(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const fileName = file.name.toLowerCase();
+        if (fileName.endsWith('.xlsx')) {
+            importFromExcel(file);
+        } else if (fileName.endsWith('.csv')) {
+            const reader = new FileReader();
+            reader.onload = e => importFromCsvText(e.target.result);
+            reader.onerror = () => alert('Errore durante la lettura del file CSV.');
+            reader.readAsText(file);
+        } else {
+            alert('Formato file non supportato. Selezionare un file .xlsx o .csv');
+        }
+        event.target.value = '';
+    }
+
+    async function handlePasteCsv() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                importFromCsvText(text);
+            } else {
+                alert('Nessun testo trovato negli appunti.');
+            }
+        } catch (error) {
+            console.error('Errore durante la lettura dagli appunti:', error);
+            alert("Impossibile leggere dagli appunti. Assicurati di aver concesso i permessi necessari.");
+        }
+    }
+
+    function parseCsvText(csvText) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = '';
+        let inQuotes = false;
+        const text = csvText.trim().replace(/\r\n/g, '\n') + '\n';
+
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            if (inQuotes) {
+                if (char === '"') {
+                    if (text[i + 1] === '"') {
+                        currentField += '"';
+                        i++; // Skip next quote
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    currentField += char;
+                }
+            } else {
+                if (char === '"') {
+                    inQuotes = true;
+                } else if (char === ',') {
+                    currentRow.push(currentField);
+                    currentField = '';
+                } else if (char === '\n') {
+                    currentRow.push(currentField);
+                    rows.push(currentRow);
+                    currentRow = [];
+                    currentField = '';
+                } else {
+                    currentField += char;
+                }
+            }
+        }
+        return rows.filter(row => row.some(cell => cell.trim() !== ''));
+    }
+
+    function importFromCsvText(csvText) {
+        try {
+            const rows = parseCsvText(csvText);
+            if (rows.length === 0) {
+                alert('Nessun dato da importare.');
+                return;
+            }
+
+            const fieldMap = {
+                'Testo descrittivo news Canale WA': 'wa', 'Titolo YouTube': 'ytTitle',
+                'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
+            };
+
+            const firstRowColumns = rows[0];
+            const isHeaderPresent = !fieldMap.hasOwnProperty(firstRowColumns[0]?.trim());
+            const dataRows = isHeaderPresent ? rows.slice(1) : rows;
+            
+            if(dataRows.length === 0) {
+                 alert('Il file CSV non contiene righe di dati valide.');
+                 return;
+            }
+
+            const firstDataRowCols = dataRows[0];
+            const numberOfDataColumns = firstDataRowCols.length - 1;
+
+            if (numberOfDataColumns === 1) {
+                const activeTabElement = document.querySelector('.tab.active');
+                const targetTabIndex = activeTabElement ? parseInt(activeTabElement.dataset.tabIndex) : 0;
+                
+                dataRows.forEach(row => {
+                    const fieldType = fieldMap[row[0]?.trim()];
+                    if (fieldType) {
+                        const tab = document.querySelector(`.tab-content[data-tab-index="${targetTabIndex}"]`);
+                        if (!tab) return; 
+
+                        const field = tab.querySelector(`[data-type="${fieldType}"]`);
+                        if (field) {
+                            const value = row[1];
+                            field.value = value !== undefined ? value.replace(/""/g, '"') : '';
+                            storeOriginalValue(field);
+                        }
+                    }
+                });
+
+            } else {
+                dataRows.forEach(row => {
+                    const fieldType = fieldMap[row[0]?.trim()];
+                    if (fieldType) {
+                        const effectiveDataColumns = row.length - 1;
+                        for (let tabIndex = 0; tabIndex < effectiveDataColumns; tabIndex++) {
+                            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+                            if (!tab) continue;
+
+                            const field = tab.querySelector(`[data-type="${fieldType}"]`);
+                            if (field) {
+                                const value = row[tabIndex + 1];
+                                field.value = value !== undefined ? value.replace(/""/g, '"') : '';
+                                storeOriginalValue(field);
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateOutputs();
+            alert('Dati CSV importati con successo!');
+        } catch (error) {
+            console.error("Errore durante l'importazione da CSV:", error);
+            alert("Si è verificato un errore durante l'importazione dei dati CSV. Controlla il formato e riprova.");
+        }
+    }
+    
+    async function importFromExcel(file) {
+      if (!file) return;
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      const fieldMap = {
+        'Testo descrittivo news Canale WA': 'wa', 'Titolo YouTube': 'ytTitle',
+        'Copy post e descrizione YT': 'ytDesc', 'Link YouTube': 'ytLink', 'Link TG Poste': 'tgLink'
+      };
+      rows.slice(1).forEach(row => {
+        const fieldType = fieldMap[row[0]?.trim()];
+        if (fieldType) {
+          for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
+            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
+            const field = tab.querySelector(`[data-type="${fieldType}"]`);
+            if (field) {
+              field.value = row[tabIndex + 1] !== undefined ? row[tabIndex + 1] : '';
+              storeOriginalValue(field);
+            }
+          }
+        }
+      });
+      updateOutputs();
+      alert('Dati Excel importati con successo!');
+    }
+    
+    window.addEventListener('DOMContentLoaded', initializeApp);
+  </script>
+</body>
+</html>
