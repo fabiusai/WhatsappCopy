@@ -755,8 +755,8 @@
         let ytDescText = getValue('ytDesc').trim();
         let movedHashtags = '';
 
-        // Trova hashtag SOLO alla fine del testo
-        const trailingHashtagRegex = /(\s*#[^\s]+)+$/;
+        // Trova hashtag SOLO alla fine del testo (esclusi quelli che terminano con un punto)
+        const trailingHashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
         const match = ytDescText.match(trailingHashtagRegex);
 
         if (match) {
