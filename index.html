@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – Final v6.8 (Blue Accent)</title>
+  <title>Social Dashboard – Final v6.9</title>
   <link rel="icon" href="faviconAI.ico" />
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
@@ -15,10 +15,10 @@
 
   <style>
     :root {
-      --primary-blue: #0047bb;       /* Blu Postale */
-      --primary-hover: #00368f;      /* Blu Scuro per hover */
-      --primary-light: #e6f0ff;      /* Azzurro chiarissimo per sfondi */
-      --accent-yellow: #eedc00;      /* Giallo Poste */
+      --primary-blue: #0047bb;
+      --primary-hover: #00368f;
+      --primary-light: #e6f0ff;
+      --accent-yellow: #eedc00;
       --bg-gray: #f4f5f7;
       --surface-white: #ffffff;
       --text-dark: #172B4D;
@@ -78,9 +78,9 @@
     .tab-btn:hover { background: #dde2e6; }
     .tab-btn.active {
       background: var(--surface-white);
-      color: var(--primary-blue); /* Testo blu attivo */
+      color: var(--primary-blue);
       border-color: var(--border-color);
-      border-top: 3px solid var(--primary-blue); /* Dettaglio blu in alto */
+      border-top: 3px solid var(--primary-blue);
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
@@ -97,7 +97,7 @@
       }
     }
 
-    /* --- COLUMN STYLES --- */
+    /* --- EDITOR & PREVIEW --- */
     .editor-container {
       background: var(--surface-white);
       padding: 24px;
@@ -142,7 +142,6 @@
       align-items: center;
       gap: 10px;
     }
-    /* ACCENTO BLU SULLE ICONE HEADER */
     .titolo-anteprima i {
         font-size: 1.1rem;
         color: var(--primary-blue); 
@@ -175,7 +174,7 @@
       transition: all 0.2s;
     }
     .btn-copia-header:hover {
-      background-color: var(--primary-light); /* Sfondo azzurro al passaggio */
+      background-color: var(--primary-light);
       color: var(--primary-blue);
       border-color: var(--primary-blue);
     }
@@ -190,13 +189,7 @@
       margin-bottom: 8px; 
       min-height: 32px;
     }
-    
-    .label-text { 
-      font-weight: 600; 
-      font-size: 0.95rem; 
-      color: var(--text-dark); 
-    }
-
+    .label-text { font-weight: 600; font-size: 0.95rem; color: var(--text-dark); }
     .right-controls { display: flex; align-items: center; gap: 12px; }
     .toolbar { display: flex; gap: 4px; margin: 0; }
 
@@ -217,7 +210,7 @@
         box-shadow: 0 0 0 3px rgba(0,71,187,0.1);
     }
 
-    /* Stile Bottoni Strumenti */
+    /* --- TOOL BUTTONS --- */
     .tool-btn {
       background: #ffffff;
       border: 1px solid #dcdcdc;
@@ -235,7 +228,6 @@
     }
     .tool-btn:hover { background: #f1f3f5; color: var(--text-dark); border-color: #ccc; }
     
-    /* BOTTONE AUTO (MAGIC) EVIDENZIATO */
     .tool-btn[data-action="auto"] {
         color: var(--primary-blue);
         background-color: #f4f8ff;
@@ -245,6 +237,14 @@
         background-color: var(--primary-blue);
         color: white;
         border-color: var(--primary-blue);
+    }
+
+    /* --- FIX SPAZIATURA TASTI DATA (OGGI/IERI) --- */
+    .tool-btn.btn-date {
+        padding: 0 14px; /* Aumentato padding laterale */
+        gap: 8px;        /* Spazio netto tra icona e testo */
+        width: auto;     /* Permette al testo di stendersi */
+        font-weight: 500;
     }
 
     /* --- AI BOX --- */
@@ -258,13 +258,11 @@
     }
     .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .ai-header h3 { font-size: 1rem; color: var(--text-dark); display: flex; gap: 8px; align-items: center; }
-    
-    /* ACCENTO BLU SULL'ICONA AI */
     .ai-header h3 i { color: var(--primary-blue); }
 
     .btn-generate {
       width: 100%;
-      background: var(--primary-blue); /* BLU PRIMARIO */
+      background: var(--primary-blue);
       color: white;
       border: none;
       padding: 12px;
@@ -316,8 +314,7 @@
       gap: 8px;
       font-size: 0.9rem;
     }
-    
-    .btn-save { background: var(--primary-blue); } /* SALVA BLU */
+    .btn-save { background: var(--primary-blue); }
     .btn-save:hover { background: var(--primary-hover); }
 
     .btn-clear { background: #ffffff; border: 1px solid #dc3545; color: #dc3545; }
@@ -325,7 +322,7 @@
     
     .btn-utility { background: #6c757d; }
     
-    /* IMPORT BAR ACCENTS */
+    /* IMPORT BAR */
     .import-bar {
       background: #fff;
       padding: 15px;
@@ -342,7 +339,6 @@
         color: var(--text-dark);
         border: 1px solid #dcdcdc;
     }
-    /* Icone blu nei bottoni import */
     .import-btn i { color: var(--primary-blue); } 
     .import-btn:hover { background: #e2e6ea; border-color: #bbb; }
 
@@ -381,7 +377,7 @@
       background: #f9fafb;
     }
     .modal-header h2 { margin: 0; color: var(--text-dark); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-    .modal-header h2 i { color: var(--primary-blue); } /* Icona Modale Blu */
+    .modal-header h2 i { color: var(--primary-blue); }
 
     .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
     .close-modal:hover { color: #333; }
@@ -425,7 +421,6 @@
         cursor: default;
         transition: all 0.2s;
     }
-    /* Rimuovi il colore blu icona durante lo stato di successo per mantenere il verde */
     .btn-success-state i { color: #0f5132 !important; }
 
     /* TOAST */
@@ -474,7 +469,7 @@
     <div class="main-header">
       <div>
         <h1>Social Dashboard</h1>
-        <p style="margin:0; color:#888; font-size:0.9rem;">v6.8 Blue Accent</p>
+        <p style="margin:0; color:#888; font-size:0.9rem;">v6.9</p>
       </div>
     </div>
 
@@ -562,8 +557,8 @@
           <button class="tool-btn" data-action="lower" title="tutto minuscolo"><i class="fas fa-arrow-down"></i> <small>abc</small></button>
           <button class="tool-btn" data-action="title" title="Iniziali Maiuscole"><i class="fas fa-arrow-up"></i> <small>Abc</small></button>
           <button class="tool-btn" data-action="upper" title="TUTTO MAIUSCOLO"><i class="fas fa-arrow-up"></i> <small>ABC</small></button>
-          <button class="tool-btn" data-action="auto" title="Formatta Auto (AI rule)"><i class="fas fa-wand-magic-sparkles"></i></button>
-          <button class="tool-btn" data-action="revert" title="Annulla modifiche"><i class="fas fa-rotate-left"></i></button>
+          <button class="tool-btn" data-action="auto" title="Formatta Auto"><i class="fas fa-wand-magic-sparkles"></i></button>
+          <button class="tool-btn" data-action="revert" title="Annulla"><i class="fas fa-rotate-left"></i></button>
           ${extraBtn}
         </div>`;
 
@@ -647,8 +642,13 @@
               <button class="action-btn btn-save" data-idx="${index}"><i class="fas fa-save"></i> Salva</button>
               <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash-alt"></i></button>
               <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
-              <button class="action-btn btn-utility" onclick="exportExcel()"><i class="fas fa-file-excel"></i></button>
-              <button class="action-btn btn-utility" onclick="exportCsv()"><i class="fas fa-file-csv"></i></button>
+              
+              <button class="action-btn btn-utility" onclick="exportExcel()">
+                <i class="fas fa-file-excel"></i> Excel
+              </button>
+              <button class="action-btn btn-utility" onclick="exportCsv()">
+                <i class="fas fa-file-csv"></i> CSV
+              </button>
             </div>
 
           </div>
@@ -682,7 +682,7 @@
       `;
     }
 
-    /* --- FEEDBACK SYSTEM --- */
+    /* --- LOGICA JS (INVARIATA) --- */
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -722,7 +722,6 @@
         }, 1500);
     }
 
-    /* --- INITIALIZATION --- */
     async function init() {
       masterList = await getMasterList();
       const container = document.getElementById('dynamicContent');
@@ -735,7 +734,6 @@
     }
 
     function setupListeners() {
-      // Tabs
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -745,7 +743,6 @@
         });
       });
 
-      // Inputs
       document.querySelectorAll('textarea').forEach(el => {
         el.addEventListener('input', (e) => {
           updateCounts(e.target);
@@ -756,7 +753,6 @@
         });
       });
 
-      // Buttons Delegate
       document.body.addEventListener('click', (e) => {
         const btn = e.target.closest('.tool-btn');
         if (!btn) return;
@@ -824,7 +820,6 @@
       document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
     }
 
-    /* --- LOGICA MODALE PROMPT --- */
     function setupModalLogic() {
         const modal = document.getElementById('promptModal');
         const closeBtn = document.getElementById('closePromptModal');
@@ -911,7 +906,6 @@ Solo codice CSV.`;
         document.getElementById('promptModal').classList.add('open');
     }
 
-    /* --- LOGICHE ANTEPRIMA & CONTEGGI --- */
     function updatePreview(idx) {
       const getVal = (type) => document.getElementById(`${type}-${idx}`)?.value || '';
       
@@ -995,7 +989,6 @@ Solo codice CSV.`;
       textarea.dispatchEvent(new Event('input'));
     }
 
-    /* --- IMPORT / EXPORT --- */
     async function handleFileInput(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -1105,8 +1098,6 @@ Solo codice CSV.`;
         });
     }
 
-    /* --- UTILITY --- */
-    
     async function handleAI(idx) {
       const input = document.getElementById(`ai-input-${idx}`).value;
       if(!input) return showToast("Inserisci testo prima!", "error");
