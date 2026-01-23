@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – Final v6.0 (Prompt Modal)</title>
+  <title>Social Dashboard – Final v6.3 (Icons Fix)</title>
   <link rel="icon" href="faviconAI.ico" />
 
   <link
@@ -179,9 +179,35 @@
 
     /* --- INPUTS --- */
     .field-group { margin-bottom: 24px; }
-    .label-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .label-text { font-weight: 600; font-size: 0.95rem; color: var(--primary-blue); }
     
+    /* Struttura Header allineata */
+    .label-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 8px; 
+      min-height: 32px;
+    }
+    
+    .label-text { 
+      font-weight: 600; 
+      font-size: 0.95rem; 
+      color: var(--primary-blue); 
+    }
+
+    /* Contenitore destra che raggruppa Toolbar e Contatore */
+    .right-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 4px;
+      margin: 0;
+    }
+
     textarea, input[type="text"] {
       width: 100%;
       box-sizing: border-box;
@@ -194,22 +220,31 @@
     }
     textarea:focus, input[type="text"]:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
 
-    .toolbar {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 4px;
-      justify-content: flex-end;
-    }
+    /* Stile Bottoni Strumenti Aggiornato */
     .tool-btn {
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      color: #555;
-      padding: 4px 8px;
+      background: #ffffff;
+      border: 1px solid #dcdcdc;
+      color: #5E6C84;
+      padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      min-width: 36px; /* Larghezza minima per evitare icone schiacciate */
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px; /* Spazio tra icona e testo se presente */
     }
-    .tool-btn:hover { background: #e9ecef; color: var(--primary-blue); }
+    .tool-btn:hover { background: #e9ecef; color: var(--primary-blue); border-color: var(--primary-blue); }
+    
+    /* Stile per il feedback successo */
+    .tool-btn.success-feedback {
+        background-color: #e6fffa;
+        color: #00875a;
+        border-color: #00875a;
+    }
 
     /* --- AI BOX --- */
     .ai-box {
@@ -370,7 +405,7 @@
     <div class="main-header">
       <div>
         <h1>Social Network Dashboard</h1>
-        <p style="margin:0; color:#666;">Versione v6.0</p>
+        <p style="margin:0; color:#666;">Versione v6.3</p>
       </div>
     </div>
 
@@ -457,14 +492,20 @@
     /* --- HTML GENERATOR --- */
     function generateTabHTML(index) {
       
-      const toolbarHTML = `
+      // Helper toolbar con icone aggiornate
+      // Uso fa-solid per sicurezza e fa-rotate-left al posto di undo
+      const getToolbar = (targetId, extraBtn = '') => `
         <div class="toolbar">
           <button class="tool-btn" data-action="lower" title="minuscolo">abc</button>
           <button class="tool-btn" data-action="title" title="Iniziali Maiuscole">Abc</button>
           <button class="tool-btn" data-action="upper" title="MAIUSCOLO">ABC</button>
-          <button class="tool-btn" data-action="auto" title="Auto Format" style="color:#0047bb;">✨ Auto</button>
-          <button class="tool-btn" data-action="revert" title="Ripristina"><i class="fas fa-undo"></i></button>
+          <button class="tool-btn" data-action="auto" title="Formatta Auto" style="color:#0047bb;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto</button>
+          <button class="tool-btn" data-action="revert" title="Ripristina originale"><i class="fa-solid fa-rotate-left"></i></button>
+          ${extraBtn}
         </div>`;
+
+      // Bottone copia specifico per YT Title
+      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fa-solid fa-copy"></i></button>`;
 
       return `
       <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
@@ -488,30 +529,33 @@
             <div class="field-group">
               <div class="label-row">
                 <span class="label-text">Testo WhatsApp</span>
-                <span class="counter" id="count-wa-${index}">0/${tabsConfig[index].limits.wa}</span>
+                <div class="right-controls">
+                    ${getToolbar()}
+                    <span class="counter" id="count-wa-${index}">0/${tabsConfig[index].limits.wa}</span>
+                </div>
               </div>
-              ${toolbarHTML}
               <textarea id="wa-${index}" data-type="wa" rows="3"></textarea>
             </div>
 
             <div class="field-group">
               <div class="label-row">
                 <span class="label-text">Titolo YouTube</span>
-                <span class="counter" id="count-ytTitle-${index}">0/${tabsConfig[index].limits.ytTitle}</span>
+                <div class="right-controls">
+                    ${getToolbar(`ytTitle-${index}`, copyTitleBtn)}
+                    <span class="counter" id="count-ytTitle-${index}">0/${tabsConfig[index].limits.ytTitle}</span>
+                </div>
               </div>
-              ${toolbarHTML}
-              <div style="display:flex; gap:5px;">
-                <textarea id="ytTitle-${index}" data-type="ytTitle" rows="2"></textarea>
-                <button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fas fa-copy"></i></button>
-              </div>
+              <textarea id="ytTitle-${index}" data-type="ytTitle" rows="2"></textarea>
             </div>
 
             <div class="field-group">
               <div class="label-row">
                 <span class="label-text">Descrizione Social</span>
-                <span class="counter" id="count-ytDesc-${index}">0/${tabsConfig[index].limits.ytDesc}</span>
+                <div class="right-controls">
+                    ${getToolbar()}
+                    <span class="counter" id="count-ytDesc-${index}">0/${tabsConfig[index].limits.ytDesc}</span>
+                </div>
               </div>
-              ${toolbarHTML}
               <textarea id="ytDesc-${index}" data-type="ytDesc" rows="5"></textarea>
             </div>
 
@@ -523,9 +567,13 @@
             <div class="field-group">
               <div class="label-row">
                 <span class="label-text">Link TG Poste</span>
-                <div>
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today">Oggi</button>
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday">Ieri</button>
+                <div class="right-controls">
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Inserisci data di Oggi">
+                    <i class="fa-solid fa-calendar-day"></i> Oggi
+                  </button>
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Inserisci data di Ieri">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ieri
+                  </button>
                 </div>
               </div>
               <textarea id="tgLink-${index}" data-type="tgLink" rows="1"></textarea>
@@ -611,12 +659,13 @@
         
         if (btn.dataset.action) {
           const textarea = btn.closest('.field-group').querySelector('textarea');
-          handleTextAction(textarea, btn.dataset.action);
+          handleTextAction(textarea, btn.dataset.action, btn);
         }
         
         if (btn.classList.contains('btn-copy-simple')) {
            const targetId = btn.dataset.target;
-           copyToClipboard(document.getElementById(targetId).value, btn);
+           const textarea = document.getElementById(targetId);
+           copyToClipboard(textarea.value, btn);
         }
 
         if (btn.classList.contains('btn-date')) {
@@ -626,6 +675,15 @@
            if(btn.dataset.day === 'yesterday') date.setDate(date.getDate() - 1);
            target.value = generateTgLink(date);
            target.dispatchEvent(new Event('input'));
+           
+           // Feedback anche per il bottone data
+           const originalHTML = btn.innerHTML;
+           btn.classList.add('success-feedback');
+           btn.innerHTML = '<i class="fas fa-check"></i>';
+           setTimeout(() => {
+              btn.innerHTML = originalHTML;
+              btn.classList.remove('success-feedback');
+           }, 1000);
         }
       });
 
@@ -812,7 +870,7 @@ Genera solo il codice CSV.`;
       }
     }
 
-    function handleTextAction(textarea, action) {
+    function handleTextAction(textarea, action, btnElement) {
       if(!textarea) return;
       if(action !== 'revert') textarea.dataset.original = textarea.value;
       
@@ -821,10 +879,22 @@ Genera solo il codice CSV.`;
       if(action === 'upper') val = val.toUpperCase();
       if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
       if(action === 'revert') val = textarea.dataset.original || val;
-      if(action === 'auto') { applyAutoFormat(textarea); return; }
+      if(action === 'auto') { applyAutoFormat(textarea); }
+      else {
+          textarea.value = val;
+          textarea.dispatchEvent(new Event('input'));
+      }
 
-      textarea.value = val;
-      textarea.dispatchEvent(new Event('input'));
+      // Feedback visivo sul bottone
+      if(btnElement) {
+          const originalHTML = btnElement.innerHTML;
+          btnElement.classList.add('success-feedback');
+          btnElement.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+              btnElement.innerHTML = originalHTML;
+              btnElement.classList.remove('success-feedback');
+          }, 1000);
+      }
     }
 
     function applyAutoFormat(textarea) {
