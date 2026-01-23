@@ -4,37 +4,28 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – Final v6.5</title>
+  <title>Social Dashboard – Final v6.8 (Blue Accent)</title>
   <link rel="icon" href="faviconAI.ico" />
 
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-  />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-pE6N1H8uZ6rS2E6EeD+WmY8/tPzTiPjzr6yPLGwFqvYykv2kK1oaXV1z+g8fVG8rBpyxOaNvGqZcIYITu5r3Q=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
     :root {
-      --primary-blue: #0047bb;
-      --primary-hover: #00368f;
-      --accent-yellow: #eedc00;
+      --primary-blue: #0047bb;       /* Blu Postale */
+      --primary-hover: #00368f;      /* Blu Scuro per hover */
+      --primary-light: #e6f0ff;      /* Azzurro chiarissimo per sfondi */
+      --accent-yellow: #eedc00;      /* Giallo Poste */
       --bg-gray: #f4f5f7;
       --surface-white: #ffffff;
       --text-dark: #172B4D;
       --text-medium: #5E6C84;
       --border-color: #dfe1e6;
-      --success-green: #36b37e;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
       --radius: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
       --font-family-base: 'Inter', sans-serif;
     }
 
@@ -47,7 +38,7 @@
       padding: 0;
     }
 
-    /* --- LAYOUT GENERALE --- */
+    /* --- LAYOUT --- */
     .app-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -66,7 +57,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .main-header h1 { margin: 0; color: var(--primary-blue); font-size: 1.6rem; }
+    .main-header h1 { margin: 0; color: var(--text-dark); font-size: 1.6rem; letter-spacing: -0.5px; }
 
     /* Tabs */
     .tabs-container {
@@ -82,10 +73,15 @@
       font-weight: 600;
       color: var(--text-medium);
       transition: 0.2s;
+      border: 1px solid transparent;
     }
+    .tab-btn:hover { background: #dde2e6; }
     .tab-btn.active {
-      background: var(--primary-blue);
-      color: #fff;
+      background: var(--surface-white);
+      color: var(--primary-blue); /* Testo blu attivo */
+      border-color: var(--border-color);
+      border-top: 3px solid var(--primary-blue); /* Dettaglio blu in alto */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
     /* --- GRIGLIA --- */
@@ -120,7 +116,7 @@
 
     /* Card Anteprima */
     .card-anteprima-finale {
-      background-color: #ffffff !important;
+      background-color: #ffffff;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -129,7 +125,7 @@
       flex-direction: column;
     }
     .header-anteprima {
-      background-color: #f1f3f5;
+      background-color: #f8f9fa;
       padding: 12px 20px;
       border-bottom: 1px solid #e0e0e0;
       display: flex;
@@ -141,11 +137,17 @@
       font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #555;
+      color: var(--text-medium);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
+    /* ACCENTO BLU SULLE ICONE HEADER */
+    .titolo-anteprima i {
+        font-size: 1.1rem;
+        color: var(--primary-blue); 
+    }
+
     .corpo-anteprima {
       padding: 24px;
       background-color: #ffffff !important;
@@ -157,6 +159,7 @@
       text-align: left;
       min-height: 100px;
     }
+    
     .btn-copia-header {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -164,23 +167,22 @@
       border-radius: 4px;
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--primary-blue);
+      color: var(--text-medium);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       transition: all 0.2s;
     }
     .btn-copia-header:hover {
-      background-color: var(--primary-blue);
-      color: #fff;
+      background-color: var(--primary-light); /* Sfondo azzurro al passaggio */
+      color: var(--primary-blue);
       border-color: var(--primary-blue);
     }
 
     /* --- INPUTS --- */
     .field-group { margin-bottom: 24px; }
     
-    /* Struttura Header allineata */
     .label-row { 
       display: flex; 
       justify-content: space-between; 
@@ -192,21 +194,11 @@
     .label-text { 
       font-weight: 600; 
       font-size: 0.95rem; 
-      color: var(--primary-blue); 
+      color: var(--text-dark); 
     }
 
-    /* Contenitore destra che raggruppa Toolbar e Contatore */
-    .right-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .toolbar {
-      display: flex;
-      gap: 4px;
-      margin: 0;
-    }
+    .right-controls { display: flex; align-items: center; gap: 12px; }
+    .toolbar { display: flex; gap: 4px; margin: 0; }
 
     textarea, input[type="text"] {
       width: 100%;
@@ -217,33 +209,42 @@
       font-family: var(--font-family-base);
       font-size: 1rem;
       resize: vertical;
+      transition: border-color 0.2s;
     }
-    textarea:focus, input[type="text"]:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
+    textarea:focus, input[type="text"]:focus { 
+        outline: none; 
+        border-color: var(--primary-blue); 
+        box-shadow: 0 0 0 3px rgba(0,71,187,0.1);
+    }
 
-    /* Stile Bottoni Strumenti Aggiornato */
+    /* Stile Bottoni Strumenti */
     .tool-btn {
       background: #ffffff;
       border: 1px solid #dcdcdc;
-      color: #5E6C84;
+      color: var(--text-medium);
       padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-      min-width: 36px; /* Larghezza minima per evitare icone schiacciate */
+      font-size: 0.9rem;
+      transition: all 0.1s;
+      min-width: 36px;
       height: 32px;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 5px; /* Spazio tra icona e testo se presente */
     }
-    .tool-btn:hover { background: #e9ecef; color: var(--primary-blue); border-color: var(--primary-blue); }
+    .tool-btn:hover { background: #f1f3f5; color: var(--text-dark); border-color: #ccc; }
     
-    /* Stile per il feedback successo */
-    .tool-btn.success-feedback {
-        background-color: #e6fffa;
-        color: #00875a;
-        border-color: #00875a;
+    /* BOTTONE AUTO (MAGIC) EVIDENZIATO */
+    .tool-btn[data-action="auto"] {
+        color: var(--primary-blue);
+        background-color: #f4f8ff;
+        border-color: #cce0ff;
+    }
+    .tool-btn[data-action="auto"]:hover {
+        background-color: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
     }
 
     /* --- AI BOX --- */
@@ -256,9 +257,14 @@
       border-radius: 6px;
     }
     .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .ai-header h3 { font-size: 1rem; color: var(--text-dark); display: flex; gap: 8px; align-items: center; }
+    
+    /* ACCENTO BLU SULL'ICONA AI */
+    .ai-header h3 i { color: var(--primary-blue); }
+
     .btn-generate {
       width: 100%;
-      background: var(--primary-blue);
+      background: var(--primary-blue); /* BLU PRIMARIO */
       color: white;
       border: none;
       padding: 12px;
@@ -266,15 +272,19 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,71,187,0.2);
     }
     .btn-generate:hover { background: var(--primary-hover); }
 
-    /* Button Prompt */
     .btn-prompt-modal {
       background-color: #fff;
-      border: 1px solid var(--primary-blue);
-      color: var(--primary-blue);
-      padding: 5px 10px;
+      border: 1px solid #ccc;
+      color: var(--text-medium);
+      padding: 5px 12px;
       border-radius: 4px;
       font-size: 0.85rem;
       cursor: pointer;
@@ -283,9 +293,9 @@
       align-items: center;
       gap: 6px;
     }
-    .btn-prompt-modal:hover { background-color: #eef4ff; }
+    .btn-prompt-modal:hover { background-color: var(--primary-light); color: var(--primary-blue); border-color: var(--primary-blue); }
 
-    /* --- ACTIONS & IMPORT --- */
+    /* --- ACTIONS --- */
     .actions-row {
       margin-top: 30px;
       padding-top: 20px;
@@ -295,7 +305,7 @@
       gap: 10px;
     }
     .action-btn {
-      padding: 10px 16px;
+      padding: 10px 18px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -303,12 +313,19 @@
       color: white;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      font-size: 0.9rem;
     }
-    .btn-save { background: var(--primary-blue); }
-    .btn-clear { background: #dc3545; }
-    .btn-utility { background: #6c757d; }
+    
+    .btn-save { background: var(--primary-blue); } /* SALVA BLU */
+    .btn-save:hover { background: var(--primary-hover); }
 
+    .btn-clear { background: #ffffff; border: 1px solid #dc3545; color: #dc3545; }
+    .btn-clear:hover { background: #dc3545; color: #fff; }
+    
+    .btn-utility { background: #6c757d; }
+    
+    /* IMPORT BAR ACCENTS */
     .import-bar {
       background: #fff;
       padding: 15px;
@@ -318,9 +335,19 @@
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
     }
+    .import-btn {
+        background: #f8f9fa;
+        color: var(--text-dark);
+        border: 1px solid #dcdcdc;
+    }
+    /* Icone blu nei bottoni import */
+    .import-btn i { color: var(--primary-blue); } 
+    .import-btn:hover { background: #e2e6ea; border-color: #bbb; }
 
-    /* --- MODAL STYLES --- */
+
+    /* --- MODAL --- */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -329,8 +356,9 @@
       z-index: 1000;
       justify-content: center;
       align-items: center;
+      backdrop-filter: blur(2px);
     }
-    .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
     
     .modal-content {
       background: #fff;
@@ -339,12 +367,11 @@
       max-height: 90vh;
       border-radius: 12px;
       padding: 0;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-    
     .modal-header {
       padding: 20px;
       border-bottom: 1px solid #eee;
@@ -353,16 +380,13 @@
       align-items: center;
       background: #f9fafb;
     }
-    .modal-header h2 { margin: 0; color: var(--primary-blue); font-size: 1.4rem; }
-    .close-modal {
-      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;
-    }
+    .modal-header h2 { margin: 0; color: var(--text-dark); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    .modal-header h2 i { color: var(--primary-blue); } /* Icona Modale Blu */
+
+    .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+    .close-modal:hover { color: #333; }
     
-    .modal-body {
-      padding: 20px;
-      overflow-y: auto;
-      flex: 1;
-    }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
 
     .modal-news-grid {
         display: grid;
@@ -376,46 +400,91 @@
         border-radius: 8px;
         border: 1px solid #eee;
     }
-    .news-input-block h3 { margin-top: 0; color: var(--text-dark); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+    .news-input-block h3 { margin-top: 0; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
     
     .prompt-output-area {
-        background: #1e293b;
-        color: #e2e8f0;
-        padding: 15px;
+        background: #2d3748;
+        color: #edf2f7;
+        padding: 20px;
         border-radius: 8px;
         font-family: monospace;
         white-space: pre-wrap;
         margin-top: 20px;
         display: none;
         position: relative;
+        font-size: 0.85rem;
     }
 
-    /* Utility */
+    /* --- FEEDBACK ANIMATION --- */
+    button:active, .tab-btn:active, .tool-btn:active, .action-btn:active { transform: scale(0.96); }
+
+    .btn-success-state {
+        background-color: #d1e7dd !important;
+        color: #0f5132 !important;
+        border-color: #badbcc !important;
+        cursor: default;
+        transition: all 0.2s;
+    }
+    /* Rimuovi il colore blu icona durante lo stato di successo per mantenere il verde */
+    .btn-success-state i { color: #0f5132 !important; }
+
+    /* TOAST */
+    #toast-container {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+    }
+    .toast {
+        background: #172B4D;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success i { color: #36b37e; }
+    .toast.error i { color: #ff5630; }
+
     .hidden { display: none; }
-    .counter { font-size: 0.8rem; color: #777; }
-    .loader { display: none; text-align: center; margin-top: 10px; }
-    
+    .counter { font-size: 0.8rem; color: #777; font-family: monospace; }
+    .loader { display: none; text-align: center; margin-top: 10px; color: var(--text-medium); font-size: 0.9rem; }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
   </style>
 </head>
 <body>
 
+  <div id="toast-container"></div>
+
   <div class="app-container">
     <div class="main-header">
       <div>
-        <h1>Social Network Dashboard</h1>
-        <p style="margin:0; color:#666;">Versione v6.5</p>
+        <h1>Social Dashboard</h1>
+        <p style="margin:0; color:#888; font-size:0.9rem;">v6.8 Blue Accent</p>
       </div>
     </div>
 
     <div class="import-bar">
-      <label for="fileInput" class="action-btn" style="background:#28a745; margin:0;">
-        <i class="fas fa-file-import"></i> Importa Excel/CSV
+      <label for="fileInput" class="action-btn import-btn" style="margin:0; cursor:pointer;">
+        <i class="fas fa-file-arrow-up"></i> Importa Excel/CSV
       </label>
       <input type="file" id="fileInput" accept=".xlsx,.csv" style="display:none;" />
-      <button id="pasteCsvButton" class="action-btn" style="background:#17a2b8; margin:0;">
-        <i class="fas fa-paste"></i> Incolla CSV da Appunti
+      <button id="pasteCsvButton" class="action-btn import-btn" style="margin:0;">
+        <i class="fas fa-clipboard"></i> Incolla CSV
       </button>
     </div>
 
@@ -431,36 +500,32 @@
   <div class="modal-overlay" id="promptModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2><i class="fas fa-magic"></i> Generatore Prompt Gemini</h2>
+        <h2><i class="fas fa-wand-magic-sparkles"></i> Generatore Prompt</h2>
         <button class="close-modal" id="closePromptModal">&times;</button>
       </div>
       <div class="modal-body">
         <p style="color:#666; margin-bottom:20px;">
-          Inserisci i dettagli delle notizie. Se hai già scritto nell'editor, i campi verranno pre-compilati.
-          Clicca "Genera Prompt", copia il risultato e incollalo su Gemini. Poi usa "Incolla CSV" nella dashboard.
+          Inserisci i dettagli. Clicca "Genera", copia il testo e usalo su Gemini.
         </p>
         
         <div class="modal-news-grid">
             <div class="news-input-block">
-                <h3><i class="fas fa-newspaper"></i> News 1</h3>
-                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <h3><i class="far fa-newspaper"></i> News 1</h3>
                 <textarea id="modal-news-1" rows="4" placeholder="Testo notizia 1..."></textarea>
-                <input type="text" id="modal-video-1" placeholder="File video (opzionale)" style="margin-top:8px;">
-                <input type="text" id="modal-specs-1" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-video-1" placeholder="File video..." style="margin-top:8px;">
+                <input type="text" id="modal-specs-1" placeholder="Note extra..." style="margin-top:8px;">
             </div>
             <div class="news-input-block">
-                <h3><i class="fas fa-newspaper"></i> News 2</h3>
-                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <h3><i class="far fa-newspaper"></i> News 2</h3>
                 <textarea id="modal-news-2" rows="4" placeholder="Testo notizia 2..."></textarea>
-                <input type="text" id="modal-video-2" placeholder="File video (opzionale)" style="margin-top:8px;">
-                <input type="text" id="modal-specs-2" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-video-2" placeholder="File video..." style="margin-top:8px;">
+                <input type="text" id="modal-specs-2" placeholder="Note extra..." style="margin-top:8px;">
             </div>
             <div class="news-input-block">
-                <h3><i class="fas fa-newspaper"></i> News 3</h3>
-                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <h3><i class="far fa-newspaper"></i> News 3</h3>
                 <textarea id="modal-news-3" rows="4" placeholder="Testo notizia 3..."></textarea>
-                <input type="text" id="modal-video-3" placeholder="File video (opzionale)" style="margin-top:8px;">
-                <input type="text" id="modal-specs-3" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-video-3" placeholder="File video..." style="margin-top:8px;">
+                <input type="text" id="modal-specs-3" placeholder="Note extra..." style="margin-top:8px;">
             </div>
         </div>
 
@@ -469,8 +534,8 @@
         </button>
 
         <div id="promptOutputArea" class="prompt-output-area">
-            <button id="btnCopyPrompt" class="btn-prompt-modal" style="position:absolute; top:10px; right:10px;">
-                <i class="fas fa-copy"></i> Copia
+            <button id="btnCopyPrompt" class="btn-prompt-modal" style="position:absolute; top:10px; right:10px; border:none; background:#4a5568; color:white;">
+                <i class="far fa-copy"></i> Copia
             </button>
             <code id="promptCodeBlock"></code>
         </div>
@@ -492,20 +557,17 @@
     /* --- HTML GENERATOR --- */
     function generateTabHTML(index) {
       
-      // Helper toolbar con icone aggiornate
-      // Uso fa-solid per sicurezza e fa-rotate-left al posto di undo
       const getToolbar = (targetId, extraBtn = '') => `
         <div class="toolbar">
-          <button class="tool-btn" data-action="lower" title="Minuscolo">abc</button>
-          <button class="tool-btn" data-action="title" title="Iniziali Maiuscole">Abc</button>
-          <button class="tool-btn" data-action="upper" title="Tutto maiuscolo">ABC</button>
-          <button class="tool-btn" data-action="auto" title="Formatta Auto" style="color:#0047bb;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto</button>
-          <button class="tool-btn" data-action="revert" title="Ripristina originale">Reset</button>
+          <button class="tool-btn" data-action="lower" title="tutto minuscolo"><i class="fas fa-arrow-down"></i> <small>abc</small></button>
+          <button class="tool-btn" data-action="title" title="Iniziali Maiuscole"><i class="fas fa-arrow-up"></i> <small>Abc</small></button>
+          <button class="tool-btn" data-action="upper" title="TUTTO MAIUSCOLO"><i class="fas fa-arrow-up"></i> <small>ABC</small></button>
+          <button class="tool-btn" data-action="auto" title="Formatta Auto (AI rule)"><i class="fas fa-wand-magic-sparkles"></i></button>
+          <button class="tool-btn" data-action="revert" title="Annulla modifiche"><i class="fas fa-rotate-left"></i></button>
           ${extraBtn}
         </div>`;
 
-      // Bottone copia specifico per YT Title
-      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fa-solid fa-copy"></i> Copia</button>`;
+      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="far fa-copy"></i></button>`;
 
       return `
       <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
@@ -516,14 +578,16 @@
             
             <div class="ai-box">
               <div class="ai-header">
-                <h3 style="margin:0; color:#0047bb;"><i class="fas fa-robot"></i> Generatore AI</h3>
+                <h3><i class="fas fa-robot"></i> Assistant</h3>
                 <button class="btn-prompt-modal" id="openPromptBtn-${index}">
-                    <i class="fas fa-magic"></i> Prompt Gemini
+                    <i class="fas fa-pen-nib"></i> Crea Prompt
                 </button>
               </div>
-              <textarea id="ai-input-${index}" placeholder="Incolla qui il testo grezzo..." style="min-height:80px;"></textarea>
-              <button class="btn-generate" data-idx="${index}">Genera Testi (API Interna)</button>
-              <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione...</div>
+              <textarea id="ai-input-${index}" placeholder="Incolla testo grezzo..." style="min-height:80px;"></textarea>
+              <button class="btn-generate" data-idx="${index}">
+                 <i class="fas fa-bolt"></i> Genera Bozze
+              </button>
+              <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione AI...</div>
             </div>
 
             <div class="field-group">
@@ -561,18 +625,18 @@
 
             <div class="field-group">
               <div class="label-row"><span class="label-text">Link YouTube</span></div>
-              <textarea id="ytLink-${index}" data-type="ytLink" rows="1"></textarea>
+              <textarea id="ytLink-${index}" data-type="ytLink" rows="1" placeholder="https://youtu.be/..."></textarea>
             </div>
 
             <div class="field-group">
               <div class="label-row">
                 <span class="label-text">Link TG Poste</span>
                 <div class="right-controls">
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Inserisci data di Oggi">
-                    <i class="fa-solid fa-calendar-day"></i> Oggi
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Oggi">
+                    <i class="far fa-calendar-check"></i> Oggi
                   </button>
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Inserisci data di Ieri">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Ieri
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Ieri">
+                    <i class="far fa-calendar-minus"></i> Ieri
                   </button>
                 </div>
               </div>
@@ -581,10 +645,10 @@
 
             <div class="actions-row">
               <button class="action-btn btn-save" data-idx="${index}"><i class="fas fa-save"></i> Salva</button>
-              <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash"></i> Pulisci</button>
+              <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash-alt"></i></button>
               <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
-              <button class="action-btn btn-utility" style="background:#217346;" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-              <button class="action-btn btn-utility" style="background:#1d6f42;" onclick="exportCsv()"><i class="fas fa-file-csv"></i> CSV</button>
+              <button class="action-btn btn-utility" onclick="exportExcel()"><i class="fas fa-file-excel"></i></button>
+              <button class="action-btn btn-utility" onclick="exportCsv()"><i class="fas fa-file-csv"></i></button>
             </div>
 
           </div>
@@ -593,9 +657,9 @@
             
             <div class="card-anteprima-finale">
               <div class="header-anteprima">
-                <div class="titolo-anteprima"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.2em;"></i> Anteprima WhatsApp</div>
+                <div class="titolo-anteprima"><i class="fab fa-whatsapp"></i> Anteprima WhatsApp</div>
                 <button class="btn-copia-header" data-copy-target="preview-wa-${index}">
-                  <i class="fas fa-copy"></i> Copia
+                  <i class="far fa-copy"></i> Copia
                 </button>
               </div>
               <div class="corpo-anteprima" id="preview-wa-${index}"></div>
@@ -603,9 +667,9 @@
 
             <div class="card-anteprima-finale">
               <div class="header-anteprima">
-                <div class="titolo-anteprima"><i class="fas fa-share-nodes" style="color:#0047bb; font-size:1.2em;"></i> Anteprima Social</div>
+                <div class="titolo-anteprima"><i class="fas fa-share-nodes"></i> Anteprima Social</div>
                 <button class="btn-copia-header" data-copy-target="preview-social-${index}">
-                  <i class="fas fa-copy"></i> Copia
+                  <i class="far fa-copy"></i> Copia
                 </button>
               </div>
               <div class="corpo-anteprima" id="preview-social-${index}"></div>
@@ -616,6 +680,46 @@
         </div>
       </div>
       `;
+    }
+
+    /* --- FEEDBACK SYSTEM --- */
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = '<i class="fas fa-check-circle"></i>';
+        if(type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
+        
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function animateButtonFeedback(btn, msg = null) {
+        if (!btn) return;
+        const originalHtml = btn.innerHTML;
+        const originalWidth = btn.offsetWidth;
+        
+        if(btn.offsetWidth > 40) {
+            btn.style.width = `${originalWidth}px`;
+            btn.style.justifyContent = 'center';
+        }
+        
+        btn.classList.add('btn-success-state');
+        btn.innerHTML = msg ? `<i class="fas fa-check"></i> ${msg}` : `<i class="fas fa-check"></i>`;
+
+        setTimeout(() => {
+            btn.classList.remove('btn-success-state');
+            btn.innerHTML = originalHtml;
+            btn.style.width = '';
+        }, 1500);
     }
 
     /* --- INITIALIZATION --- */
@@ -675,39 +779,36 @@
            if(btn.dataset.day === 'yesterday') date.setDate(date.getDate() - 1);
            target.value = generateTgLink(date);
            target.dispatchEvent(new Event('input'));
-           
-           // Feedback anche per il bottone data
-           const originalHTML = btn.innerHTML;
-           btn.classList.add('success-feedback');
-           btn.innerHTML = '<i class="fas fa-check"></i>';
-           setTimeout(() => {
-              btn.innerHTML = originalHTML;
-              btn.classList.remove('success-feedback');
-           }, 1000);
+           animateButtonFeedback(btn);
         }
       });
 
-      // AI Button Internal
       document.querySelectorAll('.btn-generate').forEach(btn => {
         btn.addEventListener('click', () => handleAI(btn.dataset.idx));
       });
 
-      // Open Modal Buttons
       document.querySelectorAll('.btn-prompt-modal').forEach(btn => {
-          btn.addEventListener('click', openPromptModal);
+          if(!btn.id.includes('btnCopyPrompt')) {
+             btn.addEventListener('click', openPromptModal);
+          }
       });
 
-      // Copy Preview
       document.querySelectorAll('.btn-copia-header').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetId = btn.dataset.copyTarget;
           const idx = targetId.split('-')[2];
           
           if (targetId.includes('preview-wa')) {
-             if(!document.getElementById(`ytLink-${idx}`).value.trim()) return alert("⚠️ Attenzione: Inserire il Link YouTube prima di copiare!");
+             if(!document.getElementById(`ytLink-${idx}`).value.trim()) {
+                 showToast("Inserisci prima il Link YouTube!", "error");
+                 return;
+             }
           }
           if (targetId.includes('preview-social')) {
-             if(!document.getElementById(`tgLink-${idx}`).value.trim()) return alert("⚠️ Attenzione: Inserire il Link TG Poste prima di copiare!");
+             if(!document.getElementById(`tgLink-${idx}`).value.trim()) {
+                 showToast("Inserisci prima il Link TG Poste!", "error");
+                 return;
+             }
           }
 
           const text = document.getElementById(targetId).innerText;
@@ -715,12 +816,10 @@
         });
       });
 
-      // Actions
       document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', () => saveData(btn.dataset.idx, btn)));
       document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', () => clearData(btn.dataset.idx)));
-      document.querySelector('.btn-copy-all').addEventListener('click', copyAllData);
+      document.querySelector('.btn-copy-all').addEventListener('click', (e) => copyAllData(e.target.closest('button')));
       
-      // Import Handlers
       document.getElementById('fileInput').addEventListener('change', handleFileInput);
       document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
     }
@@ -736,7 +835,6 @@
             modal.classList.remove('open');
         });
         
-        // Chiudi se clicchi fuori
         modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.classList.remove('open');
         });
@@ -760,54 +858,50 @@
                 }
             }
 
-            if (newsCount === 0) return alert("Inserisci almeno una notizia!");
+            if (newsCount === 0) return showToast("Inserisci almeno una notizia!", "error");
 
-            const finalPrompt = `Sei un assistente per la creazione di contenuti social. Il tuo compito è generare dei testi per i canali social partendo dalle informazioni fornite.
+            const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
 
-**INFORMAZIONI SULLE NOTIZIE:**
+**INFO NEWS:**
 ${newsContent}
 
-**DIRETTIVE DI STILE E TONO:**
-* **Tono di voce:** Chiaro e istituzionale, senza enfasi.
-* **Stile:** Semplice ed informativo.
-* **Brand:** Parla a nome dell'azienda "Poste".
-* **Contesto:** Testo per video giornalistico TG aziendale.
+**TONO E STILE:**
+* Istituzionale, chiaro, informativo. Brand: "Poste".
 
-**REQUISITI DI LUNGHEZZA:**
+**LUNGHEZZE:**
 1. **WhatsApp:** ~90 caratteri.
 2. **YouTube Titolo:** Max 49 caratteri.
-3. **Social (FB/Linkedin):** Sintetico ma completo. Hashtag pertinenti.
+3. **Social:** Sintetico ma completo. Hashtag pertinenti.
 
-**FORMATO OUTPUT (CSV PURO):**
-L'output deve essere SOLO un blocco CSV.
-* Delimitatore: Virgola (,)
-* Qualificatore: Doppie virgolette (")
-* Intestazione: ,${columnHeaders.join(',')}
-* Righe richieste:
+**OUTPUT CSV REQUISITO:**
+Output SOLO CSV puro.
+Delimitatore: Virgola (,)
+Qualificatore: Doppie virgolette (")
+Intestazione: ,${columnHeaders.join(',')}
+Righe:
 "Testo descrittivo news Canale WA",...
 "Titolo YouTube",...
 "Copy post e descrizione YT",...
 "Link YouTube",...
 "Link TG Poste",...
 
-Genera solo il codice CSV.`;
+Solo codice CSV.`;
 
             document.getElementById('promptCodeBlock').textContent = finalPrompt;
             document.getElementById('promptOutputArea').style.display = 'block';
+            animateButtonFeedback(generateBtn, "Generato!");
         });
 
         copyBtn.addEventListener('click', () => {
             const txt = document.getElementById('promptCodeBlock').textContent;
             navigator.clipboard.writeText(txt).then(() => {
-                const orig = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiato';
-                setTimeout(() => copyBtn.innerHTML = orig, 2000);
+                animateButtonFeedback(copyBtn, "Copiato!");
+                showToast("Prompt copiato!");
             });
         });
     }
 
     function openPromptModal() {
-        // Pre-popola la modale con i testi inseriti nell'editor AI (se presenti)
         for(let i=0; i<3; i++) {
             const editorText = document.getElementById(`ai-input-${i}`).value;
             if(editorText) {
@@ -821,7 +915,6 @@ Genera solo il codice CSV.`;
     function updatePreview(idx) {
       const getVal = (type) => document.getElementById(`${type}-${idx}`)?.value || '';
       
-      // WA
       const waText = getVal('wa');
       const ytLink = getVal('ytLink');
       
@@ -832,7 +925,6 @@ Genera solo il codice CSV.`;
       }
       document.getElementById(`preview-wa-${idx}`).innerHTML = waHtml;
 
-      // Social
       let ytDesc = getVal('ytDesc').trim();
       const tgLink = getVal('tgLink');
       let hashtags = '';
@@ -866,7 +958,7 @@ Genera solo il codice CSV.`;
         const len = el.value.length;
         const max = tabsConfig[0].limits[type];
         counter.innerText = `${len}/${max}`;
-        counter.style.color = len > max ? 'red' : '#777';
+        counter.style.color = len > max ? '#dc3545' : '#777';
       }
     }
 
@@ -885,16 +977,7 @@ Genera solo il codice CSV.`;
           textarea.dispatchEvent(new Event('input'));
       }
 
-      // Feedback visivo sul bottone
-      if(btnElement) {
-          const originalHTML = btnElement.innerHTML;
-          btnElement.classList.add('success-feedback');
-          btnElement.innerHTML = '<i class="fas fa-check"></i>';
-          setTimeout(() => {
-              btnElement.innerHTML = originalHTML;
-              btnElement.classList.remove('success-feedback');
-          }, 1000);
-      }
+      if(btnElement) animateButtonFeedback(btnElement);
     }
 
     function applyAutoFormat(textarea) {
@@ -912,7 +995,7 @@ Genera solo il codice CSV.`;
       textarea.dispatchEvent(new Event('input'));
     }
 
-    /* --- IMPORT / EXPORT LOGIC --- */
+    /* --- IMPORT / EXPORT --- */
     async function handleFileInput(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -925,7 +1008,7 @@ Genera solo il codice CSV.`;
             reader.onload = e => importFromCsvText(e.target.result);
             reader.readAsText(file);
         } else {
-            alert('Formato non supportato. Usa .xlsx o .csv');
+            showToast('Formato non supportato. Usa .xlsx o .csv', 'error');
         }
         event.target.value = '';
     }
@@ -935,11 +1018,12 @@ Genera solo il codice CSV.`;
             const text = await navigator.clipboard.readText();
             if (text) {
                 importFromCsvText(text);
+                showToast("CSV incollato e processato!");
             } else {
-                alert('Appunti vuoti o permessi negati.');
+                showToast('Appunti vuoti o permessi negati.', 'error');
             }
         } catch (error) {
-            alert("Errore lettura appunti: " + error);
+            showToast("Errore lettura appunti.", 'error');
         }
     }
 
@@ -950,15 +1034,16 @@ Genera solo il codice CSV.`;
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         processImportRows(rows);
+        showToast("Excel importato con successo!");
       } catch (e) {
-        alert("Errore Import Excel: " + e.message);
+        showToast("Errore Import Excel", 'error');
       }
     }
 
     function importFromCsvText(csvText) {
         const rows = parseCsvText(csvText);
         if (rows.length > 0) processImportRows(rows);
-        else alert("CSV vuoto o non valido");
+        else showToast("CSV vuoto o non valido", 'error');
     }
 
     function parseCsvText(csvText) {
@@ -991,7 +1076,7 @@ Genera solo il codice CSV.`;
     }
 
     function processImportRows(rows) {
-        if (!rows || rows.length < 2) return alert("Nessun dato valido trovato.");
+        if (!rows || rows.length < 2) return showToast("Dati CSV non validi.", 'error');
 
         const fieldMap = {
             'Testo descrittivo news Canale WA': 'wa',
@@ -1018,16 +1103,17 @@ Genera solo il codice CSV.`;
                 }
             }
         });
-        alert("Importazione completata!");
     }
 
-    /* --- ALTRE UTILITY --- */
+    /* --- UTILITY --- */
     
     async function handleAI(idx) {
       const input = document.getElementById(`ai-input-${idx}`).value;
-      if(!input) return alert("Inserisci testo!");
+      if(!input) return showToast("Inserisci testo prima!", "error");
+      
       const loader = document.getElementById(`ai-loader-${idx}`);
       loader.style.display = 'block';
+      
       try {
         const res = await fetch(API_URL, {
           method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: input})
@@ -1042,14 +1128,19 @@ Genera solo il codice CSV.`;
         setVal(`wa-${idx}`, data.whatsapp);
         setVal(`ytTitle-${idx}`, data.youtube);
         setVal(`ytDesc-${idx}`, data.facebook_linkedin);
-      } catch(e) { alert("Errore AI: " + e.message); } finally { loader.style.display = 'none'; }
+        showToast("Contenuti generati dall'AI!");
+      } catch(e) { 
+          showToast("Errore connessione AI", "error"); 
+      } finally { 
+          loader.style.display = 'none'; 
+      }
     }
 
     function copyToClipboard(text, btn) {
+      if(!text) return showToast("Nulla da copiare", "error");
       navigator.clipboard.writeText(text).then(() => {
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        setTimeout(() => btn.innerHTML = originalHTML, 1500);
+        if(btn) animateButtonFeedback(btn, "Copiato!");
+        showToast("Copiato negli appunti");
       });
     }
 
@@ -1059,9 +1150,8 @@ Genera solo il codice CSV.`;
         data[el.dataset.type] = el.value;
       });
       localStorage.setItem(`news_data_${idx}`, JSON.stringify(data));
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Salvato';
-      setTimeout(() => btn.innerHTML = originalHTML, 1500);
+      animateButtonFeedback(btn, "Salvato!");
+      showToast("Bozza salvata");
     }
 
     function loadSavedData() {
@@ -1081,11 +1171,12 @@ Genera solo il codice CSV.`;
     }
 
     function clearData(idx) {
-      if(!confirm("Cancelli tutto?")) return;
+      if(!confirm("Cancellare tutti i campi di questa scheda?")) return;
       document.querySelectorAll(`.tab-pane[data-tab="${idx}"] textarea`).forEach(el => {
         el.value = '';
         el.dispatchEvent(new Event('input'));
       });
+      showToast("Campi puliti", "info");
     }
 
     function generateTgLink(date) {
@@ -1105,12 +1196,15 @@ Genera solo il codice CSV.`;
       } catch { return []; }
     }
     
-    function copyAllData() {
+    function copyAllData(btn) {
        let txt = '';
        [0,1,2].forEach(i => {
           txt += `NEWS ${i+1}\nWA: ${document.getElementById(`wa-${i}`).value}\nYT Title: ${document.getElementById(`ytTitle-${i}`).value}\nSocial: ${document.getElementById(`ytDesc-${i}`).value}\n\n`;
        });
-       navigator.clipboard.writeText(txt).then(() => alert("Copiato tutto!"));
+       navigator.clipboard.writeText(txt).then(() => {
+           animateButtonFeedback(btn, "Fatto!");
+           showToast("Tutto copiato!");
+       });
     }
 
     function exportExcel() {
@@ -1128,6 +1222,7 @@ Genera solo il codice CSV.`;
        const wb = XLSX.utils.book_new();
        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
        XLSX.writeFile(wb, "export_social.xlsx");
+       showToast("Excel scaricato!");
     }
 
     function exportCsv() {
@@ -1151,9 +1246,9 @@ Genera solo il codice CSV.`;
        document.body.appendChild(link);
        link.click();
        document.body.removeChild(link);
+       showToast("CSV scaricato!");
     }
 
-    // Avvio
     document.addEventListener('DOMContentLoaded', init);
 
   </script>
