@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Network – Contatore Caratteri</title>
-  <link rel="icon" href="favicon.ico" />
+  <title>Social Dashboard – Final v5.0 (Import Fix)</title>
+  <link rel="icon" href="faviconAI.ico" />
 
-  <!-- Importa il font “Inter” ottimizzato per Windows (ClearType) e fallback per Segoe UI, ecc. -->
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
   />
 
-  <!-- Font Awesome per icone -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -21,771 +20,827 @@
     referrerpolicy="no-referrer"
   />
 
-  <!-- XLSX.js per import/export Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
     :root {
-      --poste-blue: #0047bb;
-      --poste-yellow: #eedc00;
-      --poste-light-blue: #0066cc;
-      --poste-gray: #f5f5f5;
-      --poste-green: #4caf50;
-      --font-family-base:
-        'Inter',
-        'Segoe UI',
-        Tahoma,
-        Geneva,
-        Verdana,
-        'Helvetica Neue',
-        Arial,
-        sans-serif;
+      --primary-blue: #0047bb;
+      --primary-hover: #00368f;
+      --accent-yellow: #eedc00;
+      --bg-gray: #f4f5f7;
+      --surface-white: #ffffff;
+      --text-dark: #172B4D;
+      --text-medium: #5E6C84;
+      --border-color: #dfe1e6;
+      --success-green: #36b37e;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --radius: 8px;
+      --font-family-base: 'Inter', sans-serif;
     }
+
     body {
       font-family: var(--font-family-base);
-      -webkit-font-smoothing: subpixel-antialiased;
-      text-rendering: optimizeLegibility;
-      background-color: #fff;
-      color: #333;
+      background-color: var(--bg-gray);
+      color: var(--text-dark);
       line-height: 1.5;
-      padding: 0 15px;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-    .header {
-      background-color: var(--poste-yellow);
-      padding: 10px 0;
-      margin: 10px 0;
-      border-radius: 6px;
-      text-align: center;
-    }
-    .header h1 {
-      font-size: 1.8em;
-      font-weight: bold;
-      color: var(--poste-blue);
-      margin: 0 0 4px 0;
-      line-height: 1.2;
-    }
-    .header h2 {
-      font-size: 1.2em;
-      font-weight: normal;
-      color: var(--poste-blue);
       margin: 0;
-      line-height: 1.2;
+      padding: 0;
     }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto 40px;
+
+    /* --- LAYOUT GENERALE --- */
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    .tabs {
+
+    /* Header */
+    .main-header {
+      background-color: var(--surface-white);
+      border-bottom: 4px solid var(--accent-yellow);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .main-header h1 { margin: 0; color: var(--primary-blue); font-size: 1.6rem; }
+
+    /* Tabs */
+    .tabs-container {
       display: flex;
       gap: 10px;
-      overflow-x: auto;
       margin-bottom: 20px;
     }
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 12px 0;
-      background-color: var(--poste-gray);
-      color: var(--poste-blue);
-      font-weight: 600;
-      border-radius: 6px;
+    .tab-btn {
+      padding: 10px 24px;
+      background: #e9ecef;
+      border-radius: var(--radius);
       cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
-      position: relative;
+      font-weight: 600;
+      color: var(--text-medium);
+      transition: 0.2s;
     }
-    .tab.active {
-      background-color: var(--poste-blue);
+    .tab-btn.active {
+      background: var(--primary-blue);
       color: #fff;
     }
-    .tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid var(--poste-blue);
+
+    /* --- GRIGLIA EDITOR (SX) vs ANTEPRIMA (DX) --- */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr; /* Mobile default */
+      gap: 30px;
+      align-items: start;
     }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .card {
-      background-color: #fff;
-      border: 1px solid var(--poste-gray);
-      border-radius: 6px;
-      padding: 20px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-      margin-bottom: 30px;
+
+    @media (min-width: 1024px) {
+      .layout-grid {
+        grid-template-columns: 55% 43%; /* SX più larga, DX per anteprima */
+      }
     }
-    .input-group {
-      margin-bottom: 20px;
-      position: relative;
+
+    /* COLONNA SINISTRA: EDITOR */
+    .editor-container {
+      background: var(--surface-white);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
     }
-    .field-label {
-      display: block;
-      font-size: 1em;
-      font-weight: 600;
-      color: var(--poste-blue);
-      margin-bottom: 8px;
+
+    /* COLONNA DESTRA: ANTEPRIME STILE CARD */
+    .preview-container {
+      position: sticky;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
-    /* NEW: Styles for label group and date shortcuts */
-    .field-label-group {
+
+    .card-anteprima-finale {
+      background-color: #ffffff !important;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-anteprima {
+      background-color: #f1f3f5;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e0e0e0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
     }
-    .field-label-group .field-label {
-      margin-bottom: 0; /* Remove bottom margin as it's handled by the group */
-    }
-    .date-shortcuts {
+
+    .titolo-anteprima {
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #555;
       display: flex;
-      gap: 6px;
-    }
-    .btn-date-shortcut {
-      background-color: transparent;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 2px 8px;
-      cursor: pointer;
-      color: var(--poste-light-blue);
-      font-size: 0.8em;
-      font-weight: 500;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
-    .btn-date-shortcut:hover {
-      background-color: var(--poste-gray);
-      border-color: var(--poste-blue);
-    }
-    /* END NEW */
-    .counter {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 0.9em;
-      color: var(--poste-light-blue);
-    }
-    .text-tools {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .text-tools button {
-      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background-color: transparent;
+      gap: 8px;
+    }
+
+    .btn-copia-header {
+      background-color: #fff;
       border: 1px solid #ccc;
+      padding: 6px 12px;
       border-radius: 4px;
-      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-blue);
       cursor: pointer;
-      color: var(--poste-blue);
-      transition: background-color 0.2s, border-color 0.2s;
-      font-size: 0.9em;
-      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
     }
-    .text-tools button:hover {
-      background-color: var(--poste-gray);
-      border-color: var(--poste-light-blue);
+    .btn-copia-header:hover {
+      background-color: var(--primary-blue);
+      color: #fff;
+      border-color: var(--primary-blue);
     }
+
+    .corpo-anteprima {
+      padding: 24px;
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      font-size: 1rem;
+      line-height: 1.6;
+      font-weight: 400;
+      white-space: pre-wrap;
+      text-align: left;
+      min-height: 100px;
+    }
+
+    /* --- STILI INPUT EDITOR --- */
+    .field-group { margin-bottom: 24px; }
+    .label-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .label-text { font-weight: 600; font-size: 0.95rem; color: var(--primary-blue); }
+    
     textarea {
       width: 100%;
-      padding: 10px;
-      border: 2px solid var(--poste-light-blue);
-      border-radius: 6px;
-      resize: vertical;
-      min-height: 80px;
-      font-size: 1em;
-      font-family: var(--font-family-base);
-      transition: border-color 0.3s;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: var(--poste-blue);
-    }
-    .btn-copy-ytTitle {
-      margin-top: 10px;
-      font-size: 0.95em;
-    }
-    .output-field {
-      background-color: var(--poste-gray);
-      border: 2px dashed var(--poste-blue);
-      border-radius: 6px;
+      box-sizing: border-box;
       padding: 12px;
-      white-space: pre-wrap;
-      min-height: 100px;
-      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       font-family: var(--font-family-base);
+      font-size: 1rem;
+      resize: vertical;
     }
-    .button-group {
+    textarea:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
+
+    /* Toolbar Formattazione */
+    .toolbar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+      justify-content: flex-end;
+    }
+    .tool-btn {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      color: #555;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .tool-btn:hover { background: #e9ecef; color: var(--primary-blue); }
+
+    /* AI Section */
+    .ai-box {
+      background: #f8faff;
+      border: 1px solid #d0d7de;
+      border-left: 4px solid var(--accent-yellow);
+      padding: 15px;
+      margin-bottom: 25px;
+      border-radius: 6px;
+    }
+    .btn-generate {
+      width: 100%;
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-generate:hover { background: var(--primary-hover); }
+
+    /* Bottom Actions */
+    .actions-row {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 20px;
+      gap: 10px;
     }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background-color: var(--poste-blue);
-      color: #fff;
+    .action-btn {
+      padding: 10px 16px;
       border: none;
-      padding: 12px 20px;
       border-radius: 6px;
-      font-size: 1em;
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.1s;
-    }
-    .btn i { font-size: 1em; }
-    .btn:hover { background-color: var(--poste-light-blue); }
-    .btn:active { transform: scale(0.98); }
-    .import-excel {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .import-excel input[type="file"] { display: none; }
-    .import-excel label {
-      display: inline-flex;
+      font-weight: 500;
+      color: white;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      background-color: var(--poste-blue);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background-color 0.3s;
+      gap: 6px;
     }
-    .import-excel label:hover { background-color: var(--poste-light-blue); }
-    @media (max-width: 600px) {
-      .button-group { flex-direction: column; }
-      .tabs { flex-direction: column; }
+    .btn-save { background: var(--primary-blue); }
+    .btn-clear { background: #dc3545; }
+    .btn-utility { background: #6c757d; }
+
+    .import-bar {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
     }
+
+    /* Utility */
+    .hidden { display: none; }
+    .counter { font-size: 0.8rem; color: #777; }
+    .loader { display: none; text-align: center; margin-top: 10px; }
+    
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Social Network</h1>
-    <h2>Contatore Caratteri</h2>
-  </div>
 
-  <div class="container">
-    <div class="tabs">
-      <div class="tab active" data-tab-index="0">News 1</div>
-      <div class="tab" data-tab-index="1">News 2</div>
-      <div class="tab" data-tab-index="2">News 3</div>
+  <div class="app-container">
+    <div class="main-header">
+      <h1>Social Network Dashboard</h1>
+      <p style="margin:0; color:#666;">Versione v5.0</p>
     </div>
-    <div class="import-excel">
-      <label for="excelInput"><i class="fas fa-file-excel"></i> Importa da Excel</label>
-      <input type="file" id="excelInput" accept=".xlsx" />
+
+    <div class="import-bar">
+      <label for="fileInput" class="action-btn" style="background:#28a745; margin:0;">
+        <i class="fas fa-file-import"></i> Importa Excel/CSV
+      </label>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" style="display:none;" />
+      <button id="pasteCsvButton" class="action-btn" style="background:#17a2b8; margin:0;">
+        <i class="fas fa-paste"></i> Incolla CSV da Appunti
+      </button>
     </div>
-    <div id="tabContents"></div>
+
+    <div class="tabs-container">
+      <div class="tab-btn active" data-index="0">News 1</div>
+      <div class="tab-btn" data-index="1">News 2</div>
+      <div class="tab-btn" data-index="2">News 3</div>
+    </div>
+
+    <div id="dynamicContent"></div>
   </div>
 
   <script>
+    /* --- CONFIGURAZIONE --- */
     let masterList = [];
+    const API_URL = 'https://aipost.onrender.com/generate';
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
-
-    async function getMasterListFromGoogleSheet() {
-      if (!googleSheetURL || googleSheetURL.includes('INCOLLA_QUI')) {
-        console.warn("URL del file CSV non impostato.");
-        return [];
-      }
-      try {
-        const url = `${googleSheetURL}?t=${new Date().getTime()}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Errore di rete nel caricamento del foglio CSV.');
-        const csvText = await response.text();
-        return csvText.split('\n').map(item => item.trim().replace(/\r$/, '')).filter(Boolean);
-      } catch (error) {
-        console.error("Impossibile caricare l'elenco dal file CSV:", error);
-        alert("Attenzione: non è stato possibile caricare l'elenco personalizzato dal file CSV.");
-        return [];
-      }
-    }
 
     const tabsConfig = Array.from({ length: 3 }, () => ({
       limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
       fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
     }));
 
-    function createTextTools() {
-      return `
-      <div class="text-tools">
-        <button type="button" data-transform="lower" title="Converti testo in minuscolo"><i class="fas fa-arrow-down-a-z"></i> minuscolo</button>
-        <button type="button" data-transform="title" title="Converti testo con Iniziali Maiuscole"><i class="fas fa-heading"></i> Iniziali</button>
-        <button type="button" data-transform="upper" title="Converti testo in MAIUSCOLO"><i class="fas fa-arrow-up-a-z"></i> MAIUSCOLO</button>
-        <button type="button" data-transform="auto" title="Formatta automaticamente il testo"><i class="fas fa-wand-magic-sparkles"></i> Auto</button>
-        <button type="button" data-transform="revert" title="Ripristina testo originale"><i class="fas fa-rotate-left"></i> Ripristina</button>
-      </div>`;
-    }
+    /* --- HTML GENERATOR --- */
+    function generateTabHTML(index) {
+      
+      const toolbarHTML = `
+        <div class="toolbar">
+          <button class="tool-btn" data-action="lower" title="minuscolo">abc</button>
+          <button class="tool-btn" data-action="title" title="Iniziali Maiuscole">Abc</button>
+          <button class="tool-btn" data-action="upper" title="MAIUSCOLO">ABC</button>
+          <button class="tool-btn" data-action="auto" title="Auto Format" style="color:#0047bb;">✨ Auto</button>
+          <button class="tool-btn" data-action="revert" title="Ripristina"><i class="fas fa-undo"></i></button>
+        </div>`;
 
-    function createTabContent(tabIndex) {
-      const fieldsWithTools = ['wa', 'ytTitle', 'ytDesc'];
-      const textToolsHTML = createTextTools();
       return `
-      <div class="tab-content${tabIndex === 0 ? ' active' : ''}" data-tab-index="${tabIndex}">
-        <div class="card">
-          <div class="input-group">
-            <label class="field-label" for="wa-${tabIndex}">Testo descrittivo news Canale WA</label>
-            <span class="counter" id="counter-wa-${tabIndex}">0/${tabsConfig[tabIndex].limits.wa}</span>
-            ${fieldsWithTools.includes('wa') ? textToolsHTML : ''}
-            <textarea id="wa-${tabIndex}" data-type="wa" rows="2"></textarea>
-          </div>
-          <div class="input-group">
-            <label class="field-label" for="ytTitle-${tabIndex}">Titolo YouTube</label>
-            <span class="counter" id="counter-ytTitle-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytTitle}</span>
-            ${fieldsWithTools.includes('ytTitle') ? textToolsHTML : ''}
-            <textarea id="ytTitle-${tabIndex}" data-type="ytTitle" rows="2"></textarea>
-            <button class="btn outline btn-copy-ytTitle" data-type="ytTitle">
-              <i class="fas fa-copy"></i> Copia Titolo YouTube
-            </button>
-          </div>
-          <div class="input-group">
-            <label class="field-label" for="ytDesc-${tabIndex}">Copy post e descrizione YT</label>
-            <span class="counter" id="counter-ytDesc-${tabIndex}">0/${tabsConfig[tabIndex].limits.ytDesc}</span>
-            ${fieldsWithTools.includes('ytDesc') ? textToolsHTML : ''}
-            <textarea id="ytDesc-${tabIndex}" data-type="ytDesc" rows="4"></textarea>
-          </div>
-          <div class="input-group">
-            <label class="field-label" for="ytLink-${tabIndex}">Link YouTube</label>
-            <textarea id="ytLink-${tabIndex}" data-type="ytLink" rows="1"></textarea>
-          </div>
-          <div class="input-group">
-            <!-- MODIFIED: Wrapped label and added buttons -->
-            <div class="field-label-group">
-              <label class="field-label" for="tgLink-${tabIndex}">Link TG Poste</label>
-              <div class="date-shortcuts">
-                <button type="button" class="btn-date-shortcut" data-day="today" title="Inserisci link con data di oggi">Oggi</button>
-                <button type="button" class="btn-date-shortcut" data-day="yesterday" title="Inserisci link con data di ieri">Ieri</button>
+      <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
+        
+        <div class="layout-grid">
+          
+          <div class="editor-container">
+            
+            <div class="ai-box">
+              <h3 style="margin-top:0; color:#0047bb;"><i class="fas fa-robot"></i> Generatore AI</h3>
+              <textarea id="ai-input-${index}" placeholder="Incolla qui il testo grezzo..." style="min-height:80px;"></textarea>
+              <button class="btn-generate" data-idx="${index}">Genera Testi</button>
+              <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione...</div>
+            </div>
+
+            <div class="field-group">
+              <div class="label-row">
+                <span class="label-text">Testo WhatsApp</span>
+                <span class="counter" id="count-wa-${index}">0/${tabsConfig[index].limits.wa}</span>
+              </div>
+              ${toolbarHTML}
+              <textarea id="wa-${index}" data-type="wa" rows="3"></textarea>
+            </div>
+
+            <div class="field-group">
+              <div class="label-row">
+                <span class="label-text">Titolo YouTube</span>
+                <span class="counter" id="count-ytTitle-${index}">0/${tabsConfig[index].limits.ytTitle}</span>
+              </div>
+              ${toolbarHTML}
+              <div style="display:flex; gap:5px;">
+                <textarea id="ytTitle-${index}" data-type="ytTitle" rows="2"></textarea>
+                <button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fas fa-copy"></i></button>
               </div>
             </div>
-            <!-- END MODIFICATION -->
-            <textarea id="tgLink-${tabIndex}" data-type="tgLink" rows="1"></textarea>
+
+            <div class="field-group">
+              <div class="label-row">
+                <span class="label-text">Descrizione Social</span>
+                <span class="counter" id="count-ytDesc-${index}">0/${tabsConfig[index].limits.ytDesc}</span>
+              </div>
+              ${toolbarHTML}
+              <textarea id="ytDesc-${index}" data-type="ytDesc" rows="5"></textarea>
+            </div>
+
+            <div class="field-group">
+              <div class="label-row"><span class="label-text">Link YouTube</span></div>
+              <textarea id="ytLink-${index}" data-type="ytLink" rows="1"></textarea>
+            </div>
+
+            <div class="field-group">
+              <div class="label-row">
+                <span class="label-text">Link TG Poste</span>
+                <div>
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today">Oggi</button>
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday">Ieri</button>
+                </div>
+              </div>
+              <textarea id="tgLink-${index}" data-type="tgLink" rows="1"></textarea>
+            </div>
+
+            <div class="actions-row">
+              <button class="action-btn btn-save" data-idx="${index}"><i class="fas fa-save"></i> Salva</button>
+              <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash"></i> Pulisci</button>
+              <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
+              <button class="action-btn btn-utility" style="background:#217346;" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+              <button class="action-btn btn-utility" style="background:#1d6f42;" onclick="exportCsv()"><i class="fas fa-file-csv"></i> CSV</button>
+              <a href="promptGemini.html" target="_blank" class="action-btn btn-utility" style="text-decoration:none;"><i class="fas fa-lightbulb"></i> Prompt</a>
+            </div>
+
           </div>
-          <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto WA</div>
-          <div class="output-field" data-type="waOutput"></div>
-          <button class="btn outline btn-copy-wa" data-type="waOutput">
-            <i class="fas fa-copy"></i> Copia Contenuto WA
-          </button>
-          <div class="field-label" style="margin-top: 20px;">Anteprima Contenuto Social</div>
-          <div class="output-field" data-type="socialOutput"></div>
-          <button class="btn outline btn-copy-social" data-type="socialOutput">
-            <i class="fas fa-copy"></i> Copia Contenuto Social
-          </button>
-          <div class="button-group" style="margin-top: 30px;">
-            <button class="btn btn-save" data-tab-index="${tabIndex}">
-              <i class="fas fa-save"></i> Salva
-            </button>
-            <button class="btn btn-clear" data-tab-index="${tabIndex}">
-              <i class="fas fa-trash"></i> Cancella tutto
-            </button>
-            <button class="btn btn-copy-all">
-              <i class="fas fa-copy"></i> Contenuto completo
-            </button>
-            <button class="btn btn-export">
-              <i class="fas fa-file-export"></i> Esporta in Excel
-            </button>
+
+          <div class="preview-container">
+            
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima"><i class="fab fa-whatsapp" style="color:#25D366; font-size:1.2em;"></i> Anteprima WhatsApp</div>
+                <button class="btn-copia-header" data-copy-target="preview-wa-${index}">
+                  <i class="fas fa-copy"></i> Copia
+                </button>
+              </div>
+              <div class="corpo-anteprima" id="preview-wa-${index}"></div>
+            </div>
+
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima"><i class="fas fa-share-nodes" style="color:#0047bb; font-size:1.2em;"></i> Anteprima Social</div>
+                <button class="btn-copia-header" data-copy-target="preview-social-${index}">
+                  <i class="fas fa-copy"></i> Copia
+                </button>
+              </div>
+              <div class="corpo-anteprima" id="preview-social-${index}"></div>
+            </div>
+
           </div>
+
         </div>
-      </div>`;
+      </div>
+      `;
     }
 
-    function escapeRegex(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function createCaseInsensitiveRegex(phrase) {
-        const wordCharRegex = /^\w|^\p{L}/u;
-        const endsWithWordCharRegex = /\w$|\p{L}$/u;
-        let pattern = escapeRegex(phrase);
-        if (wordCharRegex.test(phrase)) {
-            pattern = `\\b` + pattern;
-        }
-        if (endsWithWordCharRegex.test(phrase)) {
-            pattern = pattern + `\\b`;
-        }
-        return new RegExp(pattern, 'g');
-    }
-
-    function applyAutoFormatting(textarea) {
-        if (!textarea) return;
-
-        const originalText = textarea.value;
-        const urls = [];
-        const urlRegex = /(https?:\/\/|www\.)[^\s]+/gi;
-        const DOT_PLACEHOLDER = '__ACRONYM_DOT__';
-
-        let textToFormat = originalText.replace(urlRegex, (url) => {
-            const placeholder = `__URL_PLACEHOLDER_${urls.length}__`;
-            urls.push(url);
-            return placeholder;
-        });
-        
-        textToFormat = textToFormat.toLowerCase();
-
-        const sortedMasterList = [...masterList].sort((a, b) => b.length - a.length);
-        sortedMasterList.forEach(phrase => {
-            const regex = createCaseInsensitiveRegex(phrase.toLowerCase());
-            const protectedPhrase = phrase.replace(/\./g, DOT_PLACEHOLDER);
-            textToFormat = textToFormat.replace(regex, protectedPhrase);
-        });
-        
-        let formattedText = textToFormat;
-        if (formattedText.length > 0 && !formattedText.startsWith('__url_')) {
-            formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
-        }
-        formattedText = formattedText.replace(/([.?!]\s+)(\p{L})/gu, (match, punctuationAndSpaces, letter) => {
-            return `${punctuationAndSpaces}${letter.toUpperCase()}`;
-        });
-        formattedText = formattedText.replace(/(^|[.?!]\s*)(")(\p{L})/gu, (match, preceding, quote, letter) => {
-            return `${preceding}${quote}${letter.toUpperCase()}`;
-        });
-
-        urls.forEach((url, index) => {
-            const placeholder = `__url_placeholder_${index}__`;
-            formattedText = formattedText.replace(placeholder, url.toLowerCase());
-        });
-
-        formattedText = formattedText.replace(new RegExp(DOT_PLACEHOLDER, 'g'), '.');
-        textarea.value = formattedText;
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    
-    function storeOriginalValue(textarea) {
-        if (textarea) {
-          textarea.dataset.originalText = textarea.value;
-        }
-    }
-    
-    // MODIFIED: Function to generate the TG link with correct day format
-    function generateTgLink(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const dayPadded = String(date.getDate()).padStart(2, '0'); // For path, e.g., "01"
-        const dayUnpadded = String(date.getDate());               // For slug, e.g., "1"
-
-        const italianMonths = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-        const monthName = italianMonths[date.getMonth()];
-
-        return `https://tgposte.poste.it/tgposte/${year}/${month}/${dayPadded}/tg-poste-del-${dayUnpadded}-${monthName}-${year}/`;
-    }
-
-    async function initializeApp() {
-      masterList = await getMasterListFromGoogleSheet();
-      const tabContents = document.getElementById('tabContents');
-      tabContents.innerHTML = tabsConfig.map((_, i) => createTabContent(i)).join('');
+    /* --- INITIALIZATION --- */
+    async function init() {
+      masterList = await getMasterList();
+      const container = document.getElementById('dynamicContent');
+      container.innerHTML = [0, 1, 2].map(i => generateTabHTML(i)).join('');
       
-      document.querySelectorAll('textarea').forEach(textarea => {
-          storeOriginalValue(textarea);
-          textarea.addEventListener('input', updateOutputs);
-          textarea.addEventListener('focus', () => storeOriginalValue(textarea));
-          textarea.addEventListener('change', () => storeOriginalValue(textarea));
+      setupListeners();
+      loadSavedData();
+      updateAllPreviews();
+    }
+
+    function setupListeners() {
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          e.target.classList.add('active');
+          document.querySelector(`.tab-pane[data-tab="${e.target.dataset.index}"]`).classList.remove('hidden');
+        });
       });
 
-      tabsConfig.forEach((_, index) => {
-        const savedData = localStorage.getItem(`tabData${index}`);
-        if (savedData) {
-          const data = JSON.parse(savedData);
-          const tab = document.querySelector(`.tab-content[data-tab-index="${index}"]`);
-          Object.entries(data).forEach(([type, value]) => {
-            const field = tab.querySelector(`[data-type="${type}"]`);
-            if (field) {
-                field.value = value;
-                storeOriginalValue(field);
+      // Inputs
+      document.querySelectorAll('textarea').forEach(el => {
+        el.addEventListener('input', (e) => {
+          updateCounts(e.target);
+          updatePreview(e.target.closest('.tab-pane').dataset.tab);
+        });
+        el.addEventListener('focus', function() {
+           if(!this.dataset.original) this.dataset.original = this.value;
+        });
+      });
+
+      // Buttons
+      document.body.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tool-btn');
+        if (!btn) return;
+        
+        if (btn.dataset.action) {
+          const textarea = btn.closest('.field-group').querySelector('textarea');
+          handleTextAction(textarea, btn.dataset.action);
+        }
+        
+        if (btn.classList.contains('btn-copy-simple')) {
+           const targetId = btn.dataset.target;
+           copyToClipboard(document.getElementById(targetId).value, btn);
+        }
+
+        if (btn.classList.contains('btn-date')) {
+           const idx = btn.dataset.idx;
+           const target = document.getElementById(`tgLink-${idx}`);
+           const date = new Date();
+           if(btn.dataset.day === 'yesterday') date.setDate(date.getDate() - 1);
+           target.value = generateTgLink(date);
+           target.dispatchEvent(new Event('input'));
+        }
+      });
+
+      // AI
+      document.querySelectorAll('.btn-generate').forEach(btn => {
+        btn.addEventListener('click', () => handleAI(btn.dataset.idx));
+      });
+
+      // Copy Preview
+      document.querySelectorAll('.btn-copia-header').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.copyTarget;
+          const text = document.getElementById(targetId).innerText;
+          copyToClipboard(text, btn);
+        });
+      });
+
+      // Actions
+      document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', () => saveData(btn.dataset.idx, btn)));
+      document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', () => clearData(btn.dataset.idx)));
+      document.querySelector('.btn-copy-all').addEventListener('click', copyAllData);
+      
+      // Import Handlers
+      document.getElementById('fileInput').addEventListener('change', handleFileInput);
+      document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
+    }
+
+    /* --- LOGICHE ANTEPRIMA & CONTEGGI --- */
+    function updatePreview(idx) {
+      const getVal = (type) => document.getElementById(`${type}-${idx}`)?.value || '';
+      
+      // WA
+      const waText = getVal('wa');
+      const ytLink = getVal('ytLink');
+      document.getElementById(`preview-wa-${idx}`).innerText = `${waText}\n${ytLink}\n➡️ TG https://tgposte.poste.it/tgposte/`;
+
+      // Social
+      let ytDesc = getVal('ytDesc').trim();
+      const tgLink = getVal('tgLink');
+      let hashtags = '';
+      const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+      const match = ytDesc.match(hashtagRegex);
+      if (match) {
+        hashtags = match[0].trim();
+        ytDesc = ytDesc.replace(hashtagRegex, '').trim();
+      }
+      const baseTags = "#TGPoste #PosteItaliane";
+      const finalTags = hashtags ? `${baseTags} ${hashtags}` : baseTags;
+      document.getElementById(`preview-social-${idx}`).innerText = `${ytDesc}\n\n➡️ ${tgLink}\n\n${finalTags}`;
+    }
+
+    function updateAllPreviews() {
+      [0,1,2].forEach(i => {
+         updateCounts(document.getElementById(`wa-${i}`));
+         updateCounts(document.getElementById(`ytTitle-${i}`));
+         updateCounts(document.getElementById(`ytDesc-${i}`));
+         updatePreview(i);
+      });
+    }
+
+    function updateCounts(el) {
+      if(!el) return;
+      const idParts = el.id.split('-'); 
+      const type = idParts[0];
+      const idx = idParts[1];
+      const counter = document.getElementById(`count-${type}-${idx}`);
+      if(counter && tabsConfig[0].limits[type]) {
+        const len = el.value.length;
+        const max = tabsConfig[0].limits[type];
+        counter.innerText = `${len}/${max}`;
+        counter.style.color = len > max ? 'red' : '#777';
+      }
+    }
+
+    function handleTextAction(textarea, action) {
+      if(!textarea) return;
+      if(action !== 'revert') textarea.dataset.original = textarea.value;
+      
+      let val = textarea.value;
+      if(action === 'lower') val = val.toLowerCase();
+      if(action === 'upper') val = val.toUpperCase();
+      if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+      if(action === 'revert') val = textarea.dataset.original || val;
+      if(action === 'auto') { applyAutoFormat(textarea); return; }
+
+      textarea.value = val;
+      textarea.dispatchEvent(new Event('input'));
+    }
+
+    function applyAutoFormat(textarea) {
+      let text = textarea.value;
+      const urls = [];
+      text = text.replace(/(https?:\/\/[^\s]+)/g, (m) => { urls.push(m); return '___URL___'; });
+      text = text.toLowerCase();
+      text = text.replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+      masterList.forEach(word => {
+        const re = new RegExp(`\\b${word}\\b`, 'gi');
+        text = text.replace(re, word);
+      });
+      urls.forEach(u => { text = text.replace('___URL___', u); });
+      textarea.value = text;
+      textarea.dispatchEvent(new Event('input'));
+    }
+
+    /* --- IMPORT / EXPORT LOGIC (RIPRISTINATA) --- */
+
+    async function handleFileInput(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const fileName = file.name.toLowerCase();
+        
+        if (fileName.endsWith('.xlsx')) {
+            await importFromExcel(file);
+        } else if (fileName.endsWith('.csv')) {
+            const reader = new FileReader();
+            reader.onload = e => importFromCsvText(e.target.result);
+            reader.readAsText(file);
+        } else {
+            alert('Formato non supportato. Usa .xlsx o .csv');
+        }
+        event.target.value = '';
+    }
+
+    async function handlePasteCsv() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                importFromCsvText(text);
+            } else {
+                alert('Appunti vuoti o permessi negati.');
+            }
+        } catch (error) {
+            alert("Errore lettura appunti: " + error);
+        }
+    }
+
+    async function importFromExcel(file) {
+      try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        processImportRows(rows);
+      } catch (e) {
+        alert("Errore Import Excel: " + e.message);
+      }
+    }
+
+    function importFromCsvText(csvText) {
+        const rows = parseCsvText(csvText);
+        if (rows.length > 0) processImportRows(rows);
+        else alert("CSV vuoto o non valido");
+    }
+
+    function parseCsvText(csvText) {
+        // Simple CSV parser logic (gestisce quote basiche)
+        const rows = [];
+        let row = [];
+        let field = "";
+        let inQuote = false;
+        
+        for (let i = 0; i < csvText.length; i++) {
+            const c = csvText[i];
+            if (inQuote) {
+                if (c === '"') {
+                    if (i + 1 < csvText.length && csvText[i + 1] === '"') {
+                        field += '"'; i++;
+                    } else { inQuote = false; }
+                } else { field += c; }
+            } else {
+                if (c === '"') { inQuote = true; }
+                else if (c === ',') { row.push(field); field = ""; }
+                else if (c === '\n' || c === '\r') {
+                    row.push(field); 
+                    if (row.length > 0 && (row.length > 1 || row[0] !== "")) rows.push(row);
+                    row = []; field = "";
+                    if (c === '\r' && csvText[i + 1] === '\n') i++;
+                } else { field += c; }
+            }
+        }
+        if (field || row.length > 0) { row.push(field); rows.push(row); }
+        return rows;
+    }
+
+    function processImportRows(rows) {
+        if (!rows || rows.length < 2) return alert("Nessun dato valido trovato.");
+
+        // Mappa headers ai field IDs (basato sul file originale)
+        const fieldMap = {
+            'Testo descrittivo news Canale WA': 'wa',
+            'Titolo YouTube': 'ytTitle',
+            'Copy post e descrizione YT': 'ytDesc',
+            'Link YouTube': 'ytLink',
+            'Link TG Poste': 'tgLink'
+        };
+
+        const headers = rows[0]; // La prima riga contiene headers
+        
+        // Itera sulle righe dati (salta header)
+        // La struttura originale ha colonne per News 1, News 2, News 3
+        // Struttura Excel attesa: [Field Name, News1Val, News2Val, News3Val]
+        
+        rows.slice(1).forEach(row => {
+            const rowLabel = (row[0] || '').trim();
+            const fieldType = fieldMap[rowLabel];
+            
+            if (fieldType) {
+                // News 1 è indice 1, News 2 indice 2, ecc.
+                for (let i = 0; i < 3; i++) {
+                    const val = row[i + 1];
+                    if (val !== undefined) {
+                        const el = document.getElementById(`${fieldType}-${i}`);
+                        if (el) {
+                            el.value = String(val).replace(/""/g, '"');
+                            el.dispatchEvent(new Event('input')); // Triggera updates
+                        }
+                    }
+                }
+            }
+        });
+        alert("Importazione completata!");
+    }
+
+    /* --- ALTRE UTILITY --- */
+    
+    async function handleAI(idx) {
+      const input = document.getElementById(`ai-input-${idx}`).value;
+      if(!input) return alert("Inserisci testo!");
+      const loader = document.getElementById(`ai-loader-${idx}`);
+      loader.style.display = 'block';
+      try {
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: input})
+        });
+        const data = await res.json();
+        const setVal = (id, val) => {
+           const el = document.getElementById(id);
+           el.value = val;
+           el.dataset.original = val;
+           el.dispatchEvent(new Event('input'));
+        };
+        setVal(`wa-${idx}`, data.whatsapp);
+        setVal(`ytTitle-${idx}`, data.youtube);
+        setVal(`ytDesc-${idx}`, data.facebook_linkedin);
+      } catch(e) { alert("Errore AI: " + e.message); } finally { loader.style.display = 'none'; }
+    }
+
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => btn.innerHTML = originalHTML, 1500);
+      });
+    }
+
+    function saveData(idx, btn) {
+      const data = {};
+      document.querySelectorAll(`.tab-pane[data-tab="${idx}"] textarea`).forEach(el => {
+        data[el.dataset.type] = el.value;
+      });
+      localStorage.setItem(`news_data_${idx}`, JSON.stringify(data));
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Salvato';
+      setTimeout(() => btn.innerHTML = originalHTML, 1500);
+    }
+
+    function loadSavedData() {
+      [0,1,2].forEach(idx => {
+        const saved = localStorage.getItem(`news_data_${idx}`);
+        if(saved) {
+          const data = JSON.parse(saved);
+          Object.keys(data).forEach(key => {
+            const el = document.getElementById(`${key}-${idx}`);
+            if(el) {
+                el.value = data[key];
+                el.dispatchEvent(new Event('input'));
             }
           });
         }
       });
-      
-      // MODIFIED: Renamed function to handle more click types
-      tabContents.addEventListener('click', handleTabContentClicks);
+    }
 
-      document.querySelectorAll('.btn-copy-wa').forEach(btn => btn.addEventListener('click', copyContent));
-      document.querySelectorAll('.btn-copy-social').forEach(btn => btn.addEventListener('click', copyContent));
-      document.querySelectorAll('.btn-copy-ytTitle').forEach(btn => btn.addEventListener('click', copyTitle));
-      document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', saveData));
-      document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', clearAll));
-      document.querySelectorAll('.btn-copy-all').forEach(btn => btn.addEventListener('click', copyAllTabsContent));
-      document.querySelectorAll('.btn-export').forEach(btn => btn.addEventListener('click', exportToExcel));
-      document.getElementById('excelInput').addEventListener('change', function () { importFromExcel(this.files[0]); });
-      document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(parseInt(tab.dataset.tabIndex))));
-      updateOutputs();
+    function clearData(idx) {
+      if(!confirm("Cancelli tutto?")) return;
+      document.querySelectorAll(`.tab-pane[data-tab="${idx}"] textarea`).forEach(el => {
+        el.value = '';
+        el.dispatchEvent(new Event('input'));
+      });
+    }
+
+    function generateTgLink(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const d_raw = String(date.getDate());
+        const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+        return `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
+    }
+
+    async function getMasterList() {
+      try {
+        const r = await fetch(googleSheetURL);
+        const t = await r.text();
+        return t.split('\n').map(s => s.trim()).filter(Boolean);
+      } catch { return []; }
     }
     
-    // MODIFIED: This function now handles both text transformations and date shortcuts
-    function handleTabContentClicks(event) {
-        // Handle text transformation buttons
-        const transformButton = event.target.closest('.text-tools button');
-        if (transformButton) {
-            event.preventDefault();
-
-            const transformType = transformButton.dataset.transform;
-            const inputGroup = transformButton.closest('.input-group');
-            const textarea = inputGroup.querySelector('textarea');
-            if (!textarea) return;
-            
-            if (transformType !== 'revert') {
-                storeOriginalValue(textarea);
-            }
-
-            if (transformType === 'revert') {
-                textarea.value = textarea.dataset.originalText || '';
-            } else if (transformType === 'auto') {
-                applyAutoFormatting(textarea);
-                return; 
-            } else {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const hasSelection = start !== end;
-
-                if (!hasSelection) {
-                    switch (transformType) {
-                        case 'lower': textarea.value = textarea.value.toLowerCase(); break;
-                        case 'upper': textarea.value = textarea.value.toUpperCase(); break;
-                        case 'title': textarea.value = textarea.value.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
-                    }
-                } else {
-                    const selectedText = textarea.value.substring(start, end);
-                    let transformedSelection = '';
-                    switch (transformType) {
-                        case 'lower': transformedSelection = selectedText.toLowerCase(); break;
-                        case 'upper': transformedSelection = selectedText.toUpperCase(); break;
-                        case 'title': transformedSelection = selectedText.toLowerCase().replace(/(^|\s|\p{P})\p{L}/gu, c => c.toUpperCase()); break;
-                    }
-                    textarea.value = textarea.value.substring(0, start) + transformedSelection + textarea.value.substring(end);
-                    textarea.focus();
-                    textarea.setSelectionRange(start, start + transformedSelection.length);
-                }
-            }
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
-            return; // Stop processing after handling the click
-        }
-
-        // NEW: Handle date shortcut buttons
-        const dateShortcutButton = event.target.closest('.btn-date-shortcut');
-        if (dateShortcutButton) {
-            event.preventDefault();
-            const dayType = dateShortcutButton.dataset.day;
-            const tab = dateShortcutButton.closest('.tab-content');
-            const tgLinkTextarea = tab.querySelector('[data-type="tgLink"]');
-
-            if (tgLinkTextarea) {
-                const date = new Date();
-                if (dayType === 'yesterday') {
-                    date.setDate(date.getDate() - 1);
-                }
-                tgLinkTextarea.value = generateTgLink(date);
-                // Trigger input event to ensure any dependent logic is run
-                tgLinkTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        }
-    }
-    
-    function switchTab(tabIndex) {
-      document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === tabIndex));
-      document.querySelectorAll('.tab-content').forEach((content, i) => content.classList.toggle('active', i === tabIndex));
-      updateOutputs();
+    function copyAllData() {
+       let txt = '';
+       [0,1,2].forEach(i => {
+          txt += `NEWS ${i+1}\nWA: ${document.getElementById(`wa-${i}`).value}\nYT Title: ${document.getElementById(`ytTitle-${i}`).value}\nSocial: ${document.getElementById(`ytDesc-${i}`).value}\n\n`;
+       });
+       navigator.clipboard.writeText(txt).then(() => alert("Copiato tutto!"));
     }
 
-    function updateOutputs() {
-      document.querySelectorAll('.tab-content').forEach((tab, tabIndex) => {
-        const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value || '';
-        ['wa', 'ytTitle', 'ytDesc'].forEach(type => {
-          const textarea = tab.querySelector(`[data-type="${type}"]`);
-          if (textarea) {
-            const counter = document.getElementById(`counter-${type}-${tabIndex}`);
-            const valueLength = textarea.value.length;
-            const maxLen = tabsConfig[tabIndex].limits[type];
-            counter.textContent = `${valueLength}/${maxLen}`;
-            counter.style.color = valueLength > maxLen ? 'red' : 'var(--poste-light-blue)';
-          }
-        });
-        const waOutput = `${getValue('wa')}\n${getValue('ytLink')}\n➡️ TG https://tgposte.poste.it/tgposte/`;
-        tab.querySelector('[data-type="waOutput"]').textContent = waOutput;
-        const socialOutput = `${getValue('ytDesc')}\n\n#TGPoste #PosteItaliane\n\n➡️ ${getValue('tgLink')}`;
-        tab.querySelector('[data-type="socialOutput"]').textContent = socialOutput;
-      });
+    function exportExcel() {
+       const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+       [0,1,2].forEach(i => {
+         rows.push([
+           `News ${i+1}`,
+           document.getElementById(`wa-${i}`).value,
+           document.getElementById(`ytTitle-${i}`).value,
+           document.getElementById(`ytDesc-${i}`).value,
+           document.getElementById(`ytLink-${i}`).value,
+           document.getElementById(`tgLink-${i}`).value
+         ]);
+       });
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
+       XLSX.writeFile(wb, "export_social.xlsx");
     }
 
-    function copyContent(event) {
-      const button = event.currentTarget;
-      const outputType = button.dataset.type;
-      const tab = button.closest('.tab-content');
-      const outputField = tab.querySelector(`[data-type="${outputType}"]`);
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
-      button.disabled = true;
-      navigator.clipboard.writeText(outputField.textContent).then(() => {
-        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-        setTimeout(() => {
-          const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
-          button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
-          button.disabled = false;
-        }, 2000);
-      }).catch(() => {
-        const label = outputType === 'waOutput' ? 'Copia Contenuto WA' : 'Copia Contenuto Social';
-        button.innerHTML = `<i class="fas fa-copy"></i> ${label}`;
-        button.disabled = false;
-      });
+    function exportCsv() {
+        const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+       [0,1,2].forEach(i => {
+         rows.push([
+           `News ${i+1}`,
+           `"${document.getElementById(`wa-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytTitle-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytDesc-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytLink-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`tgLink-${i}`).value.replace(/"/g, '""')}"`
+         ]);
+       });
+       const csvContent = rows.map(e => e.join(",")).join("\n");
+       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+       const link = document.createElement("a");
+       const url = URL.createObjectURL(blob);
+       link.setAttribute("href", url);
+       link.setAttribute("download", "export.csv");
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
     }
 
-    function copyTitle(event) {
-      const button = event.currentTarget;
-      const tab = button.closest('.tab-content');
-      const textarea = tab.querySelector(`[data-type="ytTitle"]`);
-      const textToCopy = textarea.value;
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
-      button.disabled = true;
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
-          button.disabled = false;
-        }, 2000);
-      }).catch(() => {
-        button.innerHTML = `<i class="fas fa-copy"></i> Copia Titolo YouTube`;
-        button.disabled = false;
-      });
-    }
+    // Avvio
+    document.addEventListener('DOMContentLoaded', init);
 
-    function saveData(event) {
-      const button = event.currentTarget;
-      const tabIndex = parseInt(button.dataset.tabIndex);
-      const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Caricamento in corso...`;
-      button.disabled = true;
-      const dataToSave = {};
-      tab.querySelectorAll('textarea').forEach(input => {
-        dataToSave[input.dataset.type] = input.value;
-        storeOriginalValue(input);
-      });
-      localStorage.setItem(`tabData${tabIndex}`, JSON.stringify(dataToSave));
-      
-      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-      setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-save"></i> Salva`;
-        button.disabled = false;
-      }, 2000);
-    }
-
-    function clearAll(event) {
-      const button = event.currentTarget;
-      const tabIndex = parseInt(button.dataset.tabIndex);
-      const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-      if (confirm("Stai cancellando tutto il testo. Sei sicuro?")) {
-        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cancellazione in corso...`;
-        button.disabled = true;
-        tab.querySelectorAll('textarea').forEach(textarea => {
-          textarea.value = '';
-          storeOriginalValue(textarea);
-          textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-        
-        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-trash"></i> Cancella tutto`;
-          button.disabled = false;
-        }, 2000);
-      }
-    }
-
-    function copyAllTabsContent(event) {
-      const button = event.currentTarget;
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Copiando...`;
-      button.disabled = true;
-      let output = '';
-      for (let i = 0; i < 3; i++) {
-        const tab = document.querySelector(`.tab-content[data-tab-index="${i}"]`);
-        const getValue = type => tab.querySelector(`[data-type="${type}"]`)?.value.trim() || '=';
-        output += `NEWS ${i + 1}\n` +
-          `Contenuto WA: ${getValue('wa')}\n` +
-          `Titolo YouTube: ${getValue('ytTitle')}\n` +
-          `Contenuto social: ${getValue('ytDesc')}\n\n`;
-      }
-      navigator.clipboard.writeText(output.trim()).then(() => {
-        setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-        setTimeout(() => {
-          button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
-          button.disabled = false;
-        }, 2000);
-      }).catch(() => {
-        button.innerHTML = `<i class="fas fa-copy"></i> Contenuto completo`;
-        button.disabled = false;
-      });
-    }
-
-    function exportToExcel(event) {
-      const button = event.currentTarget;
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Esportazione in corso...`;
-      button.disabled = true;
-      const today = new Date();
-      const fileName = `copyWA_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
-      const excelData = [
-        ["", "News 1", "News 2", "News 3"],
-        ["Testo descrittivo news Canale WA", "", "", ""],
-        ["Titolo YouTube", "", "", ""],
-        ["Copy post e descrizione YT", "", "", ""],
-        ["Link YouTube", "", "", ""],
-        ["Link TG Poste", "", "", ""]
-      ];
-      const fieldMap = { 'wa': 1, 'ytTitle': 2, 'ytDesc': 3, 'ytLink': 4, 'tgLink': 5 };
-      for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
-        const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-        tab.querySelectorAll('textarea').forEach(textarea => {
-          const rowIndex = fieldMap[textarea.dataset.type];
-          if (rowIndex !== undefined) {
-            excelData[rowIndex][tabIndex + 1] = textarea.value;
-          }
-        });
-      }
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(excelData);
-      XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
-      XLSX.writeFile(wb, fileName);
-      setTimeout(() => { button.innerHTML = `<i class="fas fa-check"></i> Fatto!`; }, 300);
-      setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-file-export"></i> Esporta in Excel`;
-        button.disabled = false;
-      }, 2000);
-    }
-    
-    async function importFromExcel(file) {
-      if (!file) return;
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      const fieldMap = {
-        'Testo descrittivo news Canale WA': 'wa',
-        'Titolo YouTube': 'ytTitle',
-        'Copy post e descrizione YT': 'ytDesc',
-        'Link YouTube': 'ytLink',
-        'Link TG Poste': 'tgLink'
-      };
-      rows.slice(1).forEach(row => {
-        const fieldType = fieldMap[row[0]?.trim()];
-        if (fieldType) {
-          for (let tabIndex = 0; tabIndex < 3; tabIndex++) {
-            const tab = document.querySelector(`.tab-content[data-tab-index="${tabIndex}"]`);
-            const field = tab.querySelector(`[data-type="${fieldType}"]`);
-            if (field) {
-              field.value = row[tabIndex + 1] !== undefined ? row[tabIndex + 1] : '';
-              storeOriginalValue(field);
-            }
-          }
-        }
-      });
-      updateOutputs();
-    }
-    
-    window.addEventListener('DOMContentLoaded', initializeApp);
   </script>
 </body>
 </html>
