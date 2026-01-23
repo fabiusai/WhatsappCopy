@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – Final v5.0 (Import Fix)</title>
+  <title>Social Dashboard – Final v6.0 (Prompt Modal)</title>
   <link rel="icon" href="faviconAI.ico" />
 
   <link
@@ -62,6 +62,9 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow-sm);
       margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .main-header h1 { margin: 0; color: var(--primary-blue); font-size: 1.6rem; }
 
@@ -85,21 +88,20 @@
       color: #fff;
     }
 
-    /* --- GRIGLIA EDITOR (SX) vs ANTEPRIMA (DX) --- */
+    /* --- GRIGLIA --- */
     .layout-grid {
       display: grid;
-      grid-template-columns: 1fr; /* Mobile default */
+      grid-template-columns: 1fr; 
       gap: 30px;
       align-items: start;
     }
-
     @media (min-width: 1024px) {
       .layout-grid {
-        grid-template-columns: 55% 43%; /* SX più larga, DX per anteprima */
+        grid-template-columns: 55% 43%;
       }
     }
 
-    /* COLONNA SINISTRA: EDITOR */
+    /* --- COLUMN STYLES --- */
     .editor-container {
       background: var(--surface-white);
       padding: 24px;
@@ -108,7 +110,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* COLONNA DESTRA: ANTEPRIME STILE CARD */
     .preview-container {
       position: sticky;
       top: 20px;
@@ -117,6 +118,7 @@
       gap: 24px;
     }
 
+    /* Card Anteprima */
     .card-anteprima-finale {
       background-color: #ffffff !important;
       border: 1px solid #e0e0e0;
@@ -126,7 +128,6 @@
       display: flex;
       flex-direction: column;
     }
-
     .header-anteprima {
       background-color: #f1f3f5;
       padding: 12px 20px;
@@ -135,7 +136,6 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .titolo-anteprima {
       font-weight: 700;
       font-size: 0.85rem;
@@ -146,7 +146,17 @@
       align-items: center;
       gap: 8px;
     }
-
+    .corpo-anteprima {
+      padding: 24px;
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      font-size: 1rem;
+      line-height: 1.6;
+      font-weight: 400;
+      white-space: pre-wrap;
+      text-align: left;
+      min-height: 100px;
+    }
     .btn-copia-header {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -167,24 +177,12 @@
       border-color: var(--primary-blue);
     }
 
-    .corpo-anteprima {
-      padding: 24px;
-      background-color: #ffffff !important;
-      color: #333333 !important;
-      font-size: 1rem;
-      line-height: 1.6;
-      font-weight: 400;
-      white-space: pre-wrap;
-      text-align: left;
-      min-height: 100px;
-    }
-
-    /* --- STILI INPUT EDITOR --- */
+    /* --- INPUTS --- */
     .field-group { margin-bottom: 24px; }
     .label-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
     .label-text { font-weight: 600; font-size: 0.95rem; color: var(--primary-blue); }
     
-    textarea {
+    textarea, input[type="text"] {
       width: 100%;
       box-sizing: border-box;
       padding: 12px;
@@ -194,9 +192,8 @@
       font-size: 1rem;
       resize: vertical;
     }
-    textarea:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
+    textarea:focus, input[type="text"]:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
 
-    /* Toolbar Formattazione */
     .toolbar {
       display: flex;
       gap: 4px;
@@ -214,7 +211,7 @@
     }
     .tool-btn:hover { background: #e9ecef; color: var(--primary-blue); }
 
-    /* AI Section */
+    /* --- AI BOX --- */
     .ai-box {
       background: #f8faff;
       border: 1px solid #d0d7de;
@@ -223,6 +220,7 @@
       margin-bottom: 25px;
       border-radius: 6px;
     }
+    .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .btn-generate {
       width: 100%;
       background: var(--primary-blue);
@@ -236,7 +234,23 @@
     }
     .btn-generate:hover { background: var(--primary-hover); }
 
-    /* Bottom Actions */
+    /* Button Prompt */
+    .btn-prompt-modal {
+      background-color: #fff;
+      border: 1px solid var(--primary-blue);
+      color: var(--primary-blue);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-prompt-modal:hover { background-color: #eef4ff; }
+
+    /* --- ACTIONS & IMPORT --- */
     .actions-row {
       margin-top: 30px;
       padding-top: 20px;
@@ -271,19 +285,93 @@
       flex-wrap: wrap;
     }
 
+    /* --- MODAL STYLES --- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.3s; }
+    
+    .modal-content {
+      background: #fff;
+      width: 90%;
+      max-width: 900px;
+      max-height: 90vh;
+      border-radius: 12px;
+      padding: 0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fafb;
+    }
+    .modal-header h2 { margin: 0; color: var(--primary-blue); font-size: 1.4rem; }
+    .close-modal {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;
+    }
+    
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .news-input-block {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    .news-input-block h3 { margin-top: 0; color: var(--text-dark); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+    
+    .prompt-output-area {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        margin-top: 20px;
+        display: none;
+        position: relative;
+    }
+
     /* Utility */
     .hidden { display: none; }
     .counter { font-size: 0.8rem; color: #777; }
     .loader { display: none; text-align: center; margin-top: 10px; }
     
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
   </style>
 </head>
 <body>
 
   <div class="app-container">
     <div class="main-header">
-      <h1>Social Network Dashboard</h1>
-      <p style="margin:0; color:#666;">Versione v5.0</p>
+      <div>
+        <h1>Social Network Dashboard</h1>
+        <p style="margin:0; color:#666;">Versione v6.0</p>
+      </div>
     </div>
 
     <div class="import-bar">
@@ -303,6 +391,56 @@
     </div>
 
     <div id="dynamicContent"></div>
+  </div>
+
+  <div class="modal-overlay" id="promptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-magic"></i> Generatore Prompt Gemini</h2>
+        <button class="close-modal" id="closePromptModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#666; margin-bottom:20px;">
+          Inserisci i dettagli delle notizie. Se hai già scritto nell'editor, i campi verranno pre-compilati.
+          Clicca "Genera Prompt", copia il risultato e incollalo su Gemini. Poi usa "Incolla CSV" nella dashboard.
+        </p>
+        
+        <div class="modal-news-grid">
+            <div class="news-input-block">
+                <h3><i class="fas fa-newspaper"></i> News 1</h3>
+                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <textarea id="modal-news-1" rows="4" placeholder="Testo notizia 1..."></textarea>
+                <input type="text" id="modal-video-1" placeholder="File video (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-specs-1" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+            </div>
+            <div class="news-input-block">
+                <h3><i class="fas fa-newspaper"></i> News 2</h3>
+                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <textarea id="modal-news-2" rows="4" placeholder="Testo notizia 2..."></textarea>
+                <input type="text" id="modal-video-2" placeholder="File video (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-specs-2" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+            </div>
+            <div class="news-input-block">
+                <h3><i class="fas fa-newspaper"></i> News 3</h3>
+                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Testo Notizia</label>
+                <textarea id="modal-news-3" rows="4" placeholder="Testo notizia 3..."></textarea>
+                <input type="text" id="modal-video-3" placeholder="File video (opzionale)" style="margin-top:8px;">
+                <input type="text" id="modal-specs-3" placeholder="Note extra (opzionale)" style="margin-top:8px;">
+            </div>
+        </div>
+
+        <button id="btnGeneratePrompt" class="action-btn" style="background:var(--primary-blue); width:100%; justify-content:center; padding:15px; font-size:1.1rem;">
+            Genera Prompt Strutturato
+        </button>
+
+        <div id="promptOutputArea" class="prompt-output-area">
+            <button id="btnCopyPrompt" class="btn-prompt-modal" style="position:absolute; top:10px; right:10px;">
+                <i class="fas fa-copy"></i> Copia
+            </button>
+            <code id="promptCodeBlock"></code>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -336,9 +474,14 @@
           <div class="editor-container">
             
             <div class="ai-box">
-              <h3 style="margin-top:0; color:#0047bb;"><i class="fas fa-robot"></i> Generatore AI</h3>
+              <div class="ai-header">
+                <h3 style="margin:0; color:#0047bb;"><i class="fas fa-robot"></i> Generatore AI</h3>
+                <button class="btn-prompt-modal" id="openPromptBtn-${index}">
+                    <i class="fas fa-magic"></i> Prompt Gemini
+                </button>
+              </div>
               <textarea id="ai-input-${index}" placeholder="Incolla qui il testo grezzo..." style="min-height:80px;"></textarea>
-              <button class="btn-generate" data-idx="${index}">Genera Testi</button>
+              <button class="btn-generate" data-idx="${index}">Genera Testi (API Interna)</button>
               <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione...</div>
             </div>
 
@@ -394,7 +537,6 @@
               <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
               <button class="action-btn btn-utility" style="background:#217346;" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
               <button class="action-btn btn-utility" style="background:#1d6f42;" onclick="exportCsv()"><i class="fas fa-file-csv"></i> CSV</button>
-              <a href="promptGemini.html" target="_blank" class="action-btn btn-utility" style="text-decoration:none;"><i class="fas fa-lightbulb"></i> Prompt</a>
             </div>
 
           </div>
@@ -437,6 +579,7 @@
       setupListeners();
       loadSavedData();
       updateAllPreviews();
+      setupModalLogic();
     }
 
     function setupListeners() {
@@ -461,7 +604,7 @@
         });
       });
 
-      // Buttons
+      // Buttons Delegate
       document.body.addEventListener('click', (e) => {
         const btn = e.target.closest('.tool-btn');
         if (!btn) return;
@@ -486,9 +629,14 @@
         }
       });
 
-      // AI
+      // AI Button Internal
       document.querySelectorAll('.btn-generate').forEach(btn => {
         btn.addEventListener('click', () => handleAI(btn.dataset.idx));
+      });
+
+      // Open Modal Buttons
+      document.querySelectorAll('.btn-prompt-modal').forEach(btn => {
+          btn.addEventListener('click', openPromptModal);
       });
 
       // Copy Preview
@@ -508,6 +656,98 @@
       // Import Handlers
       document.getElementById('fileInput').addEventListener('change', handleFileInput);
       document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
+    }
+
+    /* --- LOGICA MODALE PROMPT --- */
+    function setupModalLogic() {
+        const modal = document.getElementById('promptModal');
+        const closeBtn = document.getElementById('closePromptModal');
+        const generateBtn = document.getElementById('btnGeneratePrompt');
+        const copyBtn = document.getElementById('btnCopyPrompt');
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('open');
+        });
+        
+        // Chiudi se clicchi fuori
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        generateBtn.addEventListener('click', () => {
+            let newsCount = 0;
+            let newsContent = "";
+            let columnHeaders = [];
+
+            for (let i = 1; i <= 3; i++) {
+                const text = document.getElementById(`modal-news-${i}`).value.trim();
+                const video = document.getElementById(`modal-video-${i}`).value.trim();
+                const specs = document.getElementById(`modal-specs-${i}`).value.trim();
+
+                if (text) {
+                    newsCount++;
+                    columnHeaders.push(`"News ${newsCount}"`);
+                    newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo:**\n${text}\n`;
+                    if (video) newsContent += `**Riferimento video:**\n${video}\n`;
+                    if (specs) newsContent += `**Specifiche aggiuntive:**\n${specs}\n`;
+                }
+            }
+
+            if (newsCount === 0) return alert("Inserisci almeno una notizia!");
+
+            const finalPrompt = `Sei un assistente per la creazione di contenuti social. Il tuo compito è generare dei testi per i canali social partendo dalle informazioni fornite.
+
+**INFORMAZIONI SULLE NOTIZIE:**
+${newsContent}
+
+**DIRETTIVE DI STILE E TONO:**
+* **Tono di voce:** Chiaro e istituzionale, senza enfasi.
+* **Stile:** Semplice ed informativo.
+* **Brand:** Parla a nome dell'azienda "Poste".
+* **Contesto:** Testo per video giornalistico TG aziendale.
+
+**REQUISITI DI LUNGHEZZA:**
+1. **WhatsApp:** ~90 caratteri.
+2. **YouTube Titolo:** Max 49 caratteri.
+3. **Social (FB/Linkedin):** Sintetico ma completo. Hashtag pertinenti.
+
+**FORMATO OUTPUT (CSV PURO):**
+L'output deve essere SOLO un blocco CSV.
+* Delimitatore: Virgola (,)
+* Qualificatore: Doppie virgolette (")
+* Intestazione: ,${columnHeaders.join(',')}
+* Righe richieste:
+"Testo descrittivo news Canale WA",...
+"Titolo YouTube",...
+"Copy post e descrizione YT",...
+"Link YouTube",...
+"Link TG Poste",...
+
+Genera solo il codice CSV.`;
+
+            document.getElementById('promptCodeBlock').textContent = finalPrompt;
+            document.getElementById('promptOutputArea').style.display = 'block';
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const txt = document.getElementById('promptCodeBlock').textContent;
+            navigator.clipboard.writeText(txt).then(() => {
+                const orig = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiato';
+                setTimeout(() => copyBtn.innerHTML = orig, 2000);
+            });
+        });
+    }
+
+    function openPromptModal() {
+        // Pre-popola la modale con i testi inseriti nell'editor AI (se presenti)
+        for(let i=0; i<3; i++) {
+            const editorText = document.getElementById(`ai-input-${i}`).value;
+            if(editorText) {
+                document.getElementById(`modal-news-${i+1}`).value = editorText;
+            }
+        }
+        document.getElementById('promptModal').classList.add('open');
     }
 
     /* --- LOGICHE ANTEPRIMA & CONTEGGI --- */
@@ -587,8 +827,7 @@
       textarea.dispatchEvent(new Event('input'));
     }
 
-    /* --- IMPORT / EXPORT LOGIC (RIPRISTINATA) --- */
-
+    /* --- IMPORT / EXPORT LOGIC --- */
     async function handleFileInput(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -638,7 +877,6 @@
     }
 
     function parseCsvText(csvText) {
-        // Simple CSV parser logic (gestisce quote basiche)
         const rows = [];
         let row = [];
         let field = "";
@@ -670,7 +908,6 @@
     function processImportRows(rows) {
         if (!rows || rows.length < 2) return alert("Nessun dato valido trovato.");
 
-        // Mappa headers ai field IDs (basato sul file originale)
         const fieldMap = {
             'Testo descrittivo news Canale WA': 'wa',
             'Titolo YouTube': 'ytTitle',
@@ -679,25 +916,18 @@
             'Link TG Poste': 'tgLink'
         };
 
-        const headers = rows[0]; // La prima riga contiene headers
-        
-        // Itera sulle righe dati (salta header)
-        // La struttura originale ha colonne per News 1, News 2, News 3
-        // Struttura Excel attesa: [Field Name, News1Val, News2Val, News3Val]
-        
         rows.slice(1).forEach(row => {
             const rowLabel = (row[0] || '').trim();
             const fieldType = fieldMap[rowLabel];
             
             if (fieldType) {
-                // News 1 è indice 1, News 2 indice 2, ecc.
                 for (let i = 0; i < 3; i++) {
                     const val = row[i + 1];
                     if (val !== undefined) {
                         const el = document.getElementById(`${fieldType}-${i}`);
                         if (el) {
                             el.value = String(val).replace(/""/g, '"');
-                            el.dispatchEvent(new Event('input')); // Triggera updates
+                            el.dispatchEvent(new Event('input')); 
                         }
                     }
                 }
