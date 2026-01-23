@@ -643,6 +643,15 @@
       document.querySelectorAll('.btn-copia-header').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetId = btn.dataset.copyTarget;
+          const idx = targetId.split('-')[2];
+          
+          if (targetId.includes('preview-wa')) {
+             if(!document.getElementById(`ytLink-${idx}`).value.trim()) return alert("⚠️ Attenzione: Inserire il Link YouTube prima di copiare!");
+          }
+          if (targetId.includes('preview-social')) {
+             if(!document.getElementById(`tgLink-${idx}`).value.trim()) return alert("⚠️ Attenzione: Inserire il Link TG Poste prima di copiare!");
+          }
+
           const text = document.getElementById(targetId).innerText;
           copyToClipboard(text, btn);
         });
@@ -757,7 +766,13 @@ Genera solo il codice CSV.`;
       // WA
       const waText = getVal('wa');
       const ytLink = getVal('ytLink');
-      document.getElementById(`preview-wa-${idx}`).innerText = `${waText}\n${ytLink}\n➡️ TG https://tgposte.poste.it/tgposte/`;
+      
+      let waHtml = `${waText.replace(/\n/g, '<br>')}<br>${ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+      const ytMatch = ytLink.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+          waHtml += `<br><img src="https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg" style="width:100%; border-radius:8px; margin-top:10px; border:1px solid #ddd;">`;
+      }
+      document.getElementById(`preview-wa-${idx}`).innerHTML = waHtml;
 
       // Social
       let ytDesc = getVal('ytDesc').trim();
