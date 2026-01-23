@@ -682,7 +682,7 @@
       `;
     }
 
-    /* --- LOGICA JS (INVARIATA) --- */
+    /* --- LOGICA JS --- */
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -913,10 +913,13 @@ Solo codice CSV.`;
       const ytLink = getVal('ytLink');
       
       let waHtml = `${waText.replace(/\n/g, '<br>')}<br>${ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+      
+      // *** MODIFICA: Ripristinata immagine statica (evita errore 153) ***
       const ytMatch = ytLink.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
       if (ytMatch && ytMatch[1]) {
           waHtml += `<br><img src="https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg" style="width:100%; border-radius:8px; margin-top:10px; border:1px solid #ddd;">`;
       }
+      
       document.getElementById(`preview-wa-${idx}`).innerHTML = waHtml;
 
       let ytDesc = getVal('ytDesc').trim();
@@ -1027,7 +1030,7 @@ Solo codice CSV.`;
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         processImportRows(rows);
-        showToast("Excel importato con successo!");
+        // showToast("Excel importato con successo!"); // DISABILITATO SU RICHIESTA
       } catch (e) {
         showToast("Errore Import Excel", 'error');
       }
@@ -1071,6 +1074,34 @@ Solo codice CSV.`;
     function processImportRows(rows) {
         if (!rows || rows.length < 2) return showToast("Dati CSV non validi.", 'error');
 
+        // Check for Standard Format (Header row contains known keys from Export)
+        const header = rows[0].map(c => String(c).trim());
+        if (header.includes('WA') && header.includes('YT Title')) {
+            const colMap = {'WA':'wa', 'YT Title':'ytTitle', 'YT Desc':'ytDesc', 'YT Link':'ytLink', 'TG Link':'tgLink'};
+            const indices = {};
+            for(let k in colMap) indices[colMap[k]] = header.indexOf(k);
+
+            rows.slice(1).forEach((row, i) => {
+                if(i > 2) return; 
+                for(let field in indices) {
+                    const idx = indices[field];
+                    if(idx > -1) {
+                         const val = row[idx];
+                         if (val !== undefined) {
+                             const el = document.getElementById(`${field}-${i}`);
+                             if (el) {
+                                 el.value = String(val).replace(/""/g, '"');
+                                 el.dispatchEvent(new Event('input'));
+                             }
+                         }
+                    }
+                }
+            });
+            showToast("CSV Standard importato!");
+            return;
+        }
+
+        // Fallback: Legacy Transposed Format
         const fieldMap = {
             'Testo descrittivo news Canale WA': 'wa',
             'Titolo YouTube': 'ytTitle',
