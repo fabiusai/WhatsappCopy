@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – Final v6.3 (Icons Fix)</title>
+  <title>Social Dashboard – Final v6.5</title>
   <link rel="icon" href="faviconAI.ico" />
 
   <link
@@ -405,7 +405,7 @@
     <div class="main-header">
       <div>
         <h1>Social Network Dashboard</h1>
-        <p style="margin:0; color:#666;">Versione v6.3</p>
+        <p style="margin:0; color:#666;">Versione v6.5</p>
       </div>
     </div>
 
@@ -496,16 +496,16 @@
       // Uso fa-solid per sicurezza e fa-rotate-left al posto di undo
       const getToolbar = (targetId, extraBtn = '') => `
         <div class="toolbar">
-          <button class="tool-btn" data-action="lower" title="minuscolo">abc</button>
+          <button class="tool-btn" data-action="lower" title="Minuscolo">abc</button>
           <button class="tool-btn" data-action="title" title="Iniziali Maiuscole">Abc</button>
-          <button class="tool-btn" data-action="upper" title="MAIUSCOLO">ABC</button>
+          <button class="tool-btn" data-action="upper" title="Tutto maiuscolo">ABC</button>
           <button class="tool-btn" data-action="auto" title="Formatta Auto" style="color:#0047bb;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto</button>
-          <button class="tool-btn" data-action="revert" title="Ripristina originale"><i class="fa-solid fa-rotate-left"></i></button>
+          <button class="tool-btn" data-action="revert" title="Ripristina originale">Reset</button>
           ${extraBtn}
         </div>`;
 
       // Bottone copia specifico per YT Title
-      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fa-solid fa-copy"></i></button>`;
+      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="fa-solid fa-copy"></i> Copia</button>`;
 
       return `
       <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
