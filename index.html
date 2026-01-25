@@ -973,6 +973,10 @@ Solo codice CSV.`;
         hashtags = match[0].trim();
         ytDesc = ytDesc.replace(hashtagRegex, '').trim();
       }
+
+      // Rimuove duplicati dei tag base se presenti nell'input utente
+      hashtags = hashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+
       const baseTags = "#TGPoste #PosteItaliane";
       const finalTags = hashtags ? `${baseTags} ${hashtags}` : baseTags;
       document.getElementById(`preview-social-${idx}`).innerText = `${ytDesc}\n\n➡️ ${tgLink}\n\n${finalTags}`;
