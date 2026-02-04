@@ -668,6 +668,7 @@
             <div class="actions-row">
               <button class="action-btn btn-save" data-idx="${index}"><i class="fas fa-save"></i> Salva</button>
               <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash-alt"></i></button>
+              <button class="action-btn btn-utility btn-copy-current" data-idx="${index}"><i class="far fa-copy"></i> Copia Questa News</button>
               <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
               
               <button class="action-btn btn-utility" onclick="exportExcel()">
@@ -1271,9 +1272,32 @@ Solo codice CSV.`;
        });
        navigator.clipboard.writeText(txt).then(() => {
            animateButtonFeedback(btn, "Fatto!");
-           showToast("Tutto copiato!");
+           showToast("Tutte le news copiate!");
        });
     }
+
+    function copyCurrentNews(idx, btn) {
+       const wa = document.getElementById(`wa-${idx}`).value;
+       const yt = document.getElementById(`ytTitle-${idx}`).value;
+       const desc = document.getElementById(`ytDesc-${idx}`).value;
+       const txt = `NEWS ${parseInt(idx)+1}\nWA: ${wa}\nYT Title: ${yt}\nSocial: ${desc}`;
+       
+       navigator.clipboard.writeText(txt).then(() => {
+           animateButtonFeedback(btn, "Copiato!");
+           showToast(`News ${parseInt(idx)+1} copiata!`);
+       });
+    }
+
+    // In setupListeners, sostituisci la riga del btn-copy-all e aggiungi il listener delegato:
+    document.body.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-copy-all')) {
+            copyAllData(e.target.closest('.btn-copy-all'));
+        }
+        if (e.target.closest('.btn-copy-current')) {
+            const btn = e.target.closest('.btn-copy-current');
+            copyCurrentNews(btn.dataset.idx, btn);
+        }
+    });
 
     function getExportName(ext) {
         const now = new Date();
