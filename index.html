@@ -587,11 +587,61 @@
           <div class="editor-container">
             
             <div class="ai-box">
-              <div class="ai-header">
-                <h3><i class="fas fa-robot"></i> Assistant</h3>
-                <button class="btn-prompt-modal" id="openPromptBtn-${index}">
-                    <i class="fas fa-pen-nib"></i> Crea Prompt
-                </button>
+              <div class="ai-header" style="flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h3><i class="fas fa-robot"></i> Assistant</h3>
+                  <button class="btn-prompt-modal" id="openPromptBtn-${index}" title="Crea Prompt">
+                      <i class="fas fa-pen-nib"></i> Prompt
+                  </button>
+                </div>
+                
+                <div class="toolbar" style="margin-left: auto; gap: 8px; display: flex; align-items: flex-start; background: #fff; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn btn-save" data-idx="${index}" title="Salva Bozze" style="background: var(--primary-blue); color: white; border: none; width: 40px;">
+                      <i class="fas fa-save"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--primary-blue); text-transform: uppercase;">Salva</span>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn btn-clear" data-idx="${index}" title="Svuota Campi Scheda" style="color: #dc3545; width: 40px;">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: #dc3545; text-transform: uppercase;">Reset</span>
+                  </div>
+
+                  <div style="width: 1px; height: 35px; background: #dfe1e6; margin: 0 2px; align-self: center;"></div>
+
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn btn-copy-current" data-idx="${index}" title="Copia Testi News Corrente" style="width: 40px;">
+                      <i class="far fa-copy" style="color: var(--primary-blue);"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-medium); text-transform: uppercase;">News</span>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn btn-copy-all" title="Copia Tutte le 3 News" style="width: 40px;">
+                      <i class="fas fa-copy" style="color: #5E6C84;"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-medium); text-transform: uppercase;">Tutte</span>
+                  </div>
+
+                  <div style="width: 1px; height: 35px; background: #dfe1e6; margin: 0 2px; align-self: center;"></div>
+
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn" onclick="exportExcel()" title="Esporta Excel" style="width: 40px;">
+                      <i class="fas fa-file-excel" style="color: #1d6f42;"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: #1d6f42; text-transform: uppercase;">Excel</span>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <button class="tool-btn" onclick="exportCsv()" title="Esporta CSV" style="width: 40px;">
+                      <i class="fas fa-file-csv" style="color: #666;"></i>
+                    </button>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: #666; text-transform: uppercase;">CSV</span>
+                  </div>
+                </div>
               </div>
                             <div style="position:relative;">
                 <textarea id="ai-input-${index}" placeholder="Incolla testo notizia... " style="min-height:80px; padding-right:40px;"></textarea>
@@ -663,20 +713,6 @@
                 </div>
               </div>
               <textarea id="tgLink-${index}" data-type="tgLink" rows="1"></textarea>
-            </div>
-
-            <div class="actions-row">
-              <button class="action-btn btn-save" data-idx="${index}"><i class="fas fa-save"></i> Salva</button>
-              <button class="action-btn btn-clear" data-idx="${index}"><i class="fas fa-trash-alt"></i></button>
-              <button class="action-btn btn-utility btn-copy-current" data-idx="${index}"><i class="far fa-copy"></i> Copia Questa News</button>
-              <button class="action-btn btn-utility btn-copy-all"><i class="fas fa-copy"></i> Copia Tutto</button>
-              
-              <button class="action-btn btn-utility" onclick="exportExcel()">
-                <i class="fas fa-file-excel"></i> Excel
-              </button>
-              <button class="action-btn btn-utility" onclick="exportCsv()">
-                <i class="fas fa-file-csv"></i> CSV
-              </button>
             </div>
 
           </div>
