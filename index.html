@@ -565,6 +565,13 @@
     }));
 
     /* --- HTML GENERATOR --- */
+    // Aggiornamento versione
+    document.title = "Social Dashboard – Final v7.0";
+    window.addEventListener('DOMContentLoaded', () => {
+        const verEl = document.querySelector('.main-header p');
+        if(verEl) verEl.innerText = "v7.0";
+    });
+
     function generateTabHTML(index) {
       
       const getToolbar = (targetId, extraBtn = '') => `
@@ -657,7 +664,7 @@
 
             <div class="field-group">
               <div class="label-row">
-                <span class="label-text">Testo WhatsApp</span>
+                <span class="label-text"><i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.1em; margin-right: 6px;"></i>Testo WhatsApp</span>
                 <div class="right-controls">
                     ${getToolbar()}
                     <span class="counter" id="count-wa-${index}">0/${tabsConfig[index].limits.wa}</span>
@@ -668,7 +675,7 @@
 
             <div class="field-group">
               <div class="label-row">
-                <span class="label-text">Titolo YouTube</span>
+                <span class="label-text"><i class="fab fa-youtube" style="color: #FF0000; font-size: 1.1em; margin-right: 6px;"></i>Titolo YouTube</span>
                 <div class="right-controls">
                     ${getToolbar(`ytTitle-${index}`, copyTitleBtn)}
                     <span class="counter" id="count-ytTitle-${index}">0/${tabsConfig[index].limits.ytTitle}</span>
@@ -679,7 +686,7 @@
 
             <div class="field-group">
               <div class="label-row">
-                <span class="label-text">Descrizione Social</span>
+                <span class="label-text"><i class="fas fa-share-nodes" style="color: var(--primary-blue); font-size: 1.1em; margin-right: 6px;"></i>Descrizione Social</span>
                 <div class="right-controls">
                     ${getToolbar()}
                     <span class="counter" id="count-ytDesc-${index}">0/${tabsConfig[index].limits.ytDesc}</span>
@@ -690,7 +697,7 @@
 
                         <div class="field-group">
               <div class="label-row">
-                <span class="label-text">Link YouTube</span>
+                <span class="label-text"><i class="fab fa-youtube" style="color: #FF0000; font-size: 1.1em; margin-right: 6px;"></i>Link YouTube</span>
                 <div class="right-controls">
                   <button class="tool-btn" data-action="paste" data-target="ytLink-${index}" title="Incolla Link">
                     <i class="fas fa-paste"></i>
@@ -702,7 +709,7 @@
 
             <div class="field-group">
               <div class="label-row">
-                <span class="label-text">Link TG Poste</span>
+                <span class="label-text"><i class="fab fa-telegram" style="color: #0088cc; font-size: 1.1em; margin-right: 6px;"></i>Link TG Poste</span>
                 <div class="right-controls">
                   <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Oggi">
                     <i class="far fa-calendar-check"></i> Oggi
