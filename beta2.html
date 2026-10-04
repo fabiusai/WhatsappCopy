@@ -1,1 +1,784 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta name="robots" content="noindex">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Dashboard – v9.3 Pro</title>
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+  <style>
+    :root {
+      --blue: #0047bb; --blue-dk: #00368f; --blue-tint: #eaf1ff; --blue-line: #c3d6f7;
+      --yellow: #eedc00; --wa-green: #25D366; --yt-red: #FF0000;
+      --bg: #f4f6f9; --surface: #ffffff; --surface-alt: #fafbfd;
+      --ink: #16233b; --muted: #5a6579; 
+      --line: #dce1ea; --line-soft: #eceff4;
+      --danger: #c62828; --danger-tint: #fdecec; --ok: #1b7f4b; 
+      --r: 12px; --r-sm: 8px;
+      --font: 'IBM Plex Sans', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.5;
+      color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
+      height: 100vh; overflow: hidden;
+    }
+
+    button, input, textarea, label { font: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .hidden { display: none !important; }
+
+    .app-layout {
+      display: grid;
+      grid-template-columns: 260px minmax(500px, 1fr) 420px;
+      gap: 24px;
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 24px;
+      height: 100vh;
+    }
+
+    .colonna-scroll {
+      overflow-y: auto;
+      padding-right: 8px;
+      padding-bottom: 40px;
+    }
+    
+    .colonna-scroll::-webkit-scrollbar { width: 6px; }
+    .colonna-scroll::-webkit-scrollbar-track { background: transparent; }
+    .colonna-scroll::-webkit-scrollbar-thumb { background: #cbd2df; border-radius: 10px; }
+    .colonna-scroll::-webkit-scrollbar-thumb:hover { background: #aab2c2; }
+
+    .sidebar { display: flex; flex-direction: column; gap: 24px; }
+    
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 16px; border-bottom: 1px solid var(--line);
+    }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border-radius: 10px; background: var(--blue); color: #fff;
+      border-bottom: 3px solid var(--yellow); font-size: 1.2rem;
+    }
+    .brand h1 { margin: 0; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+    .brand p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+
+    .menu-section { display: flex; flex-direction: column; gap: 8px; }
+    .menu-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 4px; }
+    
+    .btn-menu {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 10px 14px; border-radius: var(--r-sm);
+      color: var(--ink); font-weight: 500; font-size: 0.9rem;
+      transition: all 0.2s; border: 1px solid transparent; text-align: left;
+    }
+    .btn-menu i { width: 16px; text-align: center; color: var(--muted); }
+    .btn-menu:hover { background: var(--surface); border-color: var(--line); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    
+    .btn-menu.primary-action { background: var(--blue); color: #fff; justify-content: center; margin-top: 10px;}
+    .btn-menu.primary-action i { color: #fff; }
+    .btn-menu.primary-action:hover { background: var(--blue-dk); }
+    
+    .btn-menu.secondary-action { background: var(--blue-tint); color: var(--blue); justify-content: center;}
+    .btn-menu.secondary-action i { color: var(--blue); }
+    .btn-menu.secondary-action:hover { background: var(--blue-line); }
+
+    #news-list-container { display: flex; flex-direction: column; gap: 4px; }
+    .news-item {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 10px 14px; border-radius: var(--r-sm);
+      color: var(--muted); font-weight: 600; font-size: 0.9rem;
+      border: 1px solid transparent; cursor: pointer; transition: all 0.2s;
+    }
+    .news-item:hover { background: #e8ebf1; color: var(--ink); }
+    .news-item.active { background: var(--surface); border-color: var(--line); color: var(--blue); box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .news-item.active i.fa-newspaper { color: var(--blue); }
+    
+    .btn-add-news {
+      width: 100%; padding: 10px; border: 1px dashed #b5bed0; border-radius: var(--r-sm);
+      color: var(--muted); font-weight: 600; text-align: center; margin-top: 8px; transition: all 0.2s;
+    }
+    .btn-add-news:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-tint); }
+
+    .editor-wrapper {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column;
+    }
+    
+    .editor-header {
+      padding: 16px 24px; border-bottom: 1px solid var(--line-soft);
+      display: flex; justify-content: space-between; align-items: center; background: var(--surface-alt);
+    }
+    .editor-header h2 { margin: 0; font-size: 1.1rem; color: var(--ink); }
+    .editor-actions { display: flex; gap: 8px; }
+
+    .ai-box { padding: 20px 24px; border-bottom: 1px solid var(--line); background: #f8fafe; }
+    .ai-box-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; color: var(--blue); }
+    .ai-input-wrap { position: relative; display: flex; gap: 10px; }
+    .ai-input-wrap textarea { flex: 1; min-height: 50px; border-radius: var(--r-sm); padding: 12px; border: 1px solid var(--blue-line); resize: vertical;}
+    .btn-ai-gen { background: var(--blue); color: #fff; padding: 0 20px; border-radius: var(--r-sm); font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-ai-gen:hover { background: var(--blue-dk); }
+    #ai-loader { display: none; font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+
+    .fields-container { padding: 0 24px 24px; }
+    .field-group { padding: 20px 0; border-bottom: 1px solid var(--line-soft); }
+    .field-group:last-child { border-bottom: none; }
+    
+    .field-label-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+    .field-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; }
+    
+    .editor-toolbar { display: flex; gap: 4px; background: var(--surface-alt); padding: 4px; border-radius: 6px; border: 1px solid var(--line); }
+    .btn-tool { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 4px; color: var(--muted); transition: 0.15s; }
+    .btn-tool:hover { background: var(--line); color: var(--ink); }
+    .btn-tool.btn-auto { color: var(--blue); background: var(--blue-tint); }
+    .btn-tool.btn-auto:hover { background: var(--blue); color: #fff; }
+
+    textarea.main-input, input.main-input {
+      width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-sm);
+      background: var(--surface); color: var(--ink); font-size: 0.95rem; line-height: 1.5;
+      transition: all 0.2s; resize: vertical; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+    }
+    textarea.main-input:focus, input.main-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,71,187,0.15); }
+    
+    .counter { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; padding: 2px 8px; background: var(--line-soft); border-radius: 20px; }
+    .counter.over { background: var(--danger-tint); color: var(--danger); font-weight: 600; }
+
+    .preview-wrapper { display: flex; flex-direction: column; gap: 20px; }
+    
+    .preview-card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r); display: flex; flex-direction: column;
+      box-shadow: 0 4px 12px rgba(15,27,51,0.03);
+      flex-shrink: 0; height: max-content; overflow: hidden;
+    }
+    .card-wa { border-top: 4px solid var(--wa-green); }
+    .card-yt { border-top: 4px solid var(--yt-red); }
+    .card-social { border-top: 4px solid var(--blue); }
+
+    .preview-header { padding: 12px 20px; border-bottom: 1px solid var(--line-soft); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; background: var(--surface-alt); }
+    .preview-body { padding: 20px; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; flex: 1 1 auto; }
+    .preview-body:empty::before { content: "Il testo approvato apparirà qui..."; color: #aab2c2; font-style: italic; }
+    
+    .preview-footer { padding: 12px 20px; border-top: 1px solid var(--line-soft); background: var(--surface-alt); }
+    .btn-big-copy { width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; height: 44px; border-radius: var(--r-sm); font-weight: 600; font-size: 0.95rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: all 0.2s; }
+    .btn-big-copy:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-tint); }
+    .btn-success { background: #e3f4ea !important; color: var(--ok) !important; border-color: #b7e0c8 !important; pointer-events: none; }
+
+    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 50px; background: var(--ink); color: #fff; font-size: 0.9rem; font-weight: 500; box-shadow: 0 8px 24px rgba(15,27,51,0.25); opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; justify-content: center; align-items: center; background: rgba(15,27,51,0.55); backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+    .modal-content { display: flex; flex-direction: column; width: 92%; max-width: 800px; max-height: 90vh; overflow: hidden; border-radius: var(--r); background: #fff; box-shadow: 0 24px 60px rgba(15,27,51,0.25); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+    .modal-header h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.0625rem; font-weight: 600; color: var(--ink); }
+    .close-modal { width: 34px; height: 34px; border-radius: 6px; font-size: 1.5rem; line-height: 1; color: var(--muted); transition: 0.15s; }
+    .close-modal:hover { background: var(--bg); color: var(--ink); }
+    .modal-body { padding: 22px; overflow-y: auto; }
+    .prompt-output-area { position: relative; padding: 52px 20px 20px; border-radius: var(--r-sm); background: #0f1b33; color: #e6ecf7; font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 0.8125rem; line-height: 1.6; white-space: pre-wrap; }
+    #btnCopyPrompt { position: absolute; top: 10px; right: 10px; padding: 6px 12px; border-radius: 6px; background: #2a3a5c; color: #fff; font-weight: 500; font-size: 0.85rem; transition: 0.2s; }
+    #btnCopyPrompt:hover { background: var(--blue); color: #fff; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="app-layout">
+    
+    <aside class="sidebar colonna-scroll">
+      <div class="brand">
+        <div class="brand-mark"><i class="fas fa-bolt"></i></div>
+        <div>
+          <h1>Social Dashboard</h1>
+          <p>v9.3 Pro Edition</p>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-title">Lavoro Attuale</div>
+        <div id="news-list-container"></div>
+        <button id="btnAddNews" class="btn-add-news"><i class="fas fa-plus"></i> Aggiungi News</button>
+      </div>
+
+      <div class="menu-section" style="margin-top: 10px;">
+        <div class="menu-title">Condivisione e Tool</div>
+        <button class="btn-menu primary-action" onclick="generateSmartLink()" title="Crea un link per inviare queste bozze">
+          <i class="fas fa-link"></i> Condividi Bozze (Link)
+        </button>
+        <button class="btn-menu secondary-action" onclick="importFromLinkPrompt()" title="Incolla un link ricevuto da un collega">
+          <i class="fas fa-paste"></i> Incolla Link Ricevuto
+        </button>
+        
+        <button class="btn-menu" style="margin-top: 8px; border: 1px solid var(--blue-line); background: #fff;" onclick="openPromptGenerator()">
+          <i class="fas fa-wand-magic-sparkles" style="color: var(--blue);"></i> Generatore Prompt
+        </button>
+        <!-- NUOVO TASTO: INCOLLA OUTPUT GEMINI -->
+        <button class="btn-menu" style="border: 1px solid var(--ok); background: #f0fdf4; color: var(--ok);" onclick="pasteFromGemini()">
+          <i class="fas fa-clipboard-check"></i> Incolla Risposta Gemini
+        </button>
+
+        <button class="btn-menu" onclick="document.getElementById('fileInput').click()" style="margin-top: 10px; border: 1px solid var(--line);">
+          <i class="fas fa-file-import"></i> Importa CSV/Excel
+        </button>
+        <input type="file" id="fileInput" accept=".xlsx,.csv" class="hidden" />
+
+        <button class="btn-menu" onclick="exportCsv()" style="margin-top: 8px;">
+          <i class="fas fa-file-export"></i> Scarica CSV Finale
+        </button>
+        <button class="btn-menu" onclick="exportExcel()">
+          <i class="fas fa-file-excel"></i> Scarica Excel Finale
+        </button>
+      </div>
+    </aside>
+
+    <main class="colonna-scroll">
+      <div class="editor-wrapper">
+        
+        <div class="editor-header">
+          <h2 id="editorTitle">Modifica: News 1</h2>
+          <div class="editor-actions">
+            <button class="btn-tool" onclick="clearCurrentNews()" title="Svuota campi di questa news"><i class="fas fa-eraser"></i></button>
+            <button class="btn-tool" onclick="deleteCurrentNews()" title="Elimina questa news" style="color: var(--danger);"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+
+        <div class="ai-box">
+          <div class="ai-box-header"><i class="fas fa-robot"></i> Generatore AI</div>
+          <div class="ai-input-wrap">
+            <textarea id="ai-input" placeholder="Incolla qui il testo grezzo della notizia o del comunicato..."></textarea>
+            <button class="btn-ai-gen" onclick="handleAI()"><i class="fas fa-bolt"></i> Genera</button>
+          </div>
+          <div id="ai-loader"><i class="fas fa-spinner fa-spin"></i> Elaborazione in corso...</div>
+        </div>
+
+        <div class="fields-container">
+          
+          <div class="field-group">
+            <div class="field-label-row">
+              <div class="field-title"><i class="fab fa-whatsapp" style="color:var(--wa-green)"></i> Testo WhatsApp</div>
+              <div class="editor-toolbar">
+                <button class="btn-tool" onclick="formatText('wa', 'lower')" title="Tutto minuscolo">a</button>
+                <button class="btn-tool" onclick="formatText('wa', 'title')" title="Iniziali maiuscole">Aa</button>
+                <button class="btn-tool" onclick="formatText('wa', 'upper')" title="Tutto maiuscolo">A</button>
+                <button class="btn-tool btn-auto" onclick="formatText('wa', 'auto')" title="Auto Format"><i class="fas fa-magic"></i></button>
+              </div>
+            </div>
+            <textarea id="editor-wa" class="main-input" rows="3" placeholder="Scrivi il testo per WhatsApp..."></textarea>
+            <div style="text-align:right; margin-top:4px;"><span class="counter" id="count-wa">0/82</span></div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <div class="field-title"><i class="fab fa-youtube" style="color:var(--yt-red)"></i> Titolo YouTube</div>
+              <div class="editor-toolbar">
+                <button class="btn-tool" onclick="formatText('ytTitle', 'title')">Aa</button>
+                <button class="btn-tool btn-auto" onclick="formatText('ytTitle', 'auto')"><i class="fas fa-magic"></i></button>
+              </div>
+            </div>
+            <textarea id="editor-ytTitle" class="main-input" rows="2"></textarea>
+            <div style="text-align:right; margin-top:4px;"><span class="counter" id="count-ytTitle">0/49</span></div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <div class="field-title"><i class="fas fa-share-nodes" style="color:var(--blue)"></i> Copy Post Social</div>
+              <div class="editor-toolbar">
+                <button class="btn-tool btn-auto" onclick="formatText('ytDesc', 'auto')"><i class="fas fa-magic"></i></button>
+              </div>
+            </div>
+            <textarea id="editor-ytDesc" class="main-input" rows="4"></textarea>
+            <div style="text-align:right; margin-top:4px;"><span class="counter" id="count-ytDesc">0/280</span></div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <div class="field-title"><i class="fas fa-link"></i> Link Risorse</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <input type="text" id="editor-ytLink" class="main-input" placeholder="Link YouTube (es. https://www.youtube.com/watch?v=...)">
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="editor-tgLink" class="main-input" placeholder="Link TG Poste">
+                <!-- TASTO IERI RIPRISTINATO -->
+                <button class="btn-menu" style="width:auto; border:1px solid var(--line);" onclick="insertTgLink('today')" title="Inserisci Link TG di Oggi"><i class="far fa-calendar-check"></i> Oggi</button>
+                <button class="btn-menu" style="width:auto; border:1px solid var(--line);" onclick="insertTgLink('yesterday')" title="Inserisci Link TG di Ieri"><i class="far fa-calendar-minus"></i> Ieri</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <aside class="colonna-scroll preview-wrapper">
+      
+      <div class="preview-card card-wa">
+        <div class="preview-header"><i class="fab fa-whatsapp" style="color:var(--wa-green)"></i> Definitivo WhatsApp</div>
+        <div class="preview-body" id="preview-wa"></div>
+        <div class="preview-footer">
+          <button class="btn-big-copy" onclick="copyCard('wa', this)"><i class="far fa-copy"></i> Copia per WhatsApp</button>
+        </div>
+      </div>
+
+      <div class="preview-card card-yt">
+        <div class="preview-header"><i class="fab fa-youtube" style="color:var(--yt-red)"></i> Titolo YouTube</div>
+        <div class="preview-body" id="preview-ytTitle" style="font-size: 1.1rem; font-weight: 600; min-height:auto;"></div>
+        <div class="preview-footer">
+          <button class="btn-big-copy" onclick="copyCard('ytTitle', this)"><i class="far fa-copy"></i> Copia Titolo</button>
+        </div>
+      </div>
+
+      <div class="preview-card card-social">
+        <div class="preview-header"><i class="fas fa-share-nodes" style="color:var(--blue)"></i> Definitivo Post Social</div>
+        <div class="preview-body" id="preview-social"></div>
+        <div class="preview-footer">
+          <button class="btn-big-copy" onclick="copyCard('social', this)"><i class="far fa-copy"></i> Copia Post</button>
+        </div>
+      </div>
+      
+      <button class="btn-big-copy" style="background:var(--ink); color:#fff; border:none; margin-top:10px;" onclick="copyAllNewsDefinitive(this)">
+        <i class="fas fa-copy"></i> Copia TUTTO (Report)
+      </button>
+
+    </aside>
+
+  </div>
+
+  <div class="modal-overlay" id="promptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-wand-magic-sparkles" style="color:var(--blue)"></i> Generatore Prompt AI</h2>
+        <button class="close-modal" id="closePromptModal" type="button" aria-label="Chiudi">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin: 0 0 16px; color: var(--muted); font-size: 0.95rem;">
+          Questo prompt è stato generato automaticamente unendo tutti i testi grezzi inseriti nel "Generatore AI" delle tue News. Copialo e incollalo su Gemini.
+        </p>
+        <div class="prompt-output-area">
+          <button id="btnCopyPrompt" type="button" onclick="copyPromptText(this)"><i class="far fa-copy"></i> Copia Prompt</button>
+          <code id="promptCodeBlock"></code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let newsState = [];
+    let activeNewsId = null;
+    let masterList = [];
+    
+    const API_URL = 'https://aipost.onrender.com/generate';
+    const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
+    const LIMITS = { wa: 82, ytTitle: 49, ytDesc: 280 };
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      masterList = await getMasterList();
+      
+      const hasSmartLink = loadFromSmartLink(window.location.hash);
+      
+      if (!hasSmartLink) {
+        const saved = localStorage.getItem('socialDashboardStateV9');
+        if (saved) {
+          try { newsState = JSON.parse(saved); } catch(e) { createDefaultNews(); }
+        }
+        if (!newsState || newsState.length === 0) createDefaultNews();
+      }
+
+      renderNewsList();
+      selectNews(newsState[0].id);
+      setupEditorListeners();
+      
+      document.getElementById('promptModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('promptModal')) {
+            document.getElementById('promptModal').classList.remove('open');
+        }
+      });
+      document.getElementById('closePromptModal').addEventListener('click', () => {
+        document.getElementById('promptModal').classList.remove('open');
+      });
+    });
+
+    function createDefaultNews() {
+      newsState = [{ id: Date.now(), title: "News 1", wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" }];
+    }
+
+    function saveState() {
+      localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState));
+    }
+
+    function generateSmartLink() {
+      const stateStr = JSON.stringify(newsState);
+      const encoded = btoa(encodeURIComponent(stateStr));
+      
+      const baseUrl = window.location.href.split('#')[0];
+      const finalUrl = baseUrl + '#share=' + encoded;
+      
+      navigator.clipboard.writeText(finalUrl).then(() => {
+        showToast("Link intelligente copiato! Incollalo su Teams/WA per condividere il lavoro.");
+      });
+    }
+
+    function loadFromSmartLink(hashString) {
+      if (hashString && hashString.includes('#share=')) {
+        try {
+          const encoded = hashString.split('#share=')[1]; 
+          const stateStr = decodeURIComponent(atob(encoded));
+          newsState = JSON.parse(stateStr);
+          
+          history.replaceState(null, null, window.location.pathname);
+          showToast("Bozze importate con successo dal link!");
+          return true;
+        } catch(e) {
+          showToast("Link condiviso non valido o corrotto", "error");
+        }
+      }
+      return false;
+    }
+    
+    function importFromLinkPrompt() {
+      const pastedUrl = prompt("Incolla qui il link completo che hai ricevuto dal collega:");
+      if(pastedUrl) {
+          const success = loadFromSmartLink(pastedUrl.substring(pastedUrl.indexOf('#')));
+          if(success) {
+              renderNewsList();
+              selectNews(newsState[0].id);
+              saveState();
+          }
+      }
+    }
+
+    /* --- PARSER E INCOLLA DA GEMINI --- */
+    function parseCsvText(csvText) {
+        const rows = [];
+        let row = [];
+        let field = "";
+        let inQuote = false;
+        
+        for (let i = 0; i < csvText.length; i++) {
+            const c = csvText[i];
+            if (inQuote) {
+                if (c === '"') {
+                    if (i + 1 < csvText.length && csvText[i + 1] === '"') {
+                        field += '"'; i++;
+                    } else { inQuote = false; }
+                } else { field += c; }
+            } else {
+                if (c === '"') { inQuote = true; }
+                else if (c === ',') { row.push(field); field = ""; }
+                else if (c === '\n' || c === '\r') {
+                    row.push(field); 
+                    if (row.length > 0 && (row.length > 1 || row[0] !== "")) rows.push(row);
+                    row = []; field = "";
+                    if (c === '\r' && csvText[i + 1] === '\n') i++;
+                } else { field += c; }
+            }
+        }
+        if (field || row.length > 0) { row.push(field); rows.push(row); }
+        return rows;
+    }
+
+    async function pasteFromGemini() {
+      try {
+          const text = await navigator.clipboard.readText();
+          if (!text) return showToast('Appunti vuoti', 'error');
+
+          // Rimuove la formattazione markdown tipica delle AI (es. ```csv)
+          let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
+
+          const rows = parseCsvText(cleanText);
+          if (rows.length > 1) {
+              const fieldMap = {
+                  'Testo descrittivo news Canale WA': 'wa',
+                  'Titolo YouTube': 'ytTitle',
+                  'Copy post e descrizione YT': 'ytDesc',
+                  'Link YouTube': 'ytLink',
+                  'Link TG Poste': 'tgLink'
+              };
+              
+              let updated = false;
+              rows.forEach(row => {
+                  const rowLabel = (row[0] || '').trim();
+                  const fieldType = fieldMap[rowLabel];
+                  
+                  if (fieldType) {
+                      for (let i = 0; i < newsState.length; i++) {
+                          const val = row[i + 1];
+                          if (val !== undefined && val !== "") {
+                              newsState[i][fieldType] = String(val).replace(/""/g, '"');
+                              updated = true;
+                          }
+                      }
+                  }
+              });
+              
+              if(updated) {
+                  saveState();
+                  selectNews(activeNewsId); // Ricarica campi
+                  showToast("Testi AI incollati con successo nelle schede!");
+              } else {
+                  showToast("Il CSV incollato non corrisponde al formato richiesto.", "error");
+              }
+          } else {
+              showToast("Nessun CSV valido trovato negli appunti.", "error");
+          }
+      } catch (error) {
+          showToast("Errore lettura appunti. Consenti l'accesso.", 'error');
+      }
+    }
+
+    /* --- IMPORTAZIONE FILE EXCEL/CSV --- */
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (rows.length > 1) {
+          if(!confirm("L'importazione sovrascriverà le bozze attuali. Vuoi procedere?")) {
+            e.target.value = '';
+            return;
+          }
+          
+          newsState = [];
+          
+          rows.slice(1).forEach((row, i) => {
+            if (row.length > 1 || (row[1] && row[1].trim() !== "")) {
+              newsState.push({
+                id: Date.now() + i,
+                title: `News ${i + 1}`,
+                wa: String(row[1] || "").replace(/""/g, '"'),
+                ytTitle: String(row[2] || "").replace(/""/g, '"'),
+                ytDesc: String(row[3] || "").replace(/""/g, '"'),
+                ytLink: String(row[4] || "").replace(/""/g, '"'),
+                tgLink: String(row[5] || "").replace(/""/g, '"'),
+                aiInput: ""
+              });
+            }
+          });
+
+          if(newsState.length === 0) createDefaultNews();
+
+          renderNewsList();
+          selectNews(newsState[0].id);
+          saveState();
+          showToast("File importato con successo! Schede generate.");
+        } else {
+          showToast("Il file sembra vuoto o non formattato correttamente.", "error");
+        }
+      } catch(err) {
+        showToast("Errore durante la lettura del file.", "error");
+      }
+      
+      e.target.value = ''; 
+    });
+
+    function openPromptGenerator() {
+      let newsContent = "";
+      let columnHeaders = [];
+      let newsCount = 0;
+
+      newsState.forEach((news, index) => {
+          const textToProcess = news.aiInput.trim() || news.wa.trim();
+          
+          if (textToProcess) {
+              newsCount++;
+              columnHeaders.push(`"News ${newsCount}"`);
+              newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${textToProcess}\n`;
+              if (news.ytLink) newsContent += `**Link YouTube:**\n${news.ytLink}\n`;
+          }
+      });
+
+      if (newsCount === 0) {
+          return showToast("Inserisci almeno un testo (nel Generatore AI o WhatsApp) per creare il prompt", "error");
+      }
+
+      const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
+
+**INFO NEWS:**
+${newsContent}
+
+**TONO E STILE:**
+* Il tono di voce deve essere chiaro, istituzionale e informativo. Evitare enfasi, eccessi di punteggiatura, emoticon o un uso eccessivo di hashtag. Lo stile deve essere sobrio e corretto, in linea con la comunicazione ufficiale di un’azienda pubblica. Non rivolgersi mai direttamente al lettore (“tu”), ma mantenere una forma giornalistica e neutra.
+I testi si riferiscono ad un comunicato stampa o ad un servizio video giornalistico, quindi devono comunicare notizie e aggiornamenti in modo chiaro e fedele alle fonti.
+Parlare a nome dell'azienda, ma nominare il brand solo quando serve. Evita di ripetere le parole contenute nel testo per Whatsapp anche nel titolo di Youtube, privilegiando la chiarezza dell'informazione sul testo di Whatsapp.
+
+**LUNGHEZZE:**
+1. **WhatsApp:** ~90 caratteri.
+2. **YouTube Titolo:** Max 49 caratteri.
+3. **Social:** Sintetico ma completo. Hashtag pertinenti.
+
+**OUTPUT CSV REQUISITO:**
+Output SOLO CSV puro. Non aggiungere codice markdown prima o dopo (niente \`\`\`csv o altro).
+Delimitatore: Virgola (,)
+Qualificatore: Doppie virgolette (")
+Intestazione: ,${columnHeaders.join(',')}
+Righe:
+"Testo descrittivo news Canale WA",...
+"Titolo YouTube",...
+"Copy post e descrizione YT",...
+"Link YouTube",...
+"Link TG Poste",...
+
+Solo codice CSV.`;
+
+      document.getElementById('promptCodeBlock').textContent = finalPrompt;
+      document.getElementById('promptModal').classList.add('open');
+    }
+
+    function copyPromptText(btn) {
+      const txt = document.getElementById('promptCodeBlock').textContent;
+      navigator.clipboard.writeText(txt).then(() => {
+          const original = btn.innerHTML;
+          btn.innerHTML = `<i class="fas fa-check"></i> Copiato!`;
+          btn.style.background = "var(--ok)";
+          showToast("Prompt copiato! Incollalo su Gemini.");
+          setTimeout(() => {
+              btn.innerHTML = original;
+              btn.style.background = "#2a3a5c";
+          }, 2000);
+      });
+    }
+
+    function renderNewsList() {
+      const container = document.getElementById('news-list-container');
+      container.innerHTML = '';
+      newsState.forEach((news, index) => {
+        const div = document.createElement('div');
+        div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
+        div.innerHTML = `<span style="display:flex; align-items:center; gap:8px;"><i class="far fa-newspaper"></i> News ${index + 1}</span>`;
+        div.onclick = () => selectNews(news.id);
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('btnAddNews').addEventListener('click', () => {
+      const newId = Date.now();
+      newsState.push({ id: newId, title: `News ${newsState.length + 1}`, wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" });
+      renderNewsList();
+      selectNews(newId);
+      saveState();
+      showToast("Nuova News aggiunta");
+    });
+
+    function selectNews(id) {
+      activeNewsId = id;
+      renderNewsList();
+      
+      const news = newsState.find(n => n.id === activeNewsId);
+      const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
+      
+      document.getElementById('editorTitle').innerText = `Modifica: News ${idx}`;
+      
+      document.getElementById('ai-input').value = news.aiInput || "";
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
+        document.getElementById(`editor-${field}`).value = news[field] || "";
+      });
+
+      updateAllPreviews();
+    }
+
+    function setupEditorListeners() {
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
+        document.getElementById(`editor-${field}`).addEventListener('input', (e) => {
+          const news = newsState.find(n => n.id === activeNewsId);
+          news[field] = e.target.value;
+          saveState();
+          updatePreview(field);
+          if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
+        });
+      });
+
+      document.getElementById('ai-input').addEventListener('input', (e) => {
+        const news = newsState.find(n => n.id === activeNewsId);
+        news.aiInput = e.target.value;
+        saveState();
+      });
+    }
+
+    function clearCurrentNews() {
+      if(!confirm("Sicuro di voler svuotare i campi di questa news?")) return;
+      const news = newsState.find(n => n.id === activeNewsId);
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = "");
+      selectNews(activeNewsId); 
+      saveState();
+    }
+
+    function deleteCurrentNews() {
+      if(newsState.length === 1) return showToast("Non puoi eliminare l'unica news", "error");
+      if(!confirm("Eliminare definitivamente questa news?")) return;
+      newsState = newsState.filter(n => n.id !== activeNewsId);
+      selectNews(newsState[0].id);
+      saveState();
+    }
+
+    function insertTgLink(dayType) {
+      const date = new Date();
+      if(dayType === 'yesterday') {
+          date.setDate(date.getDate() - 1);
+      }
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+      const link = `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${date.getDate()}-${months[date.getMonth()]}-${y}/`;
+      
+      const el = document.getElementById('editor-tgLink');
+      el.value = link;
+      el.dispatchEvent(new Event('input')); 
+    }
+
+    function formatText(field, action) {
+      const el = document.getElementById(`editor-${field}`);
+      let val = el.value;
+      if(!val) return;
+
+      if(action === 'lower') val = val.toLowerCase();
+      if(action === 'upper') val = val.toUpperCase();
+      if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+      if(action === 'auto') {
+        let urls = [];
+        val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
+        val = val.toLowerCase().replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+        masterList.forEach(word => {
+          const re = new RegExp(`\\b${word}\\b`, 'gi');
+          val = val.replace(re, word);
+        });
+        urls.forEach(u => val = val.replace('___URL___', u));
+      }
+
+      el.value = val;
+      el.dispatchEvent(new Event('input'));
+      showToast("Testo formattato");
+    }
+
+    function updateAllPreviews() {
+      updatePreview('wa');
+      updatePreview('ytTitle');
+      updatePreview('social');
+      ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount);
+    }
+
+    function updatePreview(sourceField) {
+      const news = newsState.find(n => n.id === activeNewsId);
+      
+      if(sourceField === 'wa' || sourceField === 'ytLink') {
+        let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
+        if (news.ytLink) {
+           waHtml += `<br><br>${news.ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+           
+           const ytMatch = news.ytLink.match(/(?:v=|\/|youtu\.be\/|shorts\/)([0-9A-Za-z_-]{11})/);
+           if (ytMatch && ytMatch[1]) {
+             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border
