@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v9.8 Pro (JSON Engine)</title>
+  <title>Social Dashboard – v9.9 Pro (Stable JSON)</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -24,13 +24,22 @@
 
     * { box-sizing: border-box; }
     
-    body { margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; height: 100vh; overflow: hidden; }
+    body { 
+        margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.5; 
+        color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; 
+        height: 100vh; overflow: hidden; 
+    }
+    
     button, input, textarea, label { font: inherit; }
     button { cursor: pointer; border: none; background: none; }
     :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .hidden { display: none !important; }
 
-    .app-layout { display: grid; grid-template-columns: 260px minmax(500px, 1fr) 420px; gap: 24px; max-width: 1800px; margin: 0 auto; padding: 24px; height: 100vh; }
+    .app-layout { 
+        display: grid; grid-template-columns: 260px minmax(500px, 1fr) 420px; 
+        gap: 24px; max-width: 1800px; margin: 0 auto; padding: 24px; height: 100vh; 
+    }
+    
     .colonna-scroll { overflow-y: auto; padding-right: 8px; padding-bottom: 40px; }
     .colonna-scroll::-webkit-scrollbar { width: 6px; }
     .colonna-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -138,12 +147,13 @@
 
   <div class="app-layout">
     
+    <!-- COLONNA 1: SIDEBAR -->
     <aside class="sidebar colonna-scroll">
       <div class="brand">
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v9.8 Pro Edition</p>
+          <p>v9.9 Pro Edition</p>
         </div>
       </div>
 
@@ -166,7 +176,6 @@
           <i class="fas fa-copy"></i> Copia tutti i testi
         </button>
 
-        <!-- Assistente AI Centrale -->
         <button class="btn-menu" style="margin-top: 12px; border: 1px solid var(--blue); background: var(--blue-tint); color: var(--blue); justify-content:center; font-weight: 600;" onclick="openAIModal()">
           <i class="fas fa-robot"></i> Assistente AI
         </button>
@@ -189,6 +198,7 @@
       </div>
     </aside>
 
+    <!-- COLONNA 2: AREA EDITORIALE -->
     <main class="colonna-scroll">
       <div class="editor-wrapper">
         
@@ -257,6 +267,7 @@
       </div>
     </main>
 
+    <!-- COLONNA 3: PREVIEW -->
     <aside class="colonna-scroll preview-wrapper">
       <div class="preview-card card-wa">
         <div class="preview-header"><i class="fab fa-whatsapp" style="color:var(--wa-green)"></i> Definitivo WhatsApp</div>
@@ -355,80 +366,158 @@
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
     const LIMITS = { wa: 82, ytTitle: 49, ytDesc: 280 };
 
+    /* --- SISTEMA ANTI-CRASH DI AVVIO --- */
     window.addEventListener('DOMContentLoaded', () => {
-      try { initApp(); } catch (error) { console.error(error); alert("Errore all'avvio."); }
+      try {
+        initApp();
+      } catch (error) {
+        console.error(error);
+        alert("Si è verificato un errore critico durante l'avvio. Controlla la console.");
+      }
     });
 
     function initApp() {
-      fetch(googleSheetURL).then(r => r.ok ? r.text() : "").then(t => { if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); }).catch(()=>{});
+      // 1. Caricamento MasterList (Asincrono e protetto)
+      fetch(googleSheetURL)
+        .then(r => r.ok ? r.text() : "")
+        .then(t => { 
+            if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); 
+        })
+        .catch(() => console.warn("Dizionario CSV offline"));
+
+      // 2. Controllo Condivisione
       const hasSmartLink = loadFromSmartLink(window.location.hash);
 
+      // 3. Caricamento da Memoria
       if (!hasSmartLink) {
-        try { const saved = localStorage.getItem('socialDashboardStateV9'); if (saved) newsState = JSON.parse(saved); } catch(e) {}
-        if (!newsState || !Array.isArray(newsState) || newsState.length === 0) createDefaultNews();
-        else newsState.forEach(n => { if(typeof n.aiInput === 'undefined') n.aiInput = ""; });
+        try {
+            const saved = localStorage.getItem('socialDashboardStateV9');
+            if (saved) {
+                newsState = JSON.parse(saved);
+            }
+        } catch(e) {
+            console.warn("Memoria locale corrotta, riparto da zero.");
+        }
+
+        if (!newsState || !Array.isArray(newsState) || newsState.length === 0) {
+            createDefaultNews();
+        } else {
+            // Retrocompatibilità per bozze vecchie
+            newsState.forEach(n => {
+                if(typeof n.aiInput === 'undefined') n.aiInput = "";
+            });
+        }
       }
 
+      // 4. Avvio Interfaccia
       renderNewsList();
-      if (newsState.length > 0) selectNews(newsState[0].id);
+      if (newsState.length > 0) {
+          selectNews(newsState[0].id);
+      }
       setupEditorListeners();
     }
 
     function createDefaultNews() {
-      newsState = [{ id: Date.now(), title: "News 1", wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" }];
+      newsState = [{ 
+          id: Date.now(), 
+          title: "News 1", 
+          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" 
+      }];
     }
 
     function saveState() {
-      try { localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState)); } catch(e) {}
+      try { 
+          localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState)); 
+      } catch(e) {
+          console.warn("Impossibile salvare lo stato attuale.");
+      }
     }
 
     function hardResetApp() {
-        if(confirm("ATTENZIONE: Questo cancellerà tutte le bozze attuali. Sei sicuro?")) {
+        if(confirm("ATTENZIONE: Questo cancellerà tutte le bozze attuali e riporterà l'app allo stato vuoto. Sei sicuro?")) {
             localStorage.removeItem('socialDashboardStateV9');
             window.location.hash = '';
             location.reload();
         }
     }
 
+    /* --- SISTEMA DI COPIA INFALLIBILE --- */
     function fallbackCopyTextToClipboard(text) {
-      const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed";
-      document.body.appendChild(textArea); textArea.focus(); textArea.select();
-      try { document.execCommand('copy'); } catch (err) { } document.body.removeChild(textArea);
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+          document.execCommand('copy');
+      } catch (err) {
+          console.error("Fallback copy fallito.");
+      }
+      document.body.removeChild(textArea);
     }
 
     async function copyToClipboardSafe(text, btnElement, successMsg) {
-      if (!navigator.clipboard) { fallbackCopyTextToClipboard(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); return; }
-      try { await navigator.clipboard.writeText(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); } 
-      catch (err) { fallbackCopyTextToClipboard(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); }
+      if (!navigator.clipboard) {
+         fallbackCopyTextToClipboard(text);
+         if(btnElement) animateButton(btnElement, successMsg);
+         showToast(successMsg);
+         return;
+      }
+      try {
+         await navigator.clipboard.writeText(text);
+         if(btnElement) animateButton(btnElement, successMsg);
+         showToast(successMsg);
+      } catch (err) {
+         fallbackCopyTextToClipboard(text);
+         if(btnElement) animateButton(btnElement, successMsg);
+         showToast(successMsg);
+      }
     }
 
+    /* --- SMART LINK (CONDIVISIONE BOZZE) --- */
     function generateSmartLink() {
-      const stateStr = JSON.stringify(newsState); const encoded = btoa(encodeURIComponent(stateStr));
+      const stateStr = JSON.stringify(newsState);
+      const encoded = btoa(encodeURIComponent(stateStr));
       const appUrl = "https://fabiusai.github.io/WhatsappCopy/beta2.html";
-      copyToClipboardSafe(appUrl + '#share=' + encoded, null, "Link intelligente copiato!");
+      const finalUrl = appUrl + '#share=' + encoded;
+      copyToClipboardSafe(finalUrl, null, "Link intelligente copiato! Incollalo su Teams.");
     }
 
     function loadFromSmartLink(hashString) {
       if (hashString && hashString.includes('#share=')) {
         try {
-          const encoded = hashString.split('#share=')[1]; const stateStr = decodeURIComponent(atob(encoded));
-          newsState = JSON.parse(stateStr); history.replaceState(null, null, window.location.pathname);
-          showToast("Bozze importate con successo!"); return true;
-        } catch(e) { showToast("Link non valido", "error"); }
+          const encoded = hashString.split('#share=')[1]; 
+          const stateStr = decodeURIComponent(atob(encoded));
+          newsState = JSON.parse(stateStr);
+          history.replaceState(null, null, window.location.pathname);
+          showToast("Bozze importate con successo dal link!");
+          return true;
+        } catch(e) {
+          showToast("Link condiviso non valido o corrotto", "error");
+        }
       }
       return false;
     }
     
     function importFromLinkPrompt() {
-      const pastedUrl = prompt("Incolla qui il link ricevuto:");
+      const pastedUrl = prompt("Incolla qui il link completo che hai ricevuto:");
       if(pastedUrl) {
           const hashIndex = pastedUrl.indexOf('#share=');
-          if(hashIndex !== -1) { if(loadFromSmartLink(pastedUrl.substring(hashIndex))) { renderNewsList(); selectNews(newsState[0].id); saveState(); } } 
-          else { showToast("Link non valido.", "error"); }
+          if(hashIndex !== -1) {
+              const success = loadFromSmartLink(pastedUrl.substring(hashIndex));
+              if(success) {
+                  renderNewsList();
+                  selectNews(newsState[0].id);
+                  saveState();
+              }
+          } else {
+              showToast("Link non valido.", "error");
+          }
       }
     }
 
-    /* === MODALE AI JSON ENGINE === */
+    /* === MODALE AI & JSON ENGINE === */
     function openAIModal() {
         document.getElementById('aiStep1').classList.remove('hidden');
         document.getElementById('aiStepLoader').classList.add('hidden');
@@ -444,21 +533,33 @@
                 hasContent = true;
             }
         });
-        if (!hasContent) addAiModalInput();
+
+        if (!hasContent) {
+            addAiModalInput();
+        }
+        
         document.getElementById('aiModal').classList.add('open');
     }
 
-    function closeAIModal() { document.getElementById('aiModal').classList.remove('open'); }
+    function closeAIModal() {
+        document.getElementById('aiModal').classList.remove('open');
+    }
 
     function addAiModalInput(text = "", link = "") {
         const container = document.getElementById('aiModalInputContainer');
-        const div = document.createElement('div'); div.className = "ai-modal-input-block";
+        const div = document.createElement('div');
+        div.className = "ai-modal-input-block";
+        
+        // Uso un approccio sicuro per non rompere l'HTML se il testo ha apici
         div.innerHTML = `
             <button class="btn-remove-block" onclick="this.parentElement.remove()" title="Rimuovi"><i class="fas fa-times"></i></button>
             <h4><i class="far fa-newspaper"></i> Notizia</h4>
-            <textarea class="main-input ai-raw-text" rows="3" placeholder="Incolla il testo grezzo...">${text}</textarea>
-            <input type="text" class="main-input ai-raw-link" style="margin-top:8px;" placeholder="Link YouTube (Opzionale)" value="${link}">
+            <textarea class="main-input ai-raw-text" rows="3" placeholder="Incolla il testo grezzo..."></textarea>
+            <input type="text" class="main-input ai-raw-link" style="margin-top:8px;" placeholder="Link YouTube (Opzionale)">
         `;
+        
+        div.querySelector('.ai-raw-text').value = text;
+        div.querySelector('.ai-raw-link').value = link;
         container.appendChild(div);
     }
 
@@ -469,7 +570,13 @@
 
     async function startInternalAI() {
         const blocks = document.querySelectorAll('.ai-modal-input-block');
-        const inputs = Array.from(blocks).map(b => ({ text: b.querySelector('.ai-raw-text').value.trim(), link: b.querySelector('.ai-raw-link').value.trim() })).filter(inp => inp.text !== "");
+        const inputs = [];
+        blocks.forEach(b => {
+            const txt = b.querySelector('.ai-raw-text').value.trim();
+            const lnk = b.querySelector('.ai-raw-link').value.trim();
+            if (txt) inputs.push({ text: txt, link: lnk });
+        });
+
         if (inputs.length === 0) return showToast("Inserisci almeno un testo", "error");
 
         document.getElementById('aiStep1').classList.add('hidden');
@@ -477,25 +584,60 @@
 
         let generatedNews = [];
         for(let i=0; i < inputs.length; i++) {
-            document.getElementById('aiModalLoaderText').innerText = `Elaborazione notizia ${i+1} di${inputs.length}...`;
+            document.getElementById('aiModalLoaderText').innerText = `Elaborazione notizia ${i+1} di ${inputs.length}...`;
             try {
-                const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: inputs[i].text}) });
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type':'application/json' }, 
+                    body: JSON.stringify({ inputText: inputs[i].text }) 
+                });
                 const data = await res.json();
-                generatedNews.push({ id: Date.now() + i, title: `News ${i+1}`, wa: data.whatsapp || "", ytTitle: data.youtube || "", ytDesc: data.facebook_linkedin || "", ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text });
+                generatedNews.push({ 
+                    id: Date.now() + i + Math.random(), 
+                    title: `News ${i+1}`, 
+                    wa: data.whatsapp || "", 
+                    ytTitle: data.youtube || "", 
+                    ytDesc: data.facebook_linkedin || "", 
+                    ytLink: inputs[i].link, 
+                    tgLink: "", 
+                    aiInput: inputs[i].text 
+                });
             } catch(e) {
-                generatedNews.push({ id: Date.now() + i, title: `News ${i+1}`, wa: "ERRORE AI", ytTitle: "Riprova", ytDesc: "Connessione fallita", ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text });
+                generatedNews.push({ 
+                    id: Date.now() + i + Math.random(), 
+                    title: `News ${i+1}`, 
+                    wa: "ERRORE AI", 
+                    ytTitle: "Riprova", 
+                    ytDesc: "Connessione fallita", 
+                    ytLink: inputs[i].link, 
+                    tgLink: "", 
+                    aiInput: inputs[i].text 
+                });
             }
         }
-        newsState = generatedNews; saveState(); renderNewsList(); selectNews(newsState[0].id); closeAIModal(); showToast(`Generazione completata! (${inputs.length} news)`);
+        newsState = generatedNews;
+        saveState();
+        renderNewsList();
+        selectNews(newsState[0].id);
+        closeAIModal();
+        showToast(`Generazione completata! (${inputs.length} news)`);
     }
 
     function generateExternalPrompt() {
         const blocks = document.querySelectorAll('.ai-modal-input-block');
-        let newsContent = ""; let newsCount = 0;
+        let newsContent = "";
+        let newsCount = 0;
+        
         blocks.forEach((b) => {
-            const text = b.querySelector('.ai-raw-text').value.trim(); const link = b.querySelector('.ai-raw-link').value.trim();
-            if(text) { newsCount++; newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${text}\n`; if(link) newsContent += `**Link YouTube:**\n${link}\n`; }
+            const text = b.querySelector('.ai-raw-text').value.trim();
+            const link = b.querySelector('.ai-raw-link').value.trim();
+            if(text) {
+                newsCount++;
+                newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${text}\n`;
+                if(link) newsContent += `**Link YouTube:**\n${link}\n`;
+            }
         });
+
         if (newsCount === 0) return showToast("Inserisci almeno un testo", "error");
 
         const finalPrompt = `Sei un copywriter e assistente social media. Elabora queste ${newsCount} notizie.
@@ -512,15 +654,15 @@ ${newsContent}
 1. **wa (WhatsApp):** ~90 caratteri.
 2. **ytTitle (YouTube Titolo):** Max 49 caratteri.
 3. **ytDesc (Copy Social):** Sintetico ma completo. Hashtag in coda.
-4. **ytLink:** Ricopialo se fornito, altrimenti stringa vuota.
+4. **ytLink:** Ricopialo identico se fornito, altrimenti lascia stringa vuota.
 
 **OUTPUT RICHIESTO: ESCLUSIVAMENTE JSON**
-Restituisci unicamente un Array di Oggetti JSON. Non aggiungere saluti né formattazione (no \`\`\`json).
-Usa esattamente questa struttura per ogni notizia:
+Restituisci unicamente un Array di Oggetti JSON. Non aggiungere commenti né blocchi markdown.
+Usa esattamente questa struttura JSON:
 [
   {
-    "wa": "testo...",
-    "ytTitle": "titolo...",
+    "wa": "testo per whatsapp...",
+    "ytTitle": "titolo per youtube...",
     "ytDesc": "descrizione social...",
     "ytLink": "link_se_presente",
     "tgLink": ""
@@ -529,104 +671,173 @@ Usa esattamente questa struttura per ogni notizia:
 
         document.getElementById('promptCodeBlock').textContent = finalPrompt;
         document.getElementById('aiJsonPaste').value = ""; 
+        
         document.getElementById('aiStep1').classList.add('hidden');
         document.getElementById('aiStepExternal').classList.remove('hidden');
     }
 
-    function copyPromptText(btn) { copyToClipboardSafe(document.getElementById('promptCodeBlock').textContent, btn, "Prompt Copiato!"); }
+    function copyPromptText(btn) {
+        const txt = document.getElementById('promptCodeBlock').textContent;
+        copyToClipboardSafe(txt, btn, "Prompt Copiato!");
+    }
 
     function applyExternalAiData() {
         const pasteArea = document.getElementById('aiJsonPaste');
         if(!pasteArea) return;
-        const text = pasteArea.value.trim();
-        if (!text) return showToast("Incolla il risultato prima di applicare", "error");
+        
+        let text = pasteArea.value.trim();
+        if (!text) return showToast("Incolla il risultato JSON prima di applicare", "error");
+
+        // Pulizia severa da eventuali "sporcizie" markdown di Gemini
+        text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
 
         let jsonData = null;
         try {
-            let cleanText = text.replace(/```(json)?/gi, '').trim();
-            const match = cleanText.match(/\[\s*\{[\s\S]*\}\s*\]/); // Estrazione Regex blindata
-            if (match) { jsonData = JSON.parse(match[0]); } 
-            else {
-                const matchObj = cleanText.match(/\{[\s\S]*\}/);
-                if (matchObj) {
-                    let obj = JSON.parse(matchObj[0]);
-                    if(obj.wa !== undefined) jsonData = [obj];
+            // Estrazione chirurgica: cerca il primo '[' e l'ultimo ']'
+            const startIdx = text.indexOf('[');
+            const endIdx = text.lastIndexOf(']');
+            
+            if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+                jsonData = JSON.parse(text.substring(startIdx, endIdx + 1));
+            } else {
+                // Tentativo fallback se l'AI ha generato un solo oggetto senza array
+                const objStart = text.indexOf('{');
+                const objEnd = text.lastIndexOf('}');
+                if (objStart !== -1 && objEnd !== -1 && objEnd > objStart) {
+                    jsonData = [JSON.parse(text.substring(objStart, objEnd + 1))];
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error("Errore di Parsing JSON:", e);
+        }
 
-        if (!jsonData || !Array.isArray(jsonData)) return showToast("Formato JSON non valido", "error");
+        if (!jsonData || !Array.isArray(jsonData)) {
+            return showToast("Il testo incollato non contiene un JSON valido. Riprova.", "error");
+        }
         
         const numAiNews = jsonData.length;
-        if(numAiNews === 0) return showToast("Nessuna news nel JSON", "error");
+        if(numAiNews === 0) return showToast("Il JSON è vuoto.", "error");
 
+        // Legge i dati grezzi originali per preservarli
         const blocks = document.querySelectorAll('.ai-modal-input-block');
-        const rawInputs = Array.from(blocks).map(b => ({ text: b.querySelector('.ai-raw-text').value.trim(), link: b.querySelector('.ai-raw-link').value.trim() }));
+        const rawInputs = Array.from(blocks).map(b => ({
+            text: b.querySelector('.ai-raw-text').value.trim(),
+            link: b.querySelector('.ai-raw-link').value.trim()
+        }));
 
         let newNewsState = [];
         for(let i=0; i<numAiNews; i++) {
             newNewsState.push({
-                id: Date.now() + i, title: `News ${i+1}`,
-                wa: jsonData[i].wa || "", ytTitle: jsonData[i].ytTitle || "", ytDesc: jsonData[i].ytDesc || "", 
-                ytLink: jsonData[i].ytLink || (rawInputs[i] ? rawInputs[i].link : ""), tgLink: jsonData[i].tgLink || "", 
+                id: Date.now() + i + Math.random(), 
+                title: `News ${i+1}`,
+                wa: jsonData[i].wa || "", 
+                ytTitle: jsonData[i].ytTitle || "", 
+                ytDesc: jsonData[i].ytDesc || "", 
+                ytLink: jsonData[i].ytLink || (rawInputs[i] ? rawInputs[i].link : ""), 
+                tgLink: jsonData[i].tgLink || "", 
                 aiInput: rawInputs[i] ? rawInputs[i].text : ""
             });
         }
 
-        newsState = newNewsState; saveState(); renderNewsList(); selectNews(newsState[0].id); closeAIModal();
-        showToast(`Bozze popolate con successo! (${numAiNews} news)`);
+        newsState = newNewsState;
+        saveState();
+        renderNewsList();
+        selectNews(newsState[0].id);
+        closeAIModal();
+        showToast(`Testi applicati con successo! (${numAiNews} news)`);
     }
 
-    /* === IMPORTAZIONE EXCEL === */
+    /* === IMPORTAZIONE EXCEL CLASSICA === */
     document.getElementById('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files[0]; if (!file) return;
+      const file = e.target.files[0];
+      if (!file) return;
+      
       try {
-        const data = await file.arrayBuffer(); const workbook = XLSX.read(data); const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        
         if (rows.length > 1) {
-          if(!confirm("L'importazione eliminerà le bozze attuali. Procedere?")) { e.target.value = ''; return; }
+          if(!confirm("L'importazione eliminerà le bozze attuali. Procedere?")) {
+              e.target.value = '';
+              return;
+          }
+          
           newsState = [];
           rows.slice(1).forEach((row, i) => {
             if (row.length > 1 || (row[1] && row[1].trim() !== "")) {
               newsState.push({
-                id: Date.now() + i, title: `News ${i + 1}`,
-                wa: String(row[1] || "").replace(/""/g, '"'), ytTitle: String(row[2] || "").replace(/""/g, '"'),
-                ytDesc: String(row[3] || "").replace(/""/g, '"'), ytLink: String(row[4] || "").replace(/""/g, '"'),
-                tgLink: String(row[5] || "").replace(/""/g, '"'), aiInput: ""
+                id: Date.now() + i + Math.random(), 
+                title: `News ${i + 1}`,
+                wa: String(row[1] || "").replace(/""/g, '"'), 
+                ytTitle: String(row[2] || "").replace(/""/g, '"'),
+                ytDesc: String(row[3] || "").replace(/""/g, '"'), 
+                ytLink: String(row[4] || "").replace(/""/g, '"'),
+                tgLink: String(row[5] || "").replace(/""/g, '"'), 
+                aiInput: ""
               });
             }
           });
+          
           if(newsState.length === 0) createDefaultNews();
-          renderNewsList(); selectNews(newsState[0].id); saveState(); showToast("File importato con successo!");
-        } else { showToast("File vuoto o non valido.", "error"); }
-      } catch(err) { showToast("Errore lettura file.", "error"); }
+          
+          renderNewsList();
+          selectNews(newsState[0].id);
+          saveState();
+          showToast("File importato con successo!");
+        } else {
+            showToast("File vuoto o non valido.", "error");
+        }
+      } catch(err) {
+          showToast("Errore durante la lettura del file.", "error");
+      }
       e.target.value = ''; 
     });
 
-    /* === INTERFACCIA E LOGICHE EDITORIALI === */
+    /* === GESTIONE UI EDITORIALE === */
     function renderNewsList() {
-      const container = document.getElementById('news-list-container'); if(!container) return; container.innerHTML = '';
+      const container = document.getElementById('news-list-container');
+      if(!container) return;
+      container.innerHTML = '';
+      
       newsState.forEach((news, index) => {
-        const div = document.createElement('div'); div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
+        const div = document.createElement('div');
+        div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
         div.innerHTML = `<span style="display:flex; align-items:center; gap:8px;"><i class="far fa-newspaper"></i> News ${index + 1}</span>`;
-        div.onclick = () => selectNews(news.id); container.appendChild(div);
+        div.onclick = () => selectNews(news.id);
+        container.appendChild(div);
       });
     }
 
     document.getElementById('btnAddNews').addEventListener('click', () => {
-      const newId = Date.now();
-      newsState.push({ id: newId, title: `News ${newsState.length + 1}`, wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" });
-      renderNewsList(); selectNews(newId); saveState(); showToast("Nuova News manuale aggiunta");
+      const newId = Date.now() + Math.random();
+      newsState.push({
+          id: newId, title: `News ${newsState.length + 1}`,
+          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: ""
+      });
+      renderNewsList();
+      selectNews(newId);
+      saveState();
+      showToast("Nuova News manuale aggiunta");
     });
 
     function selectNews(id) {
-      activeNewsId = id; renderNewsList(); const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
+      activeNewsId = id;
+      renderNewsList();
+      
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
+      
       const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
-      const titleEl = document.getElementById('editorTitle'); if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
+      const titleEl = document.getElementById('editorTitle');
+      if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
       
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
-        const el = document.getElementById(`editor-${field}`); if(el) el.value = news[field] || "";
+        const el = document.getElementById(`editor-${field}`);
+        if(el) el.value = news[field] || "";
       });
+      
       updateAllPreviews(); 
     }
 
@@ -636,50 +847,234 @@ Usa esattamente questa struttura per ogni notizia:
         if(el) {
             el.addEventListener('input', (e) => {
               const news = newsState.find(n => n.id === activeNewsId);
-              if(news) { news[field] = e.target.value; saveState(); updatePreview(field); if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field); }
+              if(news) {
+                  news[field] = e.target.value;
+                  saveState();
+                  updatePreview(field);
+                  if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
+              }
             });
         }
       });
     }
 
     function clearCurrentNews() {
-      if(!confirm("Vuoi svuotare i campi di questa news?")) return;
-      const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
-      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = ""); selectNews(activeNewsId); saveState();
+      if(!confirm("Vuoi svuotare tutti i campi di questa news?")) return;
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = "");
+      selectNews(activeNewsId);
+      saveState();
     }
 
     function deleteCurrentNews() {
-      if(newsState.length === 1) return showToast("Non puoi eliminare l'unica news", "error");
+      if(newsState.length === 1) return showToast("Non puoi eliminare l'unica news rimasta", "error");
       if(!confirm("Eliminare definitivamente questa news?")) return;
-      newsState = newsState.filter(n => n.id !== activeNewsId); selectNews(newsState[0].id); saveState();
+      newsState = newsState.filter(n => n.id !== activeNewsId);
+      selectNews(newsState[0].id);
+      saveState();
     }
 
     function insertTgLink(dayType) {
-      const date = new Date(); if(dayType === 'yesterday') date.setDate(date.getDate() - 1);
-      const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
+      const date = new Date();
+      if(dayType === 'yesterday') date.setDate(date.getDate() - 1);
+      
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const d_raw = date.getDate(); 
       const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-      const link = `[https://tgposte.poste.it/tgposte/$](https://tgposte.poste.it/tgposte/$){y}/${m}/${d}/tg-poste-del-${date.getDate()}-${months[date.getMonth()]}-${y}/`;
-      const el = document.getElementById('editor-tgLink'); if(el) { el.value = link; el.dispatchEvent(new Event('input')); }
+      
+      const link = `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
+      
+      const el = document.getElementById('editor-tgLink');
+      if(el) {
+          el.value = link;
+          el.dispatchEvent(new Event('input')); 
+      }
     }
 
     function formatText(field, action) {
-      const el = document.getElementById(`editor-${field}`); if(!el) return; let val = el.value; if(!val) return;
+      const el = document.getElementById(`editor-${field}`);
+      if(!el) return;
+      
+      let val = el.value;
+      if(!val) return;
+
       if(action === 'lower') val = val.toLowerCase();
       if(action === 'upper') val = val.toUpperCase();
       if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
       if(action === 'auto') {
-        let urls = []; val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
+        let urls = [];
+        val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
         val = val.toLowerCase().replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
-        masterList.forEach(word => { const re = new RegExp(`\\b${word}\\b`, 'gi'); val = val.replace(re, word); });
+        masterList.forEach(word => {
+          const re = new RegExp(`\\b${word}\\b`, 'gi');
+          val = val.replace(re, word);
+        });
         urls.forEach(u => val = val.replace('___URL___', u));
       }
-      el.value = val; el.dispatchEvent(new Event('input')); showToast("Testo formattato");
+      
+      el.value = val;
+      el.dispatchEvent(new Event('input')); 
+      showToast("Testo formattato");
     }
 
-    function updateAllPreviews() { updatePreview('wa'); updatePreview('ytTitle'); updatePreview('ytDesc'); ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount); }
+    /* === GESTIONE ANTEPRIME === */
+    function updateAllPreviews() {
+      updatePreview('wa');
+      updatePreview('ytTitle');
+      updatePreview('ytDesc');
+      ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount);
+    }
 
     function updatePreview(sourceField) {
-      const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
       
       if(sourceField === 'wa' || sourceField === 'ytLink') {
-        let waHtml =
+        let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
+        if (news.ytLink) {
+           waHtml += `<br><br>${news.ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+           const ytMatch = news.ytLink.match(/(?:v=|\/|youtu\.be\/|shorts\/)([0-9A-Za-z_-]{11})/);
+           if (ytMatch && ytMatch[1]) {
+             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border:1px solid #ddd; flex-shrink:0;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
+           }
+        }
+        const el = document.getElementById('preview-wa');
+        if(el) el.innerHTML = waHtml;
+      }
+
+      if(sourceField === 'ytTitle') {
+        const el = document.getElementById('preview-ytTitle');
+        if(el) el.innerText = news.ytTitle || "";
+      }
+
+      if(sourceField === 'ytDesc' || sourceField === 'tgLink') {
+        let ytDescRaw = (news.ytDesc || "").trim();
+        const tgLink = news.tgLink || "";
+        let extractedHashtags = "";
+        
+        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+        const match = ytDescRaw.match(hashtagRegex);
+        
+        if (match) {
+            extractedHashtags = match[0].trim();
+            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
+        }
+        
+        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+        const finalTags = extractedHashtags ? `#TGPoste #PosteItaliane ${extractedHashtags}` : "#TGPoste #PosteItaliane";
+        
+        const el = document.getElementById('preview-social');
+        if(el) el.innerText = `${ytDescRaw}\n\n➡️ ${tgLink}\n\n${finalTags}`;
+      }
+    }
+
+    function updateCount(field) {
+      if(!LIMITS[field]) return;
+      const el = document.getElementById(`editor-${field}`);
+      const counter = document.getElementById(`count-${field}`);
+      if(el && counter) {
+        const len = el.value.length;
+        counter.innerText = `${len}/${LIMITS[field]}`;
+        counter.classList.toggle('over', len > LIMITS[field]);
+      }
+    }
+
+    /* === COPIA ED ESPORTAZIONE === */
+    function copyCard(type, btnElement) {
+      const targetMap = { 'wa': 'preview-wa', 'ytTitle': 'preview-ytTitle', 'social': 'preview-social' };
+      const el = document.getElementById(targetMap[type]);
+      if(!el) return;
+      
+      const text = el.innerText;
+      if(!text.trim()) return showToast("Nessun testo da copiare", "error");
+      
+      copyToClipboardSafe(text, btnElement, "Copiato!");
+    }
+
+    function copyAllNewsDefinitive(btnElement) {
+      let fullText = "";
+      newsState.forEach((news, idx) => {
+        let ytDescRaw = (news.ytDesc || "").trim();
+        let extractedHashtags = "";
+        
+        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+        const match = ytDescRaw.match(hashtagRegex);
+        if (match) {
+            extractedHashtags = match[0].trim();
+            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
+        }
+        
+        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+        const finalTags = extractedHashtags ? `#TGPoste #PosteItaliane ${extractedHashtags}` : "#TGPoste #PosteItaliane";
+
+        fullText += `*** NEWS ${idx+1} ***\n\n`;
+        fullText += `[WHATSAPP]\n${news.wa}\n${news.ytLink}\n➡️ TG https://tgposte.poste.it/tgposte/\n\n`;
+        fullText += `[YOUTUBE TITOLO]\n${news.ytTitle}\n\n`;
+        fullText += `[POST SOCIAL]\n${ytDescRaw}\n➡️ ${news.tgLink}\n${finalTags}\n`;
+        fullText += `\n-------------------------\n\n`;
+      });
+      copyToClipboardSafe(fullText, btnElement, "Tutti i testi copiati!");
+    }
+
+    function animateButton(btn, msg) {
+      const original = btn.innerHTML;
+      btn.classList.add('btn-success-anim');
+      btn.innerHTML = `<i class="fas fa-check"></i> ${msg}`;
+      setTimeout(() => {
+          btn.classList.remove('btn-success-anim');
+          btn.innerHTML = original;
+      }, 2000);
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if(!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast`;
+      toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${type === 'error' ? '#ff7a5c' : '#4cc790'}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => toast.classList.add('show'));
+      
+      setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function exportCsv() {
+      const rows = [["News ID", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      newsState.forEach((n, i) => {
+        rows.push([
+          `News ${i+1}`, 
+          `"${(n.wa||"").replace(/"/g, '""')}"`, 
+          `"${(n.ytTitle||"").replace(/"/g, '""')}"`, 
+          `"${(n.ytDesc||"").replace(/"/g, '""')}"`, 
+          `"${(n.ytLink||"").replace(/"/g, '""')}"`, 
+          `"${(n.tgLink||"").replace(/"/g, '""')}"`
+        ]);
+      });
+      const csv = rows.map(e => e.join(",")).join("\n");
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `CopyWhatsapp_${new Date().getTime()}.csv`;
+      link.click();
+    }
+
+    function exportExcel() {
+      const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      newsState.forEach((n, i) => {
+          rows.push([`News ${i+1}`, n.wa, n.ytTitle, n.ytDesc, n.ytLink, n.tgLink]);
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
+      XLSX.writeFile(wb, `CopyWhatsapp_${new Date().getTime()}.xlsx`);
+    }
+  </script>
+</body>
+</html>
