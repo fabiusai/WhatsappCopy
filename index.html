@@ -564,35 +564,89 @@
       fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
     }));
 
-    /* --- HTML GENERATOR --- */
+        /* --- HTML GENERATOR --- */
     // Aggiornamento versione
-    document.title = "Social Dashboard – Final v7.0";
+    const APP_VERSION = "8.0";
+    document.title = `Social Dashboard – Final v${APP_VERSION}`;
     window.addEventListener('DOMContentLoaded', () => {
         const verEl = document.querySelector('.main-header p');
-        if(verEl) verEl.innerText = "v7.0";
+        if(verEl) verEl.innerText = `v${APP_VERSION}`;
     });
 
+    /* --- STILI UI v8.0: barra comandi, toolbar con etichette --- */
+    document.head.insertAdjacentHTML('beforeend', `<style>
+      .tool-btn.btn-lbl { width:auto; padding:0 12px; gap:6px; font-size:0.82rem; font-weight:600; white-space:nowrap; }
+      .toolbar-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+      .command-bar { display:flex; flex-wrap:wrap; gap:14px 28px; background:#fff; border:1px solid var(--border-color); border-radius:8px; padding:12px 16px; margin-bottom:24px; }
+      .cmd-group { display:flex; flex-direction:column; gap:6px; }
+      .cmd-title { font-size:0.68rem; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-medium); }
+      .cmd-row { display:flex; flex-wrap:wrap; gap:6px; }
+      .tool-btn.btn-save { background:var(--primary-blue); border-color:var(--primary-blue); color:#fff; }
+      .tool-btn.btn-save:hover { background:var(--primary-hover); color:#fff; }
+      .tool-btn.btn-copy-current, .tool-btn.btn-copy-all { background:var(--primary-light); border-color:#b3d1ff; color:var(--primary-blue); }
+      .tool-btn.btn-copy-current:hover, .tool-btn.btn-copy-all:hover { background:var(--primary-blue); color:#fff; }
+    </style>`);
+
+    /* --- FORMATO COPIA NEWS (NEWS / TUTTE) --- */
+    function buildNewsText(i) {
+      const v = id => (document.getElementById(`${id}-${i}`)?.value || '').trim();
+      return `***NEWS ${i+1}***\n\n***COPY WHATSAPP***\n${v('wa')}\n\n***TITOLO YOUTUBE***\n${v('ytTitle')}\n\n***COPY POST SOCIAL***\n${v('ytDesc')}`;
+    }
+
+    // Ridefiniscono le funzioni dichiarate più sotto (stesso scope globale)
+    copyAllData = function(btn) {
+      if (copyAllData._t && Date.now() - copyAllData._t < 400) return; // evita il doppio listener
+      copyAllData._t = Date.now();
+      const txt = [0,1,2].map(i => buildNewsText(i)).join('\n\n-----\n\n');
+      navigator.clipboard.writeText(txt).then(() => {
+        animateButtonFeedback(btn, "Copiato!");
+        showToast("Tutte le news copiate!");
+      });
+    };
+
+    copyCurrentNews = function(idx, btn) {
+      const n = parseInt(idx);
+      navigator.clipboard.writeText(buildNewsText(n)).then(() => {
+        animateButtonFeedback(btn, "Copiato!");
+        showToast(`News ${n+1} copiata!`);
+      });
+    };
+
+    // Sincronizza la card "Titolo YouTube" (colonna destra) col campo di input
+    document.addEventListener('input', (e) => {
+      const el = e.target;
+      if (!el || !el.dataset || el.dataset.type !== 'ytTitle') return;
+      const box = document.getElementById(`preview-yt-${el.id.split('-')[1]}`);
+      if (box) box.textContent = el.value;
+    }, true);
+
     function generateTabHTML(index) {
-      
-      const getToolbar = (targetId, extraBtn = '') => `
-        <div class="toolbar">
-          <button class="tool-btn" data-action="lower" title="tutto minuscolo"><i class="fas fa-arrow-down"></i> <small>abc</small></button>
-          <button class="tool-btn" data-action="title" title="Iniziali Maiuscole"><i class="fas fa-arrow-up"></i> <small>Abc</small></button>
-          <button class="tool-btn" data-action="upper" title="TUTTO MAIUSCOLO"><i class="fas fa-arrow-up"></i> <small>ABC</small></button>
-          <button class="tool-btn" data-action="auto" title="Formatta Auto"><i class="fas fa-wand-magic-sparkles"></i></button>
-          <button class="tool-btn" data-action="revert" title="Annulla"><i class="fas fa-rotate-left"></i></button>
-          ${extraBtn}
+      const L = tabsConfig[index].limits;
+
+      const getToolbar = () => `
+        <div class="toolbar-row">
+          <button class="tool-btn btn-lbl" data-action="lower" title="Tutto minuscolo"><i class="fas fa-arrow-down"></i> minuscolo</button>
+          <button class="tool-btn btn-lbl" data-action="title" title="Iniziali Maiuscole"><i class="fas fa-font"></i> Iniziali</button>
+          <button class="tool-btn btn-lbl" data-action="upper" title="TUTTO MAIUSCOLO"><i class="fas fa-arrow-up"></i> MAIUSCOLO</button>
+          <button class="tool-btn btn-lbl" data-action="auto" title="Formattazione automatica (maiuscole dopo il punto e parole speciali)"><i class="fas fa-wand-magic-sparkles"></i> Formatta auto</button>
+          <button class="tool-btn btn-lbl" data-action="revert" title="Annulla l'ultima modifica di formato"><i class="fas fa-rotate-left"></i> Annulla</button>
         </div>`;
 
-      const copyTitleBtn = `<button class="tool-btn btn-copy-simple" data-target="ytTitle-${index}" title="Copia Titolo"><i class="far fa-copy"></i></button>`;
+      const head = (icon, label, type) => `
+        <div class="label-row">
+          <span class="label-text">${icon}${label}</span>
+          <span class="counter" id="count-${type}-${index}">0/${L[type]}</span>
+        </div>`;
+
+      const ico = (cls, color) => `<i class="${cls}" style="color:${color}; font-size:1.1em; margin-right:6px;"></i>`;
 
       return `
       <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
-        
+
         <div class="layout-grid">
-          
+
           <div class="editor-container">
-            
+
             <div class="ai-box">
               <div class="ai-header" style="flex-wrap: wrap; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -601,56 +655,8 @@
                       <i class="fas fa-pen-nib"></i> Prompt
                   </button>
                 </div>
-                
-                <div class="toolbar" style="margin-left: auto; gap: 8px; display: flex; align-items: flex-start; background: #fff; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn btn-save" data-idx="${index}" title="Salva Bozze" style="background: var(--primary-blue); color: white; border: none; width: 40px;">
-                      <i class="fas fa-save"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--primary-blue); text-transform: uppercase;">Salva</span>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn btn-clear" data-idx="${index}" title="Svuota Campi Scheda" style="color: #dc3545; width: 40px;">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: #dc3545; text-transform: uppercase;">Reset</span>
-                  </div>
-
-                  <div style="width: 1px; height: 35px; background: #dfe1e6; margin: 0 2px; align-self: center;"></div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn btn-copy-current" data-idx="${index}" title="Copia Testi News Corrente" style="width: 40px;">
-                      <i class="far fa-copy" style="color: var(--primary-blue);"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-medium); text-transform: uppercase;">News</span>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn btn-copy-all" title="Copia Tutte le 3 News" style="width: 40px;">
-                      <i class="fas fa-copy" style="color: #5E6C84;"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-medium); text-transform: uppercase;">Tutte</span>
-                  </div>
-
-                  <div style="width: 1px; height: 35px; background: #dfe1e6; margin: 0 2px; align-self: center;"></div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn" onclick="exportExcel()" title="Esporta Excel" style="width: 40px;">
-                      <i class="fas fa-file-excel" style="color: #1d6f42;"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: #1d6f42; text-transform: uppercase;">Excel</span>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <button class="tool-btn" onclick="exportCsv()" title="Esporta CSV" style="width: 40px;">
-                      <i class="fas fa-file-csv" style="color: #666;"></i>
-                    </button>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: #666; text-transform: uppercase;">CSV</span>
-                  </div>
-                </div>
               </div>
-                            <div style="position:relative;">
+              <div style="position:relative;">
                 <textarea id="ai-input-${index}" placeholder="Incolla testo notizia... " style="min-height:80px; padding-right:40px;"></textarea>
                 <button class="tool-btn" data-action="paste" data-target="ai-input-${index}" title="Incolla Testo" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:#5E6C84;">
                   <i class="fas fa-paste"></i>
@@ -662,45 +668,54 @@
               <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione AI...</div>
             </div>
 
-            <div class="field-group">
-              <div class="label-row">
-                <span class="label-text"><i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.1em; margin-right: 6px;"></i>Testo WhatsApp</span>
-                <div class="right-controls">
-                    ${getToolbar()}
-                    <span class="counter" id="count-wa-${index}">0/${tabsConfig[index].limits.wa}</span>
+            <div class="command-bar">
+              <div class="cmd-group">
+                <span class="cmd-title">Scheda</span>
+                <div class="cmd-row">
+                  <button class="tool-btn btn-lbl btn-save" data-idx="${index}" title="Salva le bozze di questa scheda nel browser"><i class="fas fa-save"></i> Salva bozza</button>
+                  <button class="tool-btn btn-lbl btn-clear" data-idx="${index}" title="Svuota tutti i campi di questa scheda"><i class="fas fa-trash-alt"></i> Svuota scheda</button>
                 </div>
               </div>
+              <div class="cmd-group">
+                <span class="cmd-title">Copia per i tool di pubblicazione</span>
+                <div class="cmd-row">
+                  <button class="tool-btn btn-lbl btn-copy-current" data-idx="${index}" title="Copia WhatsApp + Titolo YouTube + Post Social di questa news"><i class="far fa-copy"></i> Copia News ${index+1}</button>
+                  <button class="tool-btn btn-lbl btn-copy-all" title="Copia in un unico blocco tutte e 3 le news"><i class="fas fa-copy"></i> Copia tutte (3)</button>
+                </div>
+              </div>
+              <div class="cmd-group">
+                <span class="cmd-title">Esporta tutte le news</span>
+                <div class="cmd-row">
+                  <button class="tool-btn btn-lbl" onclick="exportExcel()" title="Scarica file Excel"><i class="fas fa-file-excel" style="color:#1d6f42;"></i> Excel</button>
+                  <button class="tool-btn btn-lbl" onclick="exportCsv()" title="Scarica file CSV"><i class="fas fa-file-csv" style="color:#666;"></i> CSV</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              ${head(ico('fab fa-whatsapp', '#25D366'), 'Testo WhatsApp', 'wa')}
+              ${getToolbar()}
               <textarea id="wa-${index}" data-type="wa" rows="3"></textarea>
             </div>
 
             <div class="field-group">
-              <div class="label-row">
-                <span class="label-text"><i class="fab fa-youtube" style="color: #FF0000; font-size: 1.1em; margin-right: 6px;"></i>Titolo YouTube</span>
-                <div class="right-controls">
-                    ${getToolbar(`ytTitle-${index}`, copyTitleBtn)}
-                    <span class="counter" id="count-ytTitle-${index}">0/${tabsConfig[index].limits.ytTitle}</span>
-                </div>
-              </div>
+              ${head(ico('fab fa-youtube', '#FF0000'), 'Titolo YouTube', 'ytTitle')}
+              ${getToolbar()}
               <textarea id="ytTitle-${index}" data-type="ytTitle" rows="2"></textarea>
             </div>
 
             <div class="field-group">
-              <div class="label-row">
-                <span class="label-text"><i class="fas fa-share-nodes" style="color: var(--primary-blue); font-size: 1.1em; margin-right: 6px;"></i>Descrizione Social</span>
-                <div class="right-controls">
-                    ${getToolbar()}
-                    <span class="counter" id="count-ytDesc-${index}">0/${tabsConfig[index].limits.ytDesc}</span>
-                </div>
-              </div>
+              ${head(ico('fas fa-share-nodes', 'var(--primary-blue)'), 'Descrizione Social', 'ytDesc')}
+              ${getToolbar()}
               <textarea id="ytDesc-${index}" data-type="ytDesc" rows="5"></textarea>
             </div>
 
-                        <div class="field-group">
+            <div class="field-group">
               <div class="label-row">
-                <span class="label-text"><i class="fab fa-youtube" style="color: #FF0000; font-size: 1.1em; margin-right: 6px;"></i>Link YouTube</span>
+                <span class="label-text">${ico('fab fa-youtube', '#FF0000')}Link YouTube</span>
                 <div class="right-controls">
-                  <button class="tool-btn" data-action="paste" data-target="ytLink-${index}" title="Incolla Link">
-                    <i class="fas fa-paste"></i>
+                  <button class="tool-btn btn-lbl" data-action="paste" data-target="ytLink-${index}" title="Incolla il link dagli appunti">
+                    <i class="fas fa-paste"></i> Incolla link
                   </button>
                 </div>
               </div>
@@ -709,13 +724,13 @@
 
             <div class="field-group">
               <div class="label-row">
-                <span class="label-text"><i class="fab fa-telegram" style="color: #0088cc; font-size: 1.1em; margin-right: 6px;"></i>Link TG Poste</span>
+                <span class="label-text">${ico('fab fa-telegram', '#0088cc')}Link TG Poste</span>
                 <div class="right-controls">
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Oggi">
-                    <i class="far fa-calendar-check"></i> Oggi
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Genera il link del TG di oggi">
+                    <i class="far fa-calendar-check"></i> Link di oggi
                   </button>
-                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Ieri">
-                    <i class="far fa-calendar-minus"></i> Ieri
+                  <button class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Genera il link del TG di ieri">
+                    <i class="far fa-calendar-minus"></i> Link di ieri
                   </button>
                 </div>
               </div>
@@ -725,12 +740,12 @@
           </div>
 
           <div class="preview-container">
-            
+
             <div class="card-anteprima-finale">
               <div class="header-anteprima">
-                <div class="titolo-anteprima"><i class="fab fa-whatsapp"></i> Anteprima WhatsApp</div>
+                <div class="titolo-anteprima"><i class="fab fa-whatsapp"></i> Copy WhatsApp</div>
                 <button class="btn-copia-header" data-copy-target="preview-wa-${index}">
-                  <i class="far fa-copy"></i> Copia
+                  <i class="far fa-copy"></i> Copia WhatsApp
                 </button>
               </div>
               <div class="corpo-anteprima" id="preview-wa-${index}"></div>
@@ -738,9 +753,19 @@
 
             <div class="card-anteprima-finale">
               <div class="header-anteprima">
-                <div class="titolo-anteprima"><i class="fas fa-share-nodes"></i> Anteprima Social</div>
+                <div class="titolo-anteprima"><i class="fab fa-youtube" style="color:#FF0000;"></i> Titolo YouTube</div>
+                <button class="btn-copia-header" data-copy-target="preview-yt-${index}">
+                  <i class="far fa-copy"></i> Copia titolo
+                </button>
+              </div>
+              <div class="corpo-anteprima" id="preview-yt-${index}" style="min-height:auto; padding:16px 24px;"></div>
+            </div>
+
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima"><i class="fas fa-share-nodes"></i> Copy Post Social</div>
                 <button class="btn-copia-header" data-copy-target="preview-social-${index}">
-                  <i class="far fa-copy"></i> Copia
+                  <i class="far fa-copy"></i> Copia post
                 </button>
               </div>
               <div class="corpo-anteprima" id="preview-social-${index}"></div>
