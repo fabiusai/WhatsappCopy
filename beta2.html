@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v9.6 Pro</title>
+  <title>Social Dashboard – v9.7 Pro</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -24,27 +24,13 @@
 
     * { box-sizing: border-box; }
     
-    body {
-      margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.5;
-      color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
-      height: 100vh; overflow: hidden;
-    }
-
+    body { margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; height: 100vh; overflow: hidden; }
     button, input, textarea, label { font: inherit; }
     button { cursor: pointer; border: none; background: none; }
     :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .hidden { display: none !important; }
 
-    .app-layout {
-      display: grid;
-      grid-template-columns: 260px minmax(500px, 1fr) 420px;
-      gap: 24px;
-      max-width: 1800px;
-      margin: 0 auto;
-      padding: 24px;
-      height: 100vh;
-    }
-
+    .app-layout { display: grid; grid-template-columns: 260px minmax(500px, 1fr) 420px; gap: 24px; max-width: 1800px; margin: 0 auto; padding: 24px; height: 100vh; }
     .colonna-scroll { overflow-y: auto; padding-right: 8px; padding-bottom: 40px; }
     .colonna-scroll::-webkit-scrollbar { width: 6px; }
     .colonna-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -52,7 +38,6 @@
     .colonna-scroll::-webkit-scrollbar-thumb:hover { background: #aab2c2; }
 
     .sidebar { display: flex; flex-direction: column; gap: 24px; }
-    
     .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
     .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: var(--blue); color: #fff; border-bottom: 3px solid var(--yellow); font-size: 1.2rem; }
     .brand h1 { margin: 0; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
@@ -86,14 +71,6 @@
     .editor-header { padding: 16px 24px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; background: var(--surface-alt); }
     .editor-header h2 { margin: 0; font-size: 1.1rem; color: var(--ink); }
     .editor-actions { display: flex; gap: 8px; }
-
-    .ai-box { padding: 20px 24px; border-bottom: 1px solid var(--line); background: #f8fafe; }
-    .ai-box-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; color: var(--blue); }
-    .ai-input-wrap { position: relative; display: flex; gap: 10px; }
-    .ai-input-wrap textarea { flex: 1; min-height: 50px; border-radius: var(--r-sm); padding: 12px; border: 1px solid var(--blue-line); resize: vertical;}
-    .btn-ai-gen { background: var(--blue); color: #fff; padding: 0 20px; border-radius: var(--r-sm); font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-    .btn-ai-gen:hover { background: var(--blue-dk); }
-    #ai-loader { display: none; font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
 
     .fields-container { padding: 0 24px 24px; }
     .field-group { padding: 20px 0; border-bottom: 1px solid var(--line-soft); }
@@ -133,17 +110,25 @@
     .toast { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 50px; background: var(--ink); color: #fff; font-size: 0.9rem; font-weight: 500; box-shadow: 0 8px 24px rgba(15,27,51,0.25); opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    /* Modale AI Rinnovata */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; justify-content: center; align-items: center; background: rgba(15,27,51,0.55); backdrop-filter: blur(2px); }
     .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
-    .modal-content { display: flex; flex-direction: column; width: 92%; max-width: 800px; max-height: 90vh; overflow: hidden; border-radius: var(--r); background: #fff; box-shadow: 0 24px 60px rgba(15,27,51,0.25); }
+    .modal-content { display: flex; flex-direction: column; width: 92%; max-width: 750px; max-height: 90vh; overflow: hidden; border-radius: var(--r); background: #fff; box-shadow: 0 24px 60px rgba(15,27,51,0.25); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
     .modal-header h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.0625rem; font-weight: 600; color: var(--ink); }
     .close-modal { width: 34px; height: 34px; border-radius: 6px; font-size: 1.5rem; line-height: 1; color: var(--muted); transition: 0.15s; }
     .close-modal:hover { background: var(--bg); color: var(--ink); }
     .modal-body { padding: 22px; overflow-y: auto; }
-    .prompt-output-area { position: relative; padding: 52px 20px 20px; border-radius: var(--r-sm); background: #0f1b33; color: #e6ecf7; font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 0.8125rem; line-height: 1.6; white-space: pre-wrap; }
+    
+    .ai-modal-input-block { margin-bottom: 16px; padding: 16px; background: var(--surface-alt); border: 1px solid var(--line); border-radius: var(--r-sm); position: relative;}
+    .ai-modal-input-block h4 { margin: 0 0 10px; color: var(--blue); font-size: 0.95rem; }
+    .btn-remove-block { position: absolute; top: 12px; right: 12px; color: var(--danger); opacity: 0.7; }
+    .btn-remove-block:hover { opacity: 1; }
+    
+    .prompt-output-area { position: relative; padding: 52px 20px 20px; border-radius: var(--r-sm); background: #0f1b33; color: #e6ecf7; font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 0.8125rem; line-height: 1.6; white-space: pre-wrap; margin-bottom: 20px; max-height: 200px; overflow-y: auto;}
     #btnCopyPrompt { position: absolute; top: 10px; right: 10px; padding: 6px 12px; border-radius: 6px; background: #2a3a5c; color: #fff; font-weight: 500; font-size: 0.85rem; transition: 0.2s; }
     #btnCopyPrompt:hover { background: var(--blue); color: #fff; }
+    
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
@@ -153,23 +138,24 @@
 
   <div class="app-layout">
     
+    <!-- COLONNA 1: SIDEBAR -->
     <aside class="sidebar colonna-scroll">
       <div class="brand">
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v9.6 Pro Edition</p>
+          <p>v9.7 Pro Edition</p>
         </div>
       </div>
 
       <div class="menu-section">
         <div class="menu-title">Lavoro Attuale</div>
         <div id="news-list-container"></div>
-        <button id="btnAddNews" class="btn-add-news"><i class="fas fa-plus"></i> Aggiungi News</button>
+        <button id="btnAddNews" class="btn-add-news"><i class="fas fa-plus"></i> Aggiungi News manuale</button>
       </div>
 
       <div class="menu-section" style="margin-top: 10px;">
-        <div class="menu-title">Condivisione e Tool</div>
+        <div class="menu-title">Condivisione e Strumenti</div>
         <button class="btn-menu primary-action" onclick="generateSmartLink()" title="Crea un link per inviare queste bozze">
           <i class="fas fa-link"></i> Condividi Bozze (Link)
         </button>
@@ -177,16 +163,17 @@
           <i class="fas fa-paste"></i> Incolla Link Ricevuto
         </button>
         
-        <button class="btn-menu" style="margin-top: 8px; border: 1px solid var(--blue-line); background: #fff;" onclick="openPromptGenerator()">
-          <i class="fas fa-wand-magic-sparkles" style="color: var(--blue);"></i> Generatore Prompt
-        </button>
-        
-        <!-- Tasto modificato: "Risposta AI" e logica per schede dinamiche -->
-        <button class="btn-menu" style="border: 1px solid var(--ok); background: #f0fdf4; color: var(--ok);" onclick="pasteFromAI()">
-          <i class="fas fa-robot"></i> Incolla Risposta AI
+        <!-- Tasto Cumulativo Spostato Qui -->
+        <button class="btn-menu" style="background:var(--ink); color:#fff; justify-content:center; margin-top: 8px; border: 1px solid var(--ink);" onclick="copyAllNewsDefinitive(this)">
+          <i class="fas fa-copy"></i> Copia tutti i testi
         </button>
 
-        <button class="btn-menu" onclick="document.getElementById('fileInput').click()" style="margin-top: 10px; border: 1px solid var(--line);">
+        <!-- Nuovo Tasto Assistente AI (Apre modale unificata) -->
+        <button class="btn-menu" style="margin-top: 12px; border: 1px solid var(--blue); background: var(--blue-tint); color: var(--blue); justify-content:center; font-weight: 600;" onclick="openAIModal()">
+          <i class="fas fa-robot"></i> Assistente AI
+        </button>
+
+        <button class="btn-menu" onclick="document.getElementById('fileInput').click()" style="margin-top: 12px; border: 1px solid var(--line);">
           <i class="fas fa-file-import"></i> Importa CSV/Excel
         </button>
         <input type="file" id="fileInput" accept=".xlsx,.csv" class="hidden" />
@@ -197,9 +184,15 @@
         <button class="btn-menu" onclick="exportExcel()">
           <i class="fas fa-file-excel"></i> Scarica Excel Finale
         </button>
+        
+        <!-- Bottone Reset Globale -->
+        <button class="btn-menu" style="border: 1px solid #efc4c4; background: #fdecec; color: var(--danger); justify-content:center; margin-top: 24px;" onclick="hardResetApp()">
+          <i class="fas fa-trash-alt"></i> Reset Completo App
+        </button>
       </div>
     </aside>
 
+    <!-- COLONNA 2: AREA EDITORIALE (Pulita dal Box AI) -->
     <main class="colonna-scroll">
       <div class="editor-wrapper">
         
@@ -211,16 +204,7 @@
           </div>
         </div>
 
-        <div class="ai-box">
-          <div class="ai-box-header"><i class="fas fa-robot"></i> Generatore AI</div>
-          <div class="ai-input-wrap">
-            <textarea id="ai-input" placeholder="Incolla qui il testo grezzo della notizia o del comunicato..."></textarea>
-            <button class="btn-ai-gen" onclick="handleAI()"><i class="fas fa-bolt"></i> Genera</button>
-          </div>
-          <div id="ai-loader"><i class="fas fa-spinner fa-spin"></i> Elaborazione in corso...</div>
-        </div>
-
-        <div class="fields-container">
+        <div class="fields-container" style="padding-top: 12px;">
           
           <div class="field-group">
             <div class="field-label-row">
@@ -277,8 +261,8 @@
       </div>
     </main>
 
+    <!-- COLONNA 3: PREVIEW (Il tasto è stato rimosso dal fondo) -->
     <aside class="colonna-scroll preview-wrapper">
-      
       <div class="preview-card card-wa">
         <div class="preview-header"><i class="fab fa-whatsapp" style="color:var(--wa-green)"></i> Definitivo WhatsApp</div>
         <div class="preview-body" id="preview-wa"></div>
@@ -302,29 +286,71 @@
           <button class="btn-big-copy" onclick="copyCard('social', this)"><i class="far fa-copy"></i> Copia Post</button>
         </div>
       </div>
-      
-      <button class="btn-big-copy" style="background:var(--ink); color:#fff; border:none; margin-top:10px;" onclick="copyAllNewsDefinitive(this)">
-        <i class="fas fa-copy"></i> Copia TUTTO (Report)
-      </button>
-
     </aside>
 
   </div>
 
-  <div class="modal-overlay" id="promptModal">
+  <!-- MODALE AI COMPLETAMENTE RIELABORATA -->
+  <div class="modal-overlay" id="aiModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2><i class="fas fa-wand-magic-sparkles" style="color:var(--blue)"></i> Generatore Prompt AI</h2>
-        <button class="close-modal" id="closePromptModal" type="button">&times;</button>
+        <h2><i class="fas fa-robot" style="color:var(--blue)"></i> Assistente AI</h2>
+        <button class="close-modal" onclick="closeAIModal()">&times;</button>
       </div>
+      
       <div class="modal-body">
-        <p style="margin: 0 0 16px; color: var(--muted); font-size: 0.95rem;">
-          Questo prompt unisce tutti i testi grezzi delle tue News. Copialo e incollalo su Gemini.
-        </p>
-        <div class="prompt-output-area">
-          <button id="btnCopyPrompt" type="button" onclick="copyPromptText(this)"><i class="far fa-copy"></i> Copia Prompt</button>
-          <code id="promptCodeBlock"></code>
+        
+        <!-- STEP 1: INPUT DATI -->
+        <div id="aiStep1">
+            <p style="margin: 0 0 16px; color: var(--muted); font-size: 0.95rem;">
+                Incolla i testi grezzi e (opzionalmente) il link video. Clicca "+ Aggiungi Notizia" per elaborare più news in un solo colpo.
+            </p>
+            
+            <div id="aiModalInputContainer">
+                <!-- Generato da JS -->
+            </div>
+            
+            <button class="btn-add-news" style="width: auto; padding: 6px 14px; margin-top: 4px;" onclick="addAiModalInput()">
+                <i class="fas fa-plus"></i> Aggiungi Notizia
+            </button>
+
+            <div style="display:flex; gap:12px; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
+                <button class="btn-menu primary-action" style="margin:0; width:50%; background: var(--blue);" onclick="startInternalAI()">
+                    <i class="fas fa-bolt"></i> Genera con API
+                </button>
+                <button class="btn-menu secondary-action" style="margin:0; width:50%; border: 1px solid var(--blue);" onclick="generateExternalPrompt()">
+                    <i class="fas fa-wand-magic-sparkles"></i> Genera Prompt (AI Esterna)
+                </button>
+            </div>
         </div>
+
+        <!-- STEP 2: CARICAMENTO API -->
+        <div id="aiStepLoader" class="hidden" style="text-align:center; padding: 40px 20px;">
+            <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--blue)"></i>
+            <h3 style="margin-top:20px; color:var(--ink);">Elaborazione API in corso...</h3>
+            <p id="aiModalLoaderText" style="color:var(--muted);">Elaborazione notizia 1...</p>
+        </div>
+
+        <!-- STEP 3: PROMPT GEMINI E INCOLLA -->
+        <div id="aiStepExternal" class="hidden">
+            <button class="btn-menu" style="width: auto; margin-bottom: 16px; padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--line);" onclick="backToAiStep1()">
+                <i class="fas fa-arrow-left"></i> Indietro
+            </button>
+            
+            <p style="margin: 0 0 8px; font-weight:600; font-size: 0.95rem;">1. Copia questo prompt e incollalo su Gemini:</p>
+            <div class="prompt-output-area">
+                <button id="btnCopyPrompt" type="button" onclick="copyPromptText(this)"><i class="far fa-copy"></i> Copia Prompt</button>
+                <code id="promptCodeBlock"></code>
+            </div>
+            
+            <p style="margin: 0 0 8px; font-weight:600; font-size: 0.95rem;">2. Incolla qui il codice CSV fornito da Gemini:</p>
+            <textarea id="aiCsvPaste" class="main-input" rows="4" placeholder="Incolla il CSV generato..."></textarea>
+            
+            <button class="btn-menu primary-action" style="background: var(--ok); margin-top:16px;" onclick="applyExternalAiCsv()">
+                <i class="fas fa-check-circle"></i> Applica CSV alle Schede
+            </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -340,12 +366,7 @@
 
     /* --- INIT CORAZZATO --- */
     window.addEventListener('DOMContentLoaded', () => {
-      try {
-        initApp();
-      } catch (error) {
-        console.error(error);
-        alert("Errore critico all'avvio. Controlla la console.");
-      }
+      try { initApp(); } catch (error) { console.error(error); alert("Errore critico all'avvio."); }
     });
 
     function initApp() {
@@ -360,7 +381,7 @@
         try {
             const saved = localStorage.getItem('socialDashboardStateV9');
             if (saved) newsState = JSON.parse(saved);
-        } catch(e) { console.warn("Nessun dato locale valido"); }
+        } catch(e) {}
 
         if (!newsState || !Array.isArray(newsState) || newsState.length === 0) {
             createDefaultNews();
@@ -373,14 +394,9 @@
       if (newsState.length > 0) selectNews(newsState[0].id);
       setupEditorListeners();
       
-      const modal = document.getElementById('promptModal');
-      const closeBtn = document.getElementById('closePromptModal');
-      if (modal) {
-          modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-      }
-      if (closeBtn) {
-          closeBtn.addEventListener('click', () => modal.classList.remove('open'));
-      }
+      // Chiusura sfondo modale
+      const modal = document.getElementById('aiModal');
+      if (modal) { modal.addEventListener('click', (e) => { if (e.target === modal) closeAIModal(); }); }
     }
 
     function createDefaultNews() {
@@ -391,6 +407,14 @@
       try { localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState)); } catch(e) {}
     }
 
+    function hardResetApp() {
+        if(confirm("ATTENZIONE: Questo cancellerà tutte le bozze attuali e riporterà l'app allo stato iniziale vuoto. Sei sicuro?")) {
+            localStorage.removeItem('socialDashboardStateV9');
+            window.location.hash = '';
+            location.reload();
+        }
+    }
+
     /* --- SISTEMA DI COPIA INFALLIBILE --- */
     function fallbackCopyTextToClipboard(text) {
       const textArea = document.createElement("textarea");
@@ -399,7 +423,7 @@
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      try { document.execCommand('copy'); } catch (err) { console.error('Fallback fallito'); }
+      try { document.execCommand('copy'); } catch (err) { }
       document.body.removeChild(textArea);
     }
 
@@ -439,9 +463,7 @@
           history.replaceState(null, null, window.location.pathname);
           showToast("Bozze importate con successo dal link!");
           return true;
-        } catch(e) {
-          showToast("Link condiviso non valido o corrotto", "error");
-        }
+        } catch(e) { showToast("Link condiviso non valido", "error"); }
       }
       return false;
     }
@@ -457,7 +479,161 @@
       }
     }
 
-    /* --- PARSER AI (GEMINI) CON CREAZIONE TAB AUTOMATICA --- */
+    /* =========================================
+       MODALE AI (IL NUOVO MOTORE)
+       ========================================= */
+
+    function openAIModal() {
+        document.getElementById('aiStep1').classList.remove('hidden');
+        document.getElementById('aiStepLoader').classList.add('hidden');
+        document.getElementById('aiStepExternal').classList.add('hidden');
+
+        const container = document.getElementById('aiModalInputContainer');
+        container.innerHTML = '';
+        
+        // Popola la modale con le news attualmente caricate (se hanno testo grezzo o link)
+        let hasContent = false;
+        newsState.forEach((news) => {
+            if (news.aiInput || news.ytLink || news.wa) {
+                addAiModalInput(news.aiInput || news.wa, news.ytLink);
+                hasContent = true;
+            }
+        });
+
+        // Se lo stato era completamente vuoto, aggiungi 1 blocco pulito
+        if (!hasContent) addAiModalInput();
+
+        document.getElementById('aiModal').classList.add('open');
+    }
+
+    function closeAIModal() {
+        document.getElementById('aiModal').classList.remove('open');
+    }
+
+    function addAiModalInput(text = "", link = "") {
+        const container = document.getElementById('aiModalInputContainer');
+        const count = container.children.length + 1;
+        const div = document.createElement('div');
+        div.className = "ai-modal-input-block";
+        
+        div.innerHTML = `
+            <button class="btn-remove-block" onclick="this.parentElement.remove()" title="Rimuovi"><i class="fas fa-times"></i></button>
+            <h4><i class="far fa-newspaper"></i> Blocco Notizia</h4>
+            <textarea class="main-input ai-raw-text" rows="3" placeholder="Incolla il testo grezzo (comunicato, articolo...)...">${text}</textarea>
+            <input type="text" class="main-input ai-raw-link" style="margin-top:8px;" placeholder="Link YouTube (Opzionale)" value="${link}">
+        `;
+        container.appendChild(div);
+    }
+
+    function backToAiStep1() {
+        document.getElementById('aiStep1').classList.remove('hidden');
+        document.getElementById('aiStepExternal').classList.add('hidden');
+    }
+
+    /* --- AZIONE 1: GENERAZIONE API INTERNA --- */
+    async function startInternalAI() {
+        const blocks = document.querySelectorAll('.ai-modal-input-block');
+        const inputs = Array.from(blocks).map(b => ({
+            text: b.querySelector('.ai-raw-text').value.trim(),
+            link: b.querySelector('.ai-raw-link').value.trim()
+        })).filter(inp => inp.text !== "");
+
+        if (inputs.length === 0) return showToast("Inserisci almeno un testo grezzo", "error");
+
+        document.getElementById('aiStep1').classList.add('hidden');
+        document.getElementById('aiStepLoader').classList.remove('hidden');
+
+        let generatedNews = [];
+        for(let i=0; i < inputs.length; i++) {
+            document.getElementById('aiModalLoaderText').innerText = `Elaborazione notizia ${i+1} di${inputs.length}...`;
+            try {
+                const res = await fetch(API_URL, {
+                    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: inputs[i].text})
+                });
+                const data = await res.json();
+                generatedNews.push({
+                    id: Date.now() + i, title: `News ${i+1}`,
+                    wa: data.whatsapp || "", ytTitle: data.youtube || "", ytDesc: data.facebook_linkedin || "",
+                    ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text
+                });
+            } catch(e) {
+                generatedNews.push({
+                    id: Date.now() + i, title: `News ${i+1}`,
+                    wa: "ERRORE AI", ytTitle: "Riprova", ytDesc: "Connessione fallita",
+                    ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text
+                });
+            }
+        }
+
+        newsState = generatedNews;
+        saveState();
+        renderNewsList();
+        selectNews(newsState[0].id);
+        closeAIModal();
+        showToast(`Generazione completata! (${inputs.length} news)`);
+    }
+
+    /* --- AZIONE 2: GENERAZIONE ESTERNA (PROMPT E CSV) --- */
+    function generateExternalPrompt() {
+        const blocks = document.querySelectorAll('.ai-modal-input-block');
+        let newsContent = "";
+        let columnHeaders = [];
+        let newsCount = 0;
+
+        blocks.forEach((b) => {
+            const text = b.querySelector('.ai-raw-text').value.trim();
+            const link = b.querySelector('.ai-raw-link').value.trim();
+            if(text) {
+                newsCount++;
+                columnHeaders.push(`"News ${newsCount}"`);
+                newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${text}\n`;
+                if(link) newsContent += `**Link YouTube:**\n${link}\n`;
+            }
+        });
+
+        if (newsCount === 0) return showToast("Inserisci almeno un testo", "error");
+
+        const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
+
+**INFO NEWS:**
+${newsContent}
+
+**TONO E STILE:**
+* Tono chiaro, istituzionale e informativo. Nessuna enfasi o emoticon. Stile sobrio, tipico di un'azienda pubblica. Nessun pronome diretto al lettore.
+* Parla a nome dell'azienda, ma nomina il brand solo quando essenziale. 
+* Evita di usare le stesse parole del testo WhatsApp per il titolo YouTube.
+
+**LUNGHEZZE:**
+1. **WhatsApp:** ~90 caratteri.
+2. **YouTube Titolo:** Max 49 caratteri.
+3. **Social:** Sintetico ma completo. Hashtag pertinenti.
+
+**OUTPUT CSV REQUISITO:**
+Output SOLO codice CSV puro. Non aggiungere formattazioni markdown (niente tag code o \`\`\`csv).
+Delimitatore: Virgola (,)
+Qualificatore: Doppie virgolette (")
+Intestazione: ,${columnHeaders.join(',')}
+Righe:
+"Testo descrittivo news Canale WA",...
+"Titolo YouTube",...
+"Copy post e descrizione YT",...
+"Link YouTube",...
+"Link TG Poste",...
+
+Fornisci unicamente le 6 righe di testo in formato CSV.`;
+
+        document.getElementById('promptCodeBlock').textContent = finalPrompt;
+        document.getElementById('aiCsvPaste').value = ""; // Svuota l'area di paste
+        
+        document.getElementById('aiStep1').classList.add('hidden');
+        document.getElementById('aiStepExternal').classList.remove('hidden');
+    }
+
+    function copyPromptText(btn) {
+        const txt = document.getElementById('promptCodeBlock').textContent;
+        copyToClipboardSafe(txt, btn, "Prompt Copiato!");
+    }
+
     function parseCsvText(csvText) {
         const rows = []; let row = []; let field = ""; let inQuote = false;
         for (let i = 0; i < csvText.length; i++) {
@@ -481,69 +657,77 @@
         return rows;
     }
 
-    async function pasteFromAI() {
-      let text = "";
-      try {
-          if (navigator.clipboard && navigator.clipboard.readText) { text = await navigator.clipboard.readText(); } 
-          else { throw new Error("API non supportata"); }
-      } catch (e) {
-          text = prompt("Il browser blocca la lettura automatica. INCOLLA QUI il CSV fornito dall'AI:");
-      }
-      
-      if (!text) return;
-      let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
-      const rows = parseCsvText(cleanText);
-      
-      if (rows.length > 1) {
-          // Calcola quante "News" (colonne) ha generato l'AI
-          let maxCols = 0;
-          rows.forEach(r => { if(r.length > maxCols) maxCols = r.length; });
-          const numAiNews = maxCols > 1 ? maxCols - 1 : 0; 
+    function applyExternalAiCsv() {
+        const pasteArea = document.getElementById('aiCsvPaste');
+        if(!pasteArea) return;
+        const text = pasteArea.value.trim();
+        if (!text) return showToast("Incolla il CSV prima di applicare", "error");
 
-          // Se l'AI ha generato più news di quante tab esistono, le creiamo in automatico
-          if (numAiNews > newsState.length) {
-              const newsToAdd = numAiNews - newsState.length;
-              for(let k = 0; k < newsToAdd; k++) {
-                  newsState.push({
-                      id: Date.now() + k,
-                      title: `News ${newsState.length + 1}`,
-                      wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: ""
-                  });
-              }
-              renderNewsList(); // Aggiorniamo la barra laterale con le nuove tab
-          }
+        let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
+        const rows = parseCsvText(cleanText);
+        
+        if (rows.length > 1) {
+            // Raccogli gli input grezzi originariamente inseriti
+            const blocks = document.querySelectorAll('.ai-modal-input-block');
+            const rawInputs = Array.from(blocks).map(b => ({
+                text: b.querySelector('.ai-raw-text').value.trim(),
+                link: b.querySelector('.ai-raw-link').value.trim()
+            })).filter(inp => inp.text !== "");
 
-          const fieldMap = {
-              'Testo descrittivo news Canale WA': 'wa',
-              'Titolo YouTube': 'ytTitle',
-              'Copy post e descrizione YT': 'ytDesc',
-              'Link YouTube': 'ytLink',
-              'Link TG Poste': 'tgLink'
-          };
-          
-          let updated = false;
-          rows.forEach(row => {
-              const rowLabel = (row[0] || '').trim();
-              const fieldType = fieldMap[rowLabel];
-              if (fieldType) {
-                  // Mappiamo i dati fino al numero totale di news generate
-                  for (let i = 0; i < newsState.length; i++) {
-                      const val = row[i + 1];
-                      if (val !== undefined && val !== "") { 
-                          newsState[i][fieldType] = String(val).replace(/""/g, '"'); 
-                          updated = true; 
-                      }
-                  }
-              }
-          });
-          
-          if(updated) { 
-              saveState(); 
-              selectNews(activeNewsId); // Forza ricaricamento campi e grafiche
-              showToast(`Risposta AI caricata! (${numAiNews} news aggiornate)`); 
-          } 
-          else { showToast("CSV non valido o struttura non riconosciuta.", "error"); }
-      } else { showToast("Nessun CSV valido trovato.", "error"); }
+            // Conta le colonne generate dall'AI
+            let maxCols = 0;
+            rows.forEach(r => { if(r.length > maxCols) maxCols = r.length; });
+            const numAiNews = maxCols > 1 ? maxCols - 1 : 0; 
+            
+            if(numAiNews === 0) return showToast("Nessuna news valida trovata nel CSV", "error");
+
+            // Ricostruisci integralmente il newsState
+            let newNewsState = [];
+            for(let i=0; i<numAiNews; i++) {
+                newNewsState.push({
+                    id: Date.now() + i, title: `News ${i+1}`,
+                    wa: "", ytTitle: "", ytDesc: "", 
+                    ytLink: rawInputs[i] ? rawInputs[i].link : "", tgLink: "", 
+                    aiInput: rawInputs[i] ? rawInputs[i].text : ""
+                });
+            }
+
+            const fieldMap = {
+                'Testo descrittivo news Canale WA': 'wa',
+                'Titolo YouTube': 'ytTitle',
+                'Copy post e descrizione YT': 'ytDesc',
+                'Link YouTube': 'ytLink',
+                'Link TG Poste': 'tgLink'
+            };
+            
+            let updated = false;
+            rows.forEach(row => {
+                const rowLabel = (row[0] || '').trim();
+                const fieldType = fieldMap[rowLabel];
+                if (fieldType) {
+                    for (let i = 0; i < newNewsState.length; i++) {
+                        const val = row[i + 1];
+                        if (val !== undefined && val !== "") { 
+                            newNewsState[i][fieldType] = String(val).replace(/""/g, '"'); 
+                            updated = true; 
+                        }
+                    }
+                }
+            });
+
+            if(updated) {
+                newsState = newNewsState;
+                saveState();
+                renderNewsList();
+                selectNews(newsState[0].id);
+                closeAIModal();
+                showToast(`Bozze popolate con successo! (${numAiNews} news)`);
+            } else {
+                showToast("Formato CSV non riconosciuto (etichette errate).", "error");
+            }
+        } else {
+            showToast("Il testo incollato non sembra un CSV valido.", "error");
+        }
     }
 
     /* --- IMPORT EXCEL/CSV (File Classico) --- */
@@ -576,60 +760,6 @@
       e.target.value = ''; 
     });
 
-    /* --- PROMPT GENERATOR --- */
-    function openPromptGenerator() {
-      let newsContent = "";
-      let columnHeaders = [];
-      let newsCount = 0;
-      newsState.forEach((news) => {
-          const textToProcess = (news.aiInput || "").trim() || (news.wa || "").trim();
-          if (textToProcess) {
-              newsCount++;
-              columnHeaders.push(`"News ${newsCount}"`);
-              newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${textToProcess}\n`;
-              if (news.ytLink) newsContent += `**Link YouTube:**\n${news.ytLink}\n`;
-          }
-      });
-      if (newsCount === 0) return showToast("Inserisci almeno un testo (nel box AI o WhatsApp)", "error");
-
-      const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
-
-**INFO NEWS:**
-${newsContent}
-
-**TONO E STILE:**
-* Tono chiaro, istituzionale e informativo. Nessuna enfasi o emoticon. Stile sobrio, tipico di un'azienda pubblica. Nessun pronome diretto al lettore.
-* Parla a nome dell'azienda, ma nomina il brand solo quando essenziale. 
-* Evita di usare le stesse parole del testo WhatsApp per il titolo YouTube.
-
-**LUNGHEZZE:**
-1. **WhatsApp:** ~90 caratteri.
-2. **YouTube Titolo:** Max 49 caratteri.
-3. **Social:** Sintetico ma completo. Hashtag pertinenti.
-
-**OUTPUT CSV REQUISITO:**
-Output SOLO codice CSV puro. Non aggiungere formattazioni extra (niente tag code).
-Delimitatore: Virgola (,)
-Qualificatore: Doppie virgolette (")
-Intestazione: ,${columnHeaders.join(',')}
-Righe:
-"Testo descrittivo news Canale WA",...
-"Titolo YouTube",...
-"Copy post e descrizione YT",...
-"Link YouTube",...
-"Link TG Poste",...
-
-Fornisci unicamente le 6 righe di testo in formato CSV.`;
-
-      document.getElementById('promptCodeBlock').textContent = finalPrompt;
-      document.getElementById('promptModal').classList.add('open');
-    }
-
-    function copyPromptText(btn) {
-      const txt = document.getElementById('promptCodeBlock').textContent;
-      copyToClipboardSafe(txt, btn, "Prompt Copiato!");
-    }
-
     /* --- UI UPDATE E REAL-TIME PREVIEW --- */
     function renderNewsList() {
       const container = document.getElementById('news-list-container');
@@ -647,7 +777,7 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
     document.getElementById('btnAddNews').addEventListener('click', () => {
       const newId = Date.now();
       newsState.push({ id: newId, title: `News ${newsState.length + 1}`, wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" });
-      renderNewsList(); selectNews(newId); saveState(); showToast("Nuova News aggiunta");
+      renderNewsList(); selectNews(newId); saveState(); showToast("Nuova News manuale aggiunta");
     });
 
     function selectNews(id) {
@@ -660,18 +790,14 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       const titleEl = document.getElementById('editorTitle');
       if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
       
-      const aiInputEl = document.getElementById('ai-input');
-      if(aiInputEl) aiInputEl.value = news.aiInput || "";
-      
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
         const el = document.getElementById(`editor-${field}`);
         if(el) el.value = news[field] || "";
       });
-      updateAllPreviews(); // Avvia l'aggiornamento visivo di tutto al cambio scheda
+      updateAllPreviews(); 
     }
 
     function setupEditorListeners() {
-      // Listener associati ai campi per garantire il real-time su ogni digitazione
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
         const el = document.getElementById(`editor-${field}`);
         if(el) {
@@ -680,20 +806,12 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
               if(news) {
                   news[field] = e.target.value;
                   saveState(); 
-                  updatePreview(field); // Aggiornamento anteprima in tempo reale
+                  updatePreview(field);
                   if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
               }
             });
         }
       });
-      
-      const aiEl = document.getElementById('ai-input');
-      if(aiEl) {
-          aiEl.addEventListener('input', (e) => {
-            const news = newsState.find(n => n.id === activeNewsId);
-            if(news) { news.aiInput = e.target.value; saveState(); }
-          });
-      }
     }
 
     function clearCurrentNews() {
@@ -745,7 +863,7 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         urls.forEach(u => val = val.replace('___URL___', u));
       }
       el.value = val;
-      el.dispatchEvent(new Event('input')); // Dispara l'evento input per il real-time
+      el.dispatchEvent(new Event('input')); 
       showToast("Testo formattato");
     }
 
@@ -758,7 +876,6 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       const news = newsState.find(n => n.id === activeNewsId);
       if(!news) return;
       
-      // ANTEPRIMA WHATSAPP
       if(sourceField === 'wa' || sourceField === 'ytLink') {
         let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
         if (news.ytLink) {
@@ -772,31 +889,25 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         if(el) el.innerHTML = waHtml;
       }
 
-      // ANTEPRIMA YOUTUBE
       if(sourceField === 'ytTitle') {
         const el = document.getElementById('preview-ytTitle');
         if(el) el.innerText = news.ytTitle || "";
       }
 
-      // ANTEPRIMA POST SOCIAL (CON ISOLAMENTO HASHTAG DINAMICO)
       if(sourceField === 'ytDesc' || sourceField === 'tgLink') {
         let ytDescRaw = (news.ytDesc || "").trim();
         const tgLink = news.tgLink || "";
         let extractedHashtags = "";
         
-        // Cerca e cattura una catena di hashtag in fondo al testo
         const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
         const match = ytDescRaw.match(hashtagRegex);
         
         if (match) {
             extractedHashtags = match[0].trim();
-            // Rimuove gli hashtag appena trovati dal corpo del testo
             ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
         }
         
-        // Pulisce eventuali tag base già presenti per evitare duplicati
         extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
-        
         const baseTags = "#TGPoste #PosteItaliane";
         const finalTags = extractedHashtags ? `${baseTags} ${extractedHashtags}` : baseTags;
         
@@ -828,8 +939,6 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
     function copyAllNewsDefinitive(btnElement) {
       let fullText = "";
       newsState.forEach((news, idx) => {
-        
-        // Isolamento Hashtag anche nella copia cumulativa finale
         let ytDescRaw = (news.ytDesc || "").trim();
         let extractedHashtags = "";
         const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
@@ -849,34 +958,6 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         fullText += `\n-------------------------\n\n`;
       });
       copyToClipboardSafe(fullText, btnElement, "Tutto Copiato!");
-    }
-
-    async function handleAI() {
-      const inputEl = document.getElementById(`ai-input`);
-      const input = inputEl ? inputEl.value : "";
-      if(!input) return showToast("Inserisci testo da elaborare!", "error");
-      
-      const loader = document.getElementById('ai-loader');
-      if(loader) loader.style.display = 'block';
-      
-      try {
-        const res = await fetch(API_URL, {
-          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: input})
-        });
-        const data = await res.json();
-        
-        const news = newsState.find(n => n.id === activeNewsId);
-        if(news) {
-            news.wa = data.whatsapp || "";
-            news.ytTitle = data.youtube || "";
-            news.ytDesc = data.facebook_linkedin || "";
-            saveState(); selectNews(activeNewsId); showToast("Contenuti generati!");
-        }
-      } catch(e) { 
-        showToast("Errore di connessione AI", "error"); 
-      } finally { 
-        if(loader) loader.style.display = 'none'; 
-      }
     }
 
     function animateButton(btn, msg) {
