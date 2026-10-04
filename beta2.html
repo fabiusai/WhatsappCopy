@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v9.5 Pro</title>
+  <title>Social Dashboard – v9.6 Pro</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -158,7 +158,7 @@
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v9.5 Pro Edition</p>
+          <p>v9.6 Pro Edition</p>
         </div>
       </div>
 
@@ -180,8 +180,10 @@
         <button class="btn-menu" style="margin-top: 8px; border: 1px solid var(--blue-line); background: #fff;" onclick="openPromptGenerator()">
           <i class="fas fa-wand-magic-sparkles" style="color: var(--blue);"></i> Generatore Prompt
         </button>
-        <button class="btn-menu" style="border: 1px solid var(--ok); background: #f0fdf4; color: var(--ok);" onclick="pasteFromGemini()">
-          <i class="fas fa-clipboard-check"></i> Incolla Risposta Gemini
+        
+        <!-- Tasto modificato: "Risposta AI" e logica per schede dinamiche -->
+        <button class="btn-menu" style="border: 1px solid var(--ok); background: #f0fdf4; color: var(--ok);" onclick="pasteFromAI()">
+          <i class="fas fa-robot"></i> Incolla Risposta AI
         </button>
 
         <button class="btn-menu" onclick="document.getElementById('fileInput').click()" style="margin-top: 10px; border: 1px solid var(--line);">
@@ -347,16 +349,13 @@
     });
 
     function initApp() {
-      // 1. Fetch Dizionario in background (non blocca nulla)
       fetch(googleSheetURL)
         .then(r => r.ok ? r.text() : "")
         .then(t => { if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); })
         .catch(() => console.warn("Dizionario CSV offline"));
 
-      // 2. Controllo Link Condiviso
       const hasSmartLink = loadFromSmartLink(window.location.hash);
 
-      // 3. Caricamento Sicuro da LocalStorage
       if (!hasSmartLink) {
         try {
             const saved = localStorage.getItem('socialDashboardStateV9');
@@ -370,7 +369,6 @@
         }
       }
 
-      // 4. Accensione Grafica
       renderNewsList();
       if (newsState.length > 0) selectNews(newsState[0].id);
       setupEditorListeners();
@@ -459,7 +457,7 @@
       }
     }
 
-    /* --- GEMINI PARSER --- */
+    /* --- PARSER AI (GEMINI) CON CREAZIONE TAB AUTOMATICA --- */
     function parseCsvText(csvText) {
         const rows = []; let row = []; let field = ""; let inQuote = false;
         for (let i = 0; i < csvText.length; i++) {
@@ -483,20 +481,38 @@
         return rows;
     }
 
-    async function pasteFromGemini() {
+    async function pasteFromAI() {
       let text = "";
       try {
           if (navigator.clipboard && navigator.clipboard.readText) { text = await navigator.clipboard.readText(); } 
           else { throw new Error("API non supportata"); }
       } catch (e) {
-          text = prompt("Safari/Browser blocca la lettura automatica. INCOLLA QUI il CSV fornito da Gemini:");
+          text = prompt("Il browser blocca la lettura automatica. INCOLLA QUI il CSV fornito dall'AI:");
       }
       
       if (!text) return;
-      let cleanText = text.replace(/[\`]{3}(csv|json)?/gi, '').trim();
+      let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
       const rows = parseCsvText(cleanText);
       
       if (rows.length > 1) {
+          // Calcola quante "News" (colonne) ha generato l'AI
+          let maxCols = 0;
+          rows.forEach(r => { if(r.length > maxCols) maxCols = r.length; });
+          const numAiNews = maxCols > 1 ? maxCols - 1 : 0; 
+
+          // Se l'AI ha generato più news di quante tab esistono, le creiamo in automatico
+          if (numAiNews > newsState.length) {
+              const newsToAdd = numAiNews - newsState.length;
+              for(let k = 0; k < newsToAdd; k++) {
+                  newsState.push({
+                      id: Date.now() + k,
+                      title: `News ${newsState.length + 1}`,
+                      wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: ""
+                  });
+              }
+              renderNewsList(); // Aggiorniamo la barra laterale con le nuove tab
+          }
+
           const fieldMap = {
               'Testo descrittivo news Canale WA': 'wa',
               'Titolo YouTube': 'ytTitle',
@@ -504,24 +520,33 @@
               'Link YouTube': 'ytLink',
               'Link TG Poste': 'tgLink'
           };
+          
           let updated = false;
           rows.forEach(row => {
               const rowLabel = (row[0] || '').trim();
               const fieldType = fieldMap[rowLabel];
               if (fieldType) {
+                  // Mappiamo i dati fino al numero totale di news generate
                   for (let i = 0; i < newsState.length; i++) {
                       const val = row[i + 1];
-                      if (val !== undefined && val !== "") { newsState[i][fieldType] = String(val).replace(/""/g, '"'); updated = true; }
+                      if (val !== undefined && val !== "") { 
+                          newsState[i][fieldType] = String(val).replace(/""/g, '"'); 
+                          updated = true; 
+                      }
                   }
               }
           });
           
-          if(updated) { saveState(); selectNews(activeNewsId); showToast("Testi AI caricati nelle schede!"); } 
-          else { showToast("CSV non valido.", "error"); }
+          if(updated) { 
+              saveState(); 
+              selectNews(activeNewsId); // Forza ricaricamento campi e grafiche
+              showToast(`Risposta AI caricata! (${numAiNews} news aggiornate)`); 
+          } 
+          else { showToast("CSV non valido o struttura non riconosciuta.", "error"); }
       } else { showToast("Nessun CSV valido trovato.", "error"); }
     }
 
-    /* --- IMPORT EXCEL/CSV --- */
+    /* --- IMPORT EXCEL/CSV (File Classico) --- */
     document.getElementById('fileInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -605,7 +630,7 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       copyToClipboardSafe(txt, btn, "Prompt Copiato!");
     }
 
-    /* --- UI UPDATE --- */
+    /* --- UI UPDATE E REAL-TIME PREVIEW --- */
     function renderNewsList() {
       const container = document.getElementById('news-list-container');
       if(!container) return;
@@ -630,8 +655,8 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       renderNewsList();
       const news = newsState.find(n => n.id === activeNewsId);
       if(!news) return;
-      const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
       
+      const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
       const titleEl = document.getElementById('editorTitle');
       if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
       
@@ -642,10 +667,11 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         const el = document.getElementById(`editor-${field}`);
         if(el) el.value = news[field] || "";
       });
-      updateAllPreviews();
+      updateAllPreviews(); // Avvia l'aggiornamento visivo di tutto al cambio scheda
     }
 
     function setupEditorListeners() {
+      // Listener associati ai campi per garantire il real-time su ogni digitazione
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
         const el = document.getElementById(`editor-${field}`);
         if(el) {
@@ -653,12 +679,14 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
               const news = newsState.find(n => n.id === activeNewsId);
               if(news) {
                   news[field] = e.target.value;
-                  saveState(); updatePreview(field);
+                  saveState(); 
+                  updatePreview(field); // Aggiornamento anteprima in tempo reale
                   if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
               }
             });
         }
       });
+      
       const aiEl = document.getElementById('ai-input');
       if(aiEl) {
           aiEl.addEventListener('input', (e) => {
@@ -691,7 +719,7 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       const d = String(date.getDate()).padStart(2, '0');
       const d_raw = date.getDate(); 
       const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-      const link = `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
+      const link = `[https://tgposte.poste.it/tgposte/$](https://tgposte.poste.it/tgposte/$){y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
       
       const el = document.getElementById('editor-tgLink');
       if(el) { el.value = link; el.dispatchEvent(new Event('input')); }
@@ -717,12 +745,12 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         urls.forEach(u => val = val.replace('___URL___', u));
       }
       el.value = val;
-      el.dispatchEvent(new Event('input'));
+      el.dispatchEvent(new Event('input')); // Dispara l'evento input per il real-time
       showToast("Testo formattato");
     }
 
     function updateAllPreviews() {
-      updatePreview('wa'); updatePreview('ytTitle'); updatePreview('social');
+      updatePreview('wa'); updatePreview('ytTitle'); updatePreview('ytDesc');
       ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount);
     }
 
@@ -730,29 +758,50 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       const news = newsState.find(n => n.id === activeNewsId);
       if(!news) return;
       
+      // ANTEPRIMA WHATSAPP
       if(sourceField === 'wa' || sourceField === 'ytLink') {
         let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
         if (news.ytLink) {
-           waHtml += `<br><br>${news.ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+           waHtml += `<br><br>${news.ytLink}<br>➡️ TG [https://tgposte.poste.it/tgposte/](https://tgposte.poste.it/tgposte/)`;
            const ytMatch = news.ytLink.match(/(?:v=|\/|youtu\.be\/|shorts\/)([0-9A-Za-z_-]{11})/);
            if (ytMatch && ytMatch[1]) {
-             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border:1px solid #ddd; flex-shrink:0;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
+             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border:1px solid #ddd; flex-shrink:0;"><iframe src="[https://www.youtube.com/embed/$](https://www.youtube.com/embed/$){ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
            }
         }
         const el = document.getElementById('preview-wa');
         if(el) el.innerHTML = waHtml;
       }
 
+      // ANTEPRIMA YOUTUBE
       if(sourceField === 'ytTitle') {
         const el = document.getElementById('preview-ytTitle');
         if(el) el.innerText = news.ytTitle || "";
       }
 
+      // ANTEPRIMA POST SOCIAL (CON ISOLAMENTO HASHTAG DINAMICO)
       if(sourceField === 'ytDesc' || sourceField === 'tgLink') {
-        let desc = (news.ytDesc || "").trim();
+        let ytDescRaw = (news.ytDesc || "").trim();
+        const tgLink = news.tgLink || "";
+        let extractedHashtags = "";
+        
+        // Cerca e cattura una catena di hashtag in fondo al testo
+        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+        const match = ytDescRaw.match(hashtagRegex);
+        
+        if (match) {
+            extractedHashtags = match[0].trim();
+            // Rimuove gli hashtag appena trovati dal corpo del testo
+            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
+        }
+        
+        // Pulisce eventuali tag base già presenti per evitare duplicati
+        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+        
         const baseTags = "#TGPoste #PosteItaliane";
+        const finalTags = extractedHashtags ? `${baseTags} ${extractedHashtags}` : baseTags;
+        
         const el = document.getElementById('preview-social');
-        if(el) el.innerText = `${desc}\n\n➡️ ${news.tgLink || ""}\n\n${baseTags}`;
+        if(el) el.innerText = `${ytDescRaw}\n\n➡️ ${tgLink}\n\n${finalTags}`;
       }
     }
 
@@ -779,10 +828,24 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
     function copyAllNewsDefinitive(btnElement) {
       let fullText = "";
       newsState.forEach((news, idx) => {
+        
+        // Isolamento Hashtag anche nella copia cumulativa finale
+        let ytDescRaw = (news.ytDesc || "").trim();
+        let extractedHashtags = "";
+        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+        const match = ytDescRaw.match(hashtagRegex);
+        if (match) {
+            extractedHashtags = match[0].trim();
+            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
+        }
+        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+        const baseTags = "#TGPoste #PosteItaliane";
+        const finalTags = extractedHashtags ? `${baseTags} ${extractedHashtags}` : baseTags;
+
         fullText += `*** NEWS ${idx+1} ***\n\n`;
-        fullText += `[WHATSAPP]\n${news.wa}\n${news.ytLink}\n➡️ TG https://tgposte.poste.it/tgposte/\n\n`;
+        fullText += `[WHATSAPP]\n${news.wa}\n${news.ytLink}\n➡️ TG [https://tgposte.poste.it/tgposte/](https://tgposte.poste.it/tgposte/)\n\n`;
         fullText += `[YOUTUBE TITOLO]\n${news.ytTitle}\n\n`;
-        fullText += `[POST SOCIAL]\n${news.ytDesc}\n➡️ ${news.tgLink}\n#TGPoste #PosteItaliane\n`;
+        fullText += `[POST SOCIAL]\n${ytDescRaw}\n➡️ ${news.tgLink}\n${finalTags}\n`;
         fullText += `\n-------------------------\n\n`;
       });
       copyToClipboardSafe(fullText, btnElement, "Tutto Copiato!");
