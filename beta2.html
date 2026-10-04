@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v9.4 Pro</title>
+  <title>Social Dashboard – v9.5 Pro</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -158,7 +158,7 @@
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v9.4 Pro Edition</p>
+          <p>v9.5 Pro Edition</p>
         </div>
       </div>
 
@@ -336,58 +336,64 @@
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
     const LIMITS = { wa: 82, ytTitle: 49, ytDesc: 280 };
 
-    /* --- SISTEMA ANTI-CRASH DI AVVIO --- */
-    window.addEventListener('DOMContentLoaded', async () => {
-      // 1. Caricamento MasterList Sicuro
+    /* --- INIT CORAZZATO --- */
+    window.addEventListener('DOMContentLoaded', () => {
       try {
-        const r = await fetch(googleSheetURL);
-        if (r.ok) {
-           const t = await r.text();
-           masterList = t.split('\n').map(s => s.trim()).filter(Boolean);
-        }
-      } catch(e) { console.warn("Dizionario CSV non caricato"); }
-      
+        initApp();
+      } catch (error) {
+        console.error(error);
+        alert("Errore critico all'avvio. Controlla la console.");
+      }
+    });
+
+    function initApp() {
+      // 1. Fetch Dizionario in background (non blocca nulla)
+      fetch(googleSheetURL)
+        .then(r => r.ok ? r.text() : "")
+        .then(t => { if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); })
+        .catch(() => console.warn("Dizionario CSV offline"));
+
       // 2. Controllo Link Condiviso
       const hasSmartLink = loadFromSmartLink(window.location.hash);
-      
-      // 3. Controllo LocalStorage Sicuro
+
+      // 3. Caricamento Sicuro da LocalStorage
       if (!hasSmartLink) {
         try {
             const saved = localStorage.getItem('socialDashboardStateV9');
             if (saved) newsState = JSON.parse(saved);
-        } catch(e) { console.warn("LocalStorage bloccato o corrotto"); }
-        
+        } catch(e) { console.warn("Nessun dato locale valido"); }
+
         if (!newsState || !Array.isArray(newsState) || newsState.length === 0) {
             createDefaultNews();
         } else {
-            // Fix per vecchie bozze senza campo aiInput
-            newsState.forEach(n => { if(n.aiInput === undefined) n.aiInput = ""; });
+            newsState.forEach(n => { if(typeof n.aiInput === 'undefined') n.aiInput = ""; });
         }
       }
 
+      // 4. Accensione Grafica
       renderNewsList();
-      selectNews(newsState[0].id);
+      if (newsState.length > 0) selectNews(newsState[0].id);
       setupEditorListeners();
       
-      document.getElementById('promptModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('promptModal')) document.getElementById('promptModal').classList.remove('open');
-      });
-      document.getElementById('closePromptModal').addEventListener('click', () => {
-        document.getElementById('promptModal').classList.remove('open');
-      });
-    });
+      const modal = document.getElementById('promptModal');
+      const closeBtn = document.getElementById('closePromptModal');
+      if (modal) {
+          modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+      }
+      if (closeBtn) {
+          closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+      }
+    }
 
     function createDefaultNews() {
       newsState = [{ id: Date.now(), title: "News 1", wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" }];
     }
 
     function saveState() {
-      try {
-          localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState));
-      } catch(e) { console.warn("Impossibile salvare le bozze nel browser"); }
+      try { localStorage.setItem('socialDashboardStateV9', JSON.stringify(newsState)); } catch(e) {}
     }
 
-    /* --- COPIA SICURA UNIVERSALE (Fallback x Safari/Github Pages) --- */
+    /* --- SISTEMA DI COPIA INFALLIBILE --- */
     function fallbackCopyTextToClipboard(text) {
       const textArea = document.createElement("textarea");
       textArea.value = text;
@@ -395,7 +401,7 @@
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      try { document.execCommand('copy'); } catch (err) {}
+      try { document.execCommand('copy'); } catch (err) { console.error('Fallback fallito'); }
       document.body.removeChild(textArea);
     }
 
@@ -417,15 +423,12 @@
       }
     }
 
-    /* --- SMART LINK (FORZATO SULLA TUA URL) --- */
+    /* --- SMART LINK --- */
     function generateSmartLink() {
       const stateStr = JSON.stringify(newsState);
       const encoded = btoa(encodeURIComponent(stateStr));
-      
-      // Usa SEMPRE l'indirizzo live corretto (richiesto da te)
       const appUrl = "https://fabiusai.github.io/WhatsappCopy/beta2.html";
       const finalUrl = appUrl + '#share=' + encoded;
-      
       copyToClipboardSafe(finalUrl, null, "Link intelligente copiato! Incollalo su Teams.");
     }
 
@@ -435,7 +438,6 @@
           const encoded = hashString.split('#share=')[1]; 
           const stateStr = decodeURIComponent(atob(encoded));
           newsState = JSON.parse(stateStr);
-          
           history.replaceState(null, null, window.location.pathname);
           showToast("Bozze importate con successo dal link!");
           return true;
@@ -452,29 +454,19 @@
           const hashIndex = pastedUrl.indexOf('#share=');
           if(hashIndex !== -1) {
               const success = loadFromSmartLink(pastedUrl.substring(hashIndex));
-              if(success) {
-                  renderNewsList();
-                  selectNews(newsState[0].id);
-                  saveState();
-              }
-          } else {
-              showToast("Link non valido. Deve contenere '#share='", "error");
-          }
+              if(success) { renderNewsList(); selectNews(newsState[0].id); saveState(); }
+          } else { showToast("Link non valido.", "error"); }
       }
     }
 
-    /* --- PARSER E INCOLLA DA GEMINI (Fallback Sicuro) --- */
+    /* --- GEMINI PARSER --- */
     function parseCsvText(csvText) {
-        const rows = [];
-        let row = [];
-        let field = "";
-        let inQuote = false;
+        const rows = []; let row = []; let field = ""; let inQuote = false;
         for (let i = 0; i < csvText.length; i++) {
             const c = csvText[i];
             if (inQuote) {
                 if (c === '"') {
-                    if (i + 1 < csvText.length && csvText[i + 1] === '"') { field += '"'; i++; } 
-                    else { inQuote = false; }
+                    if (i + 1 < csvText.length && csvText[i + 1] === '"') { field += '"'; i++; } else { inQuote = false; }
                 } else { field += c; }
             } else {
                 if (c === '"') { inQuote = true; }
@@ -494,15 +486,14 @@
     async function pasteFromGemini() {
       let text = "";
       try {
-          if (!navigator.clipboard || !navigator.clipboard.readText) throw new Error("API non supportata");
-          text = await navigator.clipboard.readText();
+          if (navigator.clipboard && navigator.clipboard.readText) { text = await navigator.clipboard.readText(); } 
+          else { throw new Error("API non supportata"); }
       } catch (e) {
           text = prompt("Safari/Browser blocca la lettura automatica. INCOLLA QUI il CSV fornito da Gemini:");
       }
       
       if (!text) return;
-
-      let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
+      let cleanText = text.replace(/[\`]{3}(csv|json)?/gi, '').trim();
       const rows = parseCsvText(cleanText);
       
       if (rows.length > 1) {
@@ -513,42 +504,32 @@
               'Link YouTube': 'ytLink',
               'Link TG Poste': 'tgLink'
           };
-          
           let updated = false;
           rows.forEach(row => {
               const rowLabel = (row[0] || '').trim();
               const fieldType = fieldMap[rowLabel];
-              
               if (fieldType) {
                   for (let i = 0; i < newsState.length; i++) {
                       const val = row[i + 1];
-                      if (val !== undefined && val !== "") {
-                          newsState[i][fieldType] = String(val).replace(/""/g, '"');
-                          updated = true;
-                      }
+                      if (val !== undefined && val !== "") { newsState[i][fieldType] = String(val).replace(/""/g, '"'); updated = true; }
                   }
               }
           });
           
-          if(updated) {
-              saveState();
-              selectNews(activeNewsId); 
-              showToast("Testi AI caricati nelle schede!");
-          } else { showToast("CSV non valido o non riconosciuto.", "error"); }
+          if(updated) { saveState(); selectNews(activeNewsId); showToast("Testi AI caricati nelle schede!"); } 
+          else { showToast("CSV non valido.", "error"); }
       } else { showToast("Nessun CSV valido trovato.", "error"); }
     }
 
-    /* --- IMPORTAZIONE FILE EXCEL/CSV --- */
+    /* --- IMPORT EXCEL/CSV --- */
     document.getElementById('fileInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       try {
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
         if (rows.length > 1) {
           if(!confirm("L'importazione eliminerà le bozze attuali. Procedere?")) { e.target.value = ''; return; }
           newsState = [];
@@ -570,13 +551,12 @@
       e.target.value = ''; 
     });
 
-    /* --- GENERATORE PROMPT --- */
+    /* --- PROMPT GENERATOR --- */
     function openPromptGenerator() {
       let newsContent = "";
       let columnHeaders = [];
       let newsCount = 0;
-
-      newsState.forEach((news, index) => {
+      newsState.forEach((news) => {
           const textToProcess = (news.aiInput || "").trim() || (news.wa || "").trim();
           if (textToProcess) {
               newsCount++;
@@ -585,7 +565,6 @@
               if (news.ytLink) newsContent += `**Link YouTube:**\n${news.ytLink}\n`;
           }
       });
-
       if (newsCount === 0) return showToast("Inserisci almeno un testo (nel box AI o WhatsApp)", "error");
 
       const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
@@ -604,7 +583,7 @@ ${newsContent}
 3. **Social:** Sintetico ma completo. Hashtag pertinenti.
 
 **OUTPUT CSV REQUISITO:**
-Output SOLO codice CSV puro. Non aggiungere markup markdown (es. niente \`\`\`csv).
+Output SOLO codice CSV puro. Non aggiungere formattazioni extra (niente tag code).
 Delimitatore: Virgola (,)
 Qualificatore: Doppie virgolette (")
 Intestazione: ,${columnHeaders.join(',')}
@@ -626,12 +605,258 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
       copyToClipboardSafe(txt, btn, "Prompt Copiato!");
     }
 
-    /* --- RENDERING E GESTIONE NEWS --- */
+    /* --- UI UPDATE --- */
     function renderNewsList() {
       const container = document.getElementById('news-list-container');
+      if(!container) return;
       container.innerHTML = '';
       newsState.forEach((news, index) => {
         const div = document.createElement('div');
         div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
         div.innerHTML = `<span style="display:flex; align-items:center; gap:8px;"><i class="far fa-newspaper"></i> News ${index + 1}</span>`;
-        div.onclick = () => selectNews
+        div.onclick = () => selectNews(news.id);
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('btnAddNews').addEventListener('click', () => {
+      const newId = Date.now();
+      newsState.push({ id: newId, title: `News ${newsState.length + 1}`, wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" });
+      renderNewsList(); selectNews(newId); saveState(); showToast("Nuova News aggiunta");
+    });
+
+    function selectNews(id) {
+      activeNewsId = id;
+      renderNewsList();
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
+      const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
+      
+      const titleEl = document.getElementById('editorTitle');
+      if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
+      
+      const aiInputEl = document.getElementById('ai-input');
+      if(aiInputEl) aiInputEl.value = news.aiInput || "";
+      
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
+        const el = document.getElementById(`editor-${field}`);
+        if(el) el.value = news[field] || "";
+      });
+      updateAllPreviews();
+    }
+
+    function setupEditorListeners() {
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
+        const el = document.getElementById(`editor-${field}`);
+        if(el) {
+            el.addEventListener('input', (e) => {
+              const news = newsState.find(n => n.id === activeNewsId);
+              if(news) {
+                  news[field] = e.target.value;
+                  saveState(); updatePreview(field);
+                  if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
+              }
+            });
+        }
+      });
+      const aiEl = document.getElementById('ai-input');
+      if(aiEl) {
+          aiEl.addEventListener('input', (e) => {
+            const news = newsState.find(n => n.id === activeNewsId);
+            if(news) { news.aiInput = e.target.value; saveState(); }
+          });
+      }
+    }
+
+    function clearCurrentNews() {
+      if(!confirm("Vuoi davvero svuotare i campi di questa news?")) return;
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = "");
+      selectNews(activeNewsId); saveState();
+    }
+
+    function deleteCurrentNews() {
+      if(newsState.length === 1) return showToast("Non puoi eliminare l'unica news", "error");
+      if(!confirm("Eliminare definitivamente questa news?")) return;
+      newsState = newsState.filter(n => n.id !== activeNewsId);
+      selectNews(newsState[0].id); saveState();
+    }
+
+    function insertTgLink(dayType) {
+      const date = new Date();
+      if(dayType === 'yesterday') date.setDate(date.getDate() - 1);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const d_raw = date.getDate(); 
+      const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+      const link = `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
+      
+      const el = document.getElementById('editor-tgLink');
+      if(el) { el.value = link; el.dispatchEvent(new Event('input')); }
+    }
+
+    function formatText(field, action) {
+      const el = document.getElementById(`editor-${field}`);
+      if(!el) return;
+      let val = el.value;
+      if(!val) return;
+
+      if(action === 'lower') val = val.toLowerCase();
+      if(action === 'upper') val = val.toUpperCase();
+      if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+      if(action === 'auto') {
+        let urls = [];
+        val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
+        val = val.toLowerCase().replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+        masterList.forEach(word => {
+          const re = new RegExp(`\\b${word}\\b`, 'gi');
+          val = val.replace(re, word);
+        });
+        urls.forEach(u => val = val.replace('___URL___', u));
+      }
+      el.value = val;
+      el.dispatchEvent(new Event('input'));
+      showToast("Testo formattato");
+    }
+
+    function updateAllPreviews() {
+      updatePreview('wa'); updatePreview('ytTitle'); updatePreview('social');
+      ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount);
+    }
+
+    function updatePreview(sourceField) {
+      const news = newsState.find(n => n.id === activeNewsId);
+      if(!news) return;
+      
+      if(sourceField === 'wa' || sourceField === 'ytLink') {
+        let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
+        if (news.ytLink) {
+           waHtml += `<br><br>${news.ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+           const ytMatch = news.ytLink.match(/(?:v=|\/|youtu\.be\/|shorts\/)([0-9A-Za-z_-]{11})/);
+           if (ytMatch && ytMatch[1]) {
+             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border:1px solid #ddd; flex-shrink:0;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
+           }
+        }
+        const el = document.getElementById('preview-wa');
+        if(el) el.innerHTML = waHtml;
+      }
+
+      if(sourceField === 'ytTitle') {
+        const el = document.getElementById('preview-ytTitle');
+        if(el) el.innerText = news.ytTitle || "";
+      }
+
+      if(sourceField === 'ytDesc' || sourceField === 'tgLink') {
+        let desc = (news.ytDesc || "").trim();
+        const baseTags = "#TGPoste #PosteItaliane";
+        const el = document.getElementById('preview-social');
+        if(el) el.innerText = `${desc}\n\n➡️ ${news.tgLink || ""}\n\n${baseTags}`;
+      }
+    }
+
+    function updateCount(field) {
+      if(!LIMITS[field]) return;
+      const el = document.getElementById(`editor-${field}`);
+      const counter = document.getElementById(`count-${field}`);
+      if(el && counter) {
+        const len = el.value.length;
+        counter.innerText = `${len}/${LIMITS[field]}`;
+        counter.classList.toggle('over', len > LIMITS[field]);
+      }
+    }
+
+    function copyCard(type, btnElement) {
+      const targetMap = { 'wa': 'preview-wa', 'ytTitle': 'preview-ytTitle', 'social': 'preview-social' };
+      const el = document.getElementById(targetMap[type]);
+      if(!el) return;
+      const text = el.innerText;
+      if(!text.trim()) return showToast("Nessun testo da copiare", "error");
+      copyToClipboardSafe(text, btnElement, "Copiato!");
+    }
+
+    function copyAllNewsDefinitive(btnElement) {
+      let fullText = "";
+      newsState.forEach((news, idx) => {
+        fullText += `*** NEWS ${idx+1} ***\n\n`;
+        fullText += `[WHATSAPP]\n${news.wa}\n${news.ytLink}\n➡️ TG https://tgposte.poste.it/tgposte/\n\n`;
+        fullText += `[YOUTUBE TITOLO]\n${news.ytTitle}\n\n`;
+        fullText += `[POST SOCIAL]\n${news.ytDesc}\n➡️ ${news.tgLink}\n#TGPoste #PosteItaliane\n`;
+        fullText += `\n-------------------------\n\n`;
+      });
+      copyToClipboardSafe(fullText, btnElement, "Tutto Copiato!");
+    }
+
+    async function handleAI() {
+      const inputEl = document.getElementById(`ai-input`);
+      const input = inputEl ? inputEl.value : "";
+      if(!input) return showToast("Inserisci testo da elaborare!", "error");
+      
+      const loader = document.getElementById('ai-loader');
+      if(loader) loader.style.display = 'block';
+      
+      try {
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: input})
+        });
+        const data = await res.json();
+        
+        const news = newsState.find(n => n.id === activeNewsId);
+        if(news) {
+            news.wa = data.whatsapp || "";
+            news.ytTitle = data.youtube || "";
+            news.ytDesc = data.facebook_linkedin || "";
+            saveState(); selectNews(activeNewsId); showToast("Contenuti generati!");
+        }
+      } catch(e) { 
+        showToast("Errore di connessione AI", "error"); 
+      } finally { 
+        if(loader) loader.style.display = 'none'; 
+      }
+    }
+
+    function animateButton(btn, msg) {
+      const original = btn.innerHTML;
+      btn.classList.add('btn-success-anim');
+      btn.innerHTML = `<i class="fas fa-check"></i> ${msg}`;
+      setTimeout(() => { btn.classList.remove('btn-success-anim'); btn.innerHTML = original; }, 2000);
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if(!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast`;
+      toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${type === 'error' ? '#ff7a5c' : '#4cc790'}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    function exportCsv() {
+      const rows = [["News ID", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      newsState.forEach((n, i) => {
+        rows.push([
+          `News ${i+1}`, `"${(n.wa||"").replace(/"/g, '""')}"`, `"${(n.ytTitle||"").replace(/"/g, '""')}"`,
+          `"${(n.ytDesc||"").replace(/"/g, '""')}"`, `"${(n.ytLink||"").replace(/"/g, '""')}"`, `"${(n.tgLink||"").replace(/"/g, '""')}"`
+        ]);
+      });
+      const csv = rows.map(e => e.join(",")).join("\n");
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `CopyWhatsapp_${new Date().getTime()}.csv`;
+      link.click();
+    }
+
+    function exportExcel() {
+      const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      newsState.forEach((n, i) => { rows.push([`News ${i+1}`, n.wa, n.ytTitle, n.ytDesc, n.ytLink, n.tgLink]); });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
+      XLSX.writeFile(wb, `CopyWhatsapp_${new Date().getTime()}.xlsx`);
+    }
+  </script>
+</body>
+</html>
