@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v9.7 Pro</title>
+  <title>Social Dashboard – v9.8 Pro (JSON Engine)</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -110,7 +110,7 @@
     .toast { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 50px; background: var(--ink); color: #fff; font-size: 0.9rem; font-weight: 500; box-shadow: 0 8px 24px rgba(15,27,51,0.25); opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* Modale AI Rinnovata */
+    /* Modale AI */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; justify-content: center; align-items: center; background: rgba(15,27,51,0.55); backdrop-filter: blur(2px); }
     .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
     .modal-content { display: flex; flex-direction: column; width: 92%; max-width: 750px; max-height: 90vh; overflow: hidden; border-radius: var(--r); background: #fff; box-shadow: 0 24px 60px rgba(15,27,51,0.25); }
@@ -138,13 +138,12 @@
 
   <div class="app-layout">
     
-    <!-- COLONNA 1: SIDEBAR -->
     <aside class="sidebar colonna-scroll">
       <div class="brand">
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v9.7 Pro Edition</p>
+          <p>v9.8 Pro Edition</p>
         </div>
       </div>
 
@@ -163,12 +162,11 @@
           <i class="fas fa-paste"></i> Incolla Link Ricevuto
         </button>
         
-        <!-- Tasto Cumulativo Spostato Qui -->
         <button class="btn-menu" style="background:var(--ink); color:#fff; justify-content:center; margin-top: 8px; border: 1px solid var(--ink);" onclick="copyAllNewsDefinitive(this)">
           <i class="fas fa-copy"></i> Copia tutti i testi
         </button>
 
-        <!-- Nuovo Tasto Assistente AI (Apre modale unificata) -->
+        <!-- Assistente AI Centrale -->
         <button class="btn-menu" style="margin-top: 12px; border: 1px solid var(--blue); background: var(--blue-tint); color: var(--blue); justify-content:center; font-weight: 600;" onclick="openAIModal()">
           <i class="fas fa-robot"></i> Assistente AI
         </button>
@@ -185,14 +183,12 @@
           <i class="fas fa-file-excel"></i> Scarica Excel Finale
         </button>
         
-        <!-- Bottone Reset Globale -->
         <button class="btn-menu" style="border: 1px solid #efc4c4; background: #fdecec; color: var(--danger); justify-content:center; margin-top: 24px;" onclick="hardResetApp()">
           <i class="fas fa-trash-alt"></i> Reset Completo App
         </button>
       </div>
     </aside>
 
-    <!-- COLONNA 2: AREA EDITORIALE (Pulita dal Box AI) -->
     <main class="colonna-scroll">
       <div class="editor-wrapper">
         
@@ -261,7 +257,6 @@
       </div>
     </main>
 
-    <!-- COLONNA 3: PREVIEW (Il tasto è stato rimosso dal fondo) -->
     <aside class="colonna-scroll preview-wrapper">
       <div class="preview-card card-wa">
         <div class="preview-header"><i class="fab fa-whatsapp" style="color:var(--wa-green)"></i> Definitivo WhatsApp</div>
@@ -290,7 +285,7 @@
 
   </div>
 
-  <!-- MODALE AI COMPLETAMENTE RIELABORATA -->
+  <!-- MODALE AI JSON ENGINE -->
   <div class="modal-overlay" id="aiModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -300,38 +295,34 @@
       
       <div class="modal-body">
         
-        <!-- STEP 1: INPUT DATI -->
+        <!-- STEP 1: INPUT -->
         <div id="aiStep1">
             <p style="margin: 0 0 16px; color: var(--muted); font-size: 0.95rem;">
-                Incolla i testi grezzi e (opzionalmente) il link video. Clicca "+ Aggiungi Notizia" per elaborare più news in un solo colpo.
+                Incolla i testi grezzi. Clicca "+ Aggiungi Notizia" per elaborare più news contemporaneamente.
             </p>
-            
-            <div id="aiModalInputContainer">
-                <!-- Generato da JS -->
-            </div>
-            
+            <div id="aiModalInputContainer"></div>
             <button class="btn-add-news" style="width: auto; padding: 6px 14px; margin-top: 4px;" onclick="addAiModalInput()">
                 <i class="fas fa-plus"></i> Aggiungi Notizia
             </button>
 
             <div style="display:flex; gap:12px; margin-top:24px; border-top:1px solid var(--line); padding-top:20px;">
                 <button class="btn-menu primary-action" style="margin:0; width:50%; background: var(--blue);" onclick="startInternalAI()">
-                    <i class="fas fa-bolt"></i> Genera con API
+                    <i class="fas fa-bolt"></i> Genera con API Interna
                 </button>
                 <button class="btn-menu secondary-action" style="margin:0; width:50%; border: 1px solid var(--blue);" onclick="generateExternalPrompt()">
-                    <i class="fas fa-wand-magic-sparkles"></i> Genera Prompt (AI Esterna)
+                    <i class="fas fa-wand-magic-sparkles"></i> Usa Gemini (AI Esterna)
                 </button>
             </div>
         </div>
 
-        <!-- STEP 2: CARICAMENTO API -->
+        <!-- STEP 2: LOADER API -->
         <div id="aiStepLoader" class="hidden" style="text-align:center; padding: 40px 20px;">
             <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--blue)"></i>
             <h3 style="margin-top:20px; color:var(--ink);">Elaborazione API in corso...</h3>
             <p id="aiModalLoaderText" style="color:var(--muted);">Elaborazione notizia 1...</p>
         </div>
 
-        <!-- STEP 3: PROMPT GEMINI E INCOLLA -->
+        <!-- STEP 3: PROMPT JSON E PASTE -->
         <div id="aiStepExternal" class="hidden">
             <button class="btn-menu" style="width: auto; margin-bottom: 16px; padding: 4px 10px; font-size: 0.8rem; border: 1px solid var(--line);" onclick="backToAiStep1()">
                 <i class="fas fa-arrow-left"></i> Indietro
@@ -343,11 +334,11 @@
                 <code id="promptCodeBlock"></code>
             </div>
             
-            <p style="margin: 0 0 8px; font-weight:600; font-size: 0.95rem;">2. Incolla qui il codice CSV fornito da Gemini:</p>
-            <textarea id="aiCsvPaste" class="main-input" rows="4" placeholder="Incolla il CSV generato..."></textarea>
+            <p style="margin: 0 0 8px; font-weight:600; font-size: 0.95rem;">2. Incolla qui il codice JSON restituito da Gemini:</p>
+            <textarea id="aiJsonPaste" class="main-input" rows="4" placeholder="Incolla il JSON puro..."></textarea>
             
-            <button class="btn-menu primary-action" style="background: var(--ok); margin-top:16px;" onclick="applyExternalAiCsv()">
-                <i class="fas fa-check-circle"></i> Applica CSV alle Schede
+            <button class="btn-menu primary-action" style="background: var(--ok); margin-top:16px;" onclick="applyExternalAiData()">
+                <i class="fas fa-check-circle"></i> Applica Testi alle Schede
             </button>
         </div>
 
@@ -364,39 +355,23 @@
     const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
     const LIMITS = { wa: 82, ytTitle: 49, ytDesc: 280 };
 
-    /* --- INIT CORAZZATO --- */
     window.addEventListener('DOMContentLoaded', () => {
-      try { initApp(); } catch (error) { console.error(error); alert("Errore critico all'avvio."); }
+      try { initApp(); } catch (error) { console.error(error); alert("Errore all'avvio."); }
     });
 
     function initApp() {
-      fetch(googleSheetURL)
-        .then(r => r.ok ? r.text() : "")
-        .then(t => { if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); })
-        .catch(() => console.warn("Dizionario CSV offline"));
-
+      fetch(googleSheetURL).then(r => r.ok ? r.text() : "").then(t => { if(t) masterList = t.split('\n').map(s => s.trim()).filter(Boolean); }).catch(()=>{});
       const hasSmartLink = loadFromSmartLink(window.location.hash);
 
       if (!hasSmartLink) {
-        try {
-            const saved = localStorage.getItem('socialDashboardStateV9');
-            if (saved) newsState = JSON.parse(saved);
-        } catch(e) {}
-
-        if (!newsState || !Array.isArray(newsState) || newsState.length === 0) {
-            createDefaultNews();
-        } else {
-            newsState.forEach(n => { if(typeof n.aiInput === 'undefined') n.aiInput = ""; });
-        }
+        try { const saved = localStorage.getItem('socialDashboardStateV9'); if (saved) newsState = JSON.parse(saved); } catch(e) {}
+        if (!newsState || !Array.isArray(newsState) || newsState.length === 0) createDefaultNews();
+        else newsState.forEach(n => { if(typeof n.aiInput === 'undefined') n.aiInput = ""; });
       }
 
       renderNewsList();
       if (newsState.length > 0) selectNews(newsState[0].id);
       setupEditorListeners();
-      
-      // Chiusura sfondo modale
-      const modal = document.getElementById('aiModal');
-      if (modal) { modal.addEventListener('click', (e) => { if (e.target === modal) closeAIModal(); }); }
     }
 
     function createDefaultNews() {
@@ -408,81 +383,52 @@
     }
 
     function hardResetApp() {
-        if(confirm("ATTENZIONE: Questo cancellerà tutte le bozze attuali e riporterà l'app allo stato iniziale vuoto. Sei sicuro?")) {
+        if(confirm("ATTENZIONE: Questo cancellerà tutte le bozze attuali. Sei sicuro?")) {
             localStorage.removeItem('socialDashboardStateV9');
             window.location.hash = '';
             location.reload();
         }
     }
 
-    /* --- SISTEMA DI COPIA INFALLIBILE --- */
     function fallbackCopyTextToClipboard(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try { document.execCommand('copy'); } catch (err) { }
-      document.body.removeChild(textArea);
+      const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed";
+      document.body.appendChild(textArea); textArea.focus(); textArea.select();
+      try { document.execCommand('copy'); } catch (err) { } document.body.removeChild(textArea);
     }
 
     async function copyToClipboardSafe(text, btnElement, successMsg) {
-      if (!navigator.clipboard) {
-         fallbackCopyTextToClipboard(text);
-         if(btnElement) animateButton(btnElement, successMsg);
-         showToast(successMsg);
-         return;
-      }
-      try {
-         await navigator.clipboard.writeText(text);
-         if(btnElement) animateButton(btnElement, successMsg);
-         showToast(successMsg);
-      } catch (err) {
-         fallbackCopyTextToClipboard(text);
-         if(btnElement) animateButton(btnElement, successMsg);
-         showToast(successMsg);
-      }
+      if (!navigator.clipboard) { fallbackCopyTextToClipboard(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); return; }
+      try { await navigator.clipboard.writeText(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); } 
+      catch (err) { fallbackCopyTextToClipboard(text); if(btnElement) animateButton(btnElement, successMsg); showToast(successMsg); }
     }
 
-    /* --- SMART LINK --- */
     function generateSmartLink() {
-      const stateStr = JSON.stringify(newsState);
-      const encoded = btoa(encodeURIComponent(stateStr));
+      const stateStr = JSON.stringify(newsState); const encoded = btoa(encodeURIComponent(stateStr));
       const appUrl = "https://fabiusai.github.io/WhatsappCopy/beta2.html";
-      const finalUrl = appUrl + '#share=' + encoded;
-      copyToClipboardSafe(finalUrl, null, "Link intelligente copiato! Incollalo su Teams.");
+      copyToClipboardSafe(appUrl + '#share=' + encoded, null, "Link intelligente copiato!");
     }
 
     function loadFromSmartLink(hashString) {
       if (hashString && hashString.includes('#share=')) {
         try {
-          const encoded = hashString.split('#share=')[1]; 
-          const stateStr = decodeURIComponent(atob(encoded));
-          newsState = JSON.parse(stateStr);
-          history.replaceState(null, null, window.location.pathname);
-          showToast("Bozze importate con successo dal link!");
-          return true;
-        } catch(e) { showToast("Link condiviso non valido", "error"); }
+          const encoded = hashString.split('#share=')[1]; const stateStr = decodeURIComponent(atob(encoded));
+          newsState = JSON.parse(stateStr); history.replaceState(null, null, window.location.pathname);
+          showToast("Bozze importate con successo!"); return true;
+        } catch(e) { showToast("Link non valido", "error"); }
       }
       return false;
     }
     
     function importFromLinkPrompt() {
-      const pastedUrl = prompt("Incolla qui il link completo che hai ricevuto dal collega:");
+      const pastedUrl = prompt("Incolla qui il link ricevuto:");
       if(pastedUrl) {
           const hashIndex = pastedUrl.indexOf('#share=');
-          if(hashIndex !== -1) {
-              const success = loadFromSmartLink(pastedUrl.substring(hashIndex));
-              if(success) { renderNewsList(); selectNews(newsState[0].id); saveState(); }
-          } else { showToast("Link non valido.", "error"); }
+          if(hashIndex !== -1) { if(loadFromSmartLink(pastedUrl.substring(hashIndex))) { renderNewsList(); selectNews(newsState[0].id); saveState(); } } 
+          else { showToast("Link non valido.", "error"); }
       }
     }
 
-    /* =========================================
-       MODALE AI (IL NUOVO MOTORE)
-       ========================================= */
-
+    /* === MODALE AI JSON ENGINE === */
     function openAIModal() {
         document.getElementById('aiStep1').classList.remove('hidden');
         document.getElementById('aiStepLoader').classList.add('hidden');
@@ -491,7 +437,6 @@
         const container = document.getElementById('aiModalInputContainer');
         container.innerHTML = '';
         
-        // Popola la modale con le news attualmente caricate (se hanno testo grezzo o link)
         let hasContent = false;
         newsState.forEach((news) => {
             if (news.aiInput || news.ytLink || news.wa) {
@@ -499,27 +444,19 @@
                 hasContent = true;
             }
         });
-
-        // Se lo stato era completamente vuoto, aggiungi 1 blocco pulito
         if (!hasContent) addAiModalInput();
-
         document.getElementById('aiModal').classList.add('open');
     }
 
-    function closeAIModal() {
-        document.getElementById('aiModal').classList.remove('open');
-    }
+    function closeAIModal() { document.getElementById('aiModal').classList.remove('open'); }
 
     function addAiModalInput(text = "", link = "") {
         const container = document.getElementById('aiModalInputContainer');
-        const count = container.children.length + 1;
-        const div = document.createElement('div');
-        div.className = "ai-modal-input-block";
-        
+        const div = document.createElement('div'); div.className = "ai-modal-input-block";
         div.innerHTML = `
             <button class="btn-remove-block" onclick="this.parentElement.remove()" title="Rimuovi"><i class="fas fa-times"></i></button>
-            <h4><i class="far fa-newspaper"></i> Blocco Notizia</h4>
-            <textarea class="main-input ai-raw-text" rows="3" placeholder="Incolla il testo grezzo (comunicato, articolo...)...">${text}</textarea>
+            <h4><i class="far fa-newspaper"></i> Notizia</h4>
+            <textarea class="main-input ai-raw-text" rows="3" placeholder="Incolla il testo grezzo...">${text}</textarea>
             <input type="text" class="main-input ai-raw-link" style="margin-top:8px;" placeholder="Link YouTube (Opzionale)" value="${link}">
         `;
         container.appendChild(div);
@@ -530,15 +467,10 @@
         document.getElementById('aiStepExternal').classList.add('hidden');
     }
 
-    /* --- AZIONE 1: GENERAZIONE API INTERNA --- */
     async function startInternalAI() {
         const blocks = document.querySelectorAll('.ai-modal-input-block');
-        const inputs = Array.from(blocks).map(b => ({
-            text: b.querySelector('.ai-raw-text').value.trim(),
-            link: b.querySelector('.ai-raw-link').value.trim()
-        })).filter(inp => inp.text !== "");
-
-        if (inputs.length === 0) return showToast("Inserisci almeno un testo grezzo", "error");
+        const inputs = Array.from(blocks).map(b => ({ text: b.querySelector('.ai-raw-text').value.trim(), link: b.querySelector('.ai-raw-link').value.trim() })).filter(inp => inp.text !== "");
+        if (inputs.length === 0) return showToast("Inserisci almeno un testo", "error");
 
         document.getElementById('aiStep1').classList.add('hidden');
         document.getElementById('aiStepLoader').classList.remove('hidden');
@@ -547,197 +479,109 @@
         for(let i=0; i < inputs.length; i++) {
             document.getElementById('aiModalLoaderText').innerText = `Elaborazione notizia ${i+1} di${inputs.length}...`;
             try {
-                const res = await fetch(API_URL, {
-                    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: inputs[i].text})
-                });
+                const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: inputs[i].text}) });
                 const data = await res.json();
-                generatedNews.push({
-                    id: Date.now() + i, title: `News ${i+1}`,
-                    wa: data.whatsapp || "", ytTitle: data.youtube || "", ytDesc: data.facebook_linkedin || "",
-                    ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text
-                });
+                generatedNews.push({ id: Date.now() + i, title: `News ${i+1}`, wa: data.whatsapp || "", ytTitle: data.youtube || "", ytDesc: data.facebook_linkedin || "", ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text });
             } catch(e) {
-                generatedNews.push({
-                    id: Date.now() + i, title: `News ${i+1}`,
-                    wa: "ERRORE AI", ytTitle: "Riprova", ytDesc: "Connessione fallita",
-                    ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text
-                });
+                generatedNews.push({ id: Date.now() + i, title: `News ${i+1}`, wa: "ERRORE AI", ytTitle: "Riprova", ytDesc: "Connessione fallita", ytLink: inputs[i].link, tgLink: "", aiInput: inputs[i].text });
             }
         }
-
-        newsState = generatedNews;
-        saveState();
-        renderNewsList();
-        selectNews(newsState[0].id);
-        closeAIModal();
-        showToast(`Generazione completata! (${inputs.length} news)`);
+        newsState = generatedNews; saveState(); renderNewsList(); selectNews(newsState[0].id); closeAIModal(); showToast(`Generazione completata! (${inputs.length} news)`);
     }
 
-    /* --- AZIONE 2: GENERAZIONE ESTERNA (PROMPT E CSV) --- */
     function generateExternalPrompt() {
         const blocks = document.querySelectorAll('.ai-modal-input-block');
-        let newsContent = "";
-        let columnHeaders = [];
-        let newsCount = 0;
-
+        let newsContent = ""; let newsCount = 0;
         blocks.forEach((b) => {
-            const text = b.querySelector('.ai-raw-text').value.trim();
-            const link = b.querySelector('.ai-raw-link').value.trim();
-            if(text) {
-                newsCount++;
-                columnHeaders.push(`"News ${newsCount}"`);
-                newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${text}\n`;
-                if(link) newsContent += `**Link YouTube:**\n${link}\n`;
-            }
+            const text = b.querySelector('.ai-raw-text').value.trim(); const link = b.querySelector('.ai-raw-link').value.trim();
+            if(text) { newsCount++; newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo originale:**\n${text}\n`; if(link) newsContent += `**Link YouTube:**\n${link}\n`; }
         });
-
         if (newsCount === 0) return showToast("Inserisci almeno un testo", "error");
 
-        const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
+        const finalPrompt = `Sei un copywriter e assistente social media. Elabora queste ${newsCount} notizie.
 
 **INFO NEWS:**
 ${newsContent}
 
 **TONO E STILE:**
-* Tono chiaro, istituzionale e informativo. Nessuna enfasi o emoticon. Stile sobrio, tipico di un'azienda pubblica. Nessun pronome diretto al lettore.
-* Parla a nome dell'azienda, ma nomina il brand solo quando essenziale. 
-* Evita di usare le stesse parole del testo WhatsApp per il titolo YouTube.
+* Istituzionale, sobrio, informativo. Niente emoticon, nessuna enfasi. Mai rivolgersi al lettore con "tu".
+* Sintetizza in forma giornalistica fedele alle fonti.
+* Evita ripetizioni identiche tra testo WhatsApp e Titolo YouTube.
 
-**LUNGHEZZE:**
-1. **WhatsApp:** ~90 caratteri.
-2. **YouTube Titolo:** Max 49 caratteri.
-3. **Social:** Sintetico ma completo. Hashtag pertinenti.
+**LUNGHEZZE E CAMPI:**
+1. **wa (WhatsApp):** ~90 caratteri.
+2. **ytTitle (YouTube Titolo):** Max 49 caratteri.
+3. **ytDesc (Copy Social):** Sintetico ma completo. Hashtag in coda.
+4. **ytLink:** Ricopialo se fornito, altrimenti stringa vuota.
 
-**OUTPUT CSV REQUISITO:**
-Output SOLO codice CSV puro. Non aggiungere formattazioni markdown (niente tag code o \`\`\`csv).
-Delimitatore: Virgola (,)
-Qualificatore: Doppie virgolette (")
-Intestazione: ,${columnHeaders.join(',')}
-Righe:
-"Testo descrittivo news Canale WA",...
-"Titolo YouTube",...
-"Copy post e descrizione YT",...
-"Link YouTube",...
-"Link TG Poste",...
-
-Fornisci unicamente le 6 righe di testo in formato CSV.`;
+**OUTPUT RICHIESTO: ESCLUSIVAMENTE JSON**
+Restituisci unicamente un Array di Oggetti JSON. Non aggiungere saluti né formattazione (no \`\`\`json).
+Usa esattamente questa struttura per ogni notizia:
+[
+  {
+    "wa": "testo...",
+    "ytTitle": "titolo...",
+    "ytDesc": "descrizione social...",
+    "ytLink": "link_se_presente",
+    "tgLink": ""
+  }
+]`;
 
         document.getElementById('promptCodeBlock').textContent = finalPrompt;
-        document.getElementById('aiCsvPaste').value = ""; // Svuota l'area di paste
-        
+        document.getElementById('aiJsonPaste').value = ""; 
         document.getElementById('aiStep1').classList.add('hidden');
         document.getElementById('aiStepExternal').classList.remove('hidden');
     }
 
-    function copyPromptText(btn) {
-        const txt = document.getElementById('promptCodeBlock').textContent;
-        copyToClipboardSafe(txt, btn, "Prompt Copiato!");
-    }
+    function copyPromptText(btn) { copyToClipboardSafe(document.getElementById('promptCodeBlock').textContent, btn, "Prompt Copiato!"); }
 
-    function parseCsvText(csvText) {
-        const rows = []; let row = []; let field = ""; let inQuote = false;
-        for (let i = 0; i < csvText.length; i++) {
-            const c = csvText[i];
-            if (inQuote) {
-                if (c === '"') {
-                    if (i + 1 < csvText.length && csvText[i + 1] === '"') { field += '"'; i++; } else { inQuote = false; }
-                } else { field += c; }
-            } else {
-                if (c === '"') { inQuote = true; }
-                else if (c === ',') { row.push(field); field = ""; }
-                else if (c === '\n' || c === '\r') {
-                    row.push(field); 
-                    if (row.length > 0 && (row.length > 1 || row[0] !== "")) rows.push(row);
-                    row = []; field = "";
-                    if (c === '\r' && csvText[i + 1] === '\n') i++;
-                } else { field += c; }
-            }
-        }
-        if (field || row.length > 0) { row.push(field); rows.push(row); }
-        return rows;
-    }
-
-    function applyExternalAiCsv() {
-        const pasteArea = document.getElementById('aiCsvPaste');
+    function applyExternalAiData() {
+        const pasteArea = document.getElementById('aiJsonPaste');
         if(!pasteArea) return;
         const text = pasteArea.value.trim();
-        if (!text) return showToast("Incolla il CSV prima di applicare", "error");
+        if (!text) return showToast("Incolla il risultato prima di applicare", "error");
 
-        let cleanText = text.replace(/```(csv|json)?/gi, '').trim();
-        const rows = parseCsvText(cleanText);
-        
-        if (rows.length > 1) {
-            // Raccogli gli input grezzi originariamente inseriti
-            const blocks = document.querySelectorAll('.ai-modal-input-block');
-            const rawInputs = Array.from(blocks).map(b => ({
-                text: b.querySelector('.ai-raw-text').value.trim(),
-                link: b.querySelector('.ai-raw-link').value.trim()
-            })).filter(inp => inp.text !== "");
-
-            // Conta le colonne generate dall'AI
-            let maxCols = 0;
-            rows.forEach(r => { if(r.length > maxCols) maxCols = r.length; });
-            const numAiNews = maxCols > 1 ? maxCols - 1 : 0; 
-            
-            if(numAiNews === 0) return showToast("Nessuna news valida trovata nel CSV", "error");
-
-            // Ricostruisci integralmente il newsState
-            let newNewsState = [];
-            for(let i=0; i<numAiNews; i++) {
-                newNewsState.push({
-                    id: Date.now() + i, title: `News ${i+1}`,
-                    wa: "", ytTitle: "", ytDesc: "", 
-                    ytLink: rawInputs[i] ? rawInputs[i].link : "", tgLink: "", 
-                    aiInput: rawInputs[i] ? rawInputs[i].text : ""
-                });
-            }
-
-            const fieldMap = {
-                'Testo descrittivo news Canale WA': 'wa',
-                'Titolo YouTube': 'ytTitle',
-                'Copy post e descrizione YT': 'ytDesc',
-                'Link YouTube': 'ytLink',
-                'Link TG Poste': 'tgLink'
-            };
-            
-            let updated = false;
-            rows.forEach(row => {
-                const rowLabel = (row[0] || '').trim();
-                const fieldType = fieldMap[rowLabel];
-                if (fieldType) {
-                    for (let i = 0; i < newNewsState.length; i++) {
-                        const val = row[i + 1];
-                        if (val !== undefined && val !== "") { 
-                            newNewsState[i][fieldType] = String(val).replace(/""/g, '"'); 
-                            updated = true; 
-                        }
-                    }
+        let jsonData = null;
+        try {
+            let cleanText = text.replace(/```(json)?/gi, '').trim();
+            const match = cleanText.match(/\[\s*\{[\s\S]*\}\s*\]/); // Estrazione Regex blindata
+            if (match) { jsonData = JSON.parse(match[0]); } 
+            else {
+                const matchObj = cleanText.match(/\{[\s\S]*\}/);
+                if (matchObj) {
+                    let obj = JSON.parse(matchObj[0]);
+                    if(obj.wa !== undefined) jsonData = [obj];
                 }
-            });
-
-            if(updated) {
-                newsState = newNewsState;
-                saveState();
-                renderNewsList();
-                selectNews(newsState[0].id);
-                closeAIModal();
-                showToast(`Bozze popolate con successo! (${numAiNews} news)`);
-            } else {
-                showToast("Formato CSV non riconosciuto (etichette errate).", "error");
             }
-        } else {
-            showToast("Il testo incollato non sembra un CSV valido.", "error");
+        } catch (e) { console.error(e); }
+
+        if (!jsonData || !Array.isArray(jsonData)) return showToast("Formato JSON non valido", "error");
+        
+        const numAiNews = jsonData.length;
+        if(numAiNews === 0) return showToast("Nessuna news nel JSON", "error");
+
+        const blocks = document.querySelectorAll('.ai-modal-input-block');
+        const rawInputs = Array.from(blocks).map(b => ({ text: b.querySelector('.ai-raw-text').value.trim(), link: b.querySelector('.ai-raw-link').value.trim() }));
+
+        let newNewsState = [];
+        for(let i=0; i<numAiNews; i++) {
+            newNewsState.push({
+                id: Date.now() + i, title: `News ${i+1}`,
+                wa: jsonData[i].wa || "", ytTitle: jsonData[i].ytTitle || "", ytDesc: jsonData[i].ytDesc || "", 
+                ytLink: jsonData[i].ytLink || (rawInputs[i] ? rawInputs[i].link : ""), tgLink: jsonData[i].tgLink || "", 
+                aiInput: rawInputs[i] ? rawInputs[i].text : ""
+            });
         }
+
+        newsState = newNewsState; saveState(); renderNewsList(); selectNews(newsState[0].id); closeAIModal();
+        showToast(`Bozze popolate con successo! (${numAiNews} news)`);
     }
 
-    /* --- IMPORT EXCEL/CSV (File Classico) --- */
+    /* === IMPORTAZIONE EXCEL === */
     document.getElementById('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       try {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = await file.arrayBuffer(); const workbook = XLSX.read(data); const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         if (rows.length > 1) {
           if(!confirm("L'importazione eliminerà le bozze attuali. Procedere?")) { e.target.value = ''; return; }
@@ -753,24 +597,19 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
             }
           });
           if(newsState.length === 0) createDefaultNews();
-          renderNewsList(); selectNews(newsState[0].id); saveState();
-          showToast("File importato con successo!");
+          renderNewsList(); selectNews(newsState[0].id); saveState(); showToast("File importato con successo!");
         } else { showToast("File vuoto o non valido.", "error"); }
       } catch(err) { showToast("Errore lettura file.", "error"); }
       e.target.value = ''; 
     });
 
-    /* --- UI UPDATE E REAL-TIME PREVIEW --- */
+    /* === INTERFACCIA E LOGICHE EDITORIALI === */
     function renderNewsList() {
-      const container = document.getElementById('news-list-container');
-      if(!container) return;
-      container.innerHTML = '';
+      const container = document.getElementById('news-list-container'); if(!container) return; container.innerHTML = '';
       newsState.forEach((news, index) => {
-        const div = document.createElement('div');
-        div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
+        const div = document.createElement('div'); div.className = `news-item ${news.id === activeNewsId ? 'active' : ''}`;
         div.innerHTML = `<span style="display:flex; align-items:center; gap:8px;"><i class="far fa-newspaper"></i> News ${index + 1}</span>`;
-        div.onclick = () => selectNews(news.id);
-        container.appendChild(div);
+        div.onclick = () => selectNews(news.id); container.appendChild(div);
       });
     }
 
@@ -781,18 +620,12 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
     });
 
     function selectNews(id) {
-      activeNewsId = id;
-      renderNewsList();
-      const news = newsState.find(n => n.id === activeNewsId);
-      if(!news) return;
-      
+      activeNewsId = id; renderNewsList(); const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
       const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
-      const titleEl = document.getElementById('editorTitle');
-      if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
+      const titleEl = document.getElementById('editorTitle'); if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
       
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
-        const el = document.getElementById(`editor-${field}`);
-        if(el) el.value = news[field] || "";
+        const el = document.getElementById(`editor-${field}`); if(el) el.value = news[field] || "";
       });
       updateAllPreviews(); 
     }
@@ -803,204 +636,50 @@ Fornisci unicamente le 6 righe di testo in formato CSV.`;
         if(el) {
             el.addEventListener('input', (e) => {
               const news = newsState.find(n => n.id === activeNewsId);
-              if(news) {
-                  news[field] = e.target.value;
-                  saveState(); 
-                  updatePreview(field);
-                  if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
-              }
+              if(news) { news[field] = e.target.value; saveState(); updatePreview(field); if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field); }
             });
         }
       });
     }
 
     function clearCurrentNews() {
-      if(!confirm("Vuoi davvero svuotare i campi di questa news?")) return;
-      const news = newsState.find(n => n.id === activeNewsId);
-      if(!news) return;
-      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = "");
-      selectNews(activeNewsId); saveState();
+      if(!confirm("Vuoi svuotare i campi di questa news?")) return;
+      const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = ""); selectNews(activeNewsId); saveState();
     }
 
     function deleteCurrentNews() {
       if(newsState.length === 1) return showToast("Non puoi eliminare l'unica news", "error");
       if(!confirm("Eliminare definitivamente questa news?")) return;
-      newsState = newsState.filter(n => n.id !== activeNewsId);
-      selectNews(newsState[0].id); saveState();
+      newsState = newsState.filter(n => n.id !== activeNewsId); selectNews(newsState[0].id); saveState();
     }
 
     function insertTgLink(dayType) {
-      const date = new Date();
-      if(dayType === 'yesterday') date.setDate(date.getDate() - 1);
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      const d_raw = date.getDate(); 
+      const date = new Date(); if(dayType === 'yesterday') date.setDate(date.getDate() - 1);
+      const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
       const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-      const link = `[https://tgposte.poste.it/tgposte/$](https://tgposte.poste.it/tgposte/$){y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
-      
-      const el = document.getElementById('editor-tgLink');
-      if(el) { el.value = link; el.dispatchEvent(new Event('input')); }
+      const link = `[https://tgposte.poste.it/tgposte/$](https://tgposte.poste.it/tgposte/$){y}/${m}/${d}/tg-poste-del-${date.getDate()}-${months[date.getMonth()]}-${y}/`;
+      const el = document.getElementById('editor-tgLink'); if(el) { el.value = link; el.dispatchEvent(new Event('input')); }
     }
 
     function formatText(field, action) {
-      const el = document.getElementById(`editor-${field}`);
-      if(!el) return;
-      let val = el.value;
-      if(!val) return;
-
+      const el = document.getElementById(`editor-${field}`); if(!el) return; let val = el.value; if(!val) return;
       if(action === 'lower') val = val.toLowerCase();
       if(action === 'upper') val = val.toUpperCase();
       if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
       if(action === 'auto') {
-        let urls = [];
-        val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
+        let urls = []; val = val.replace(/(https?:\/\/[^\s]+)/g, m => { urls.push(m); return '___URL___'; });
         val = val.toLowerCase().replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
-        masterList.forEach(word => {
-          const re = new RegExp(`\\b${word}\\b`, 'gi');
-          val = val.replace(re, word);
-        });
+        masterList.forEach(word => { const re = new RegExp(`\\b${word}\\b`, 'gi'); val = val.replace(re, word); });
         urls.forEach(u => val = val.replace('___URL___', u));
       }
-      el.value = val;
-      el.dispatchEvent(new Event('input')); 
-      showToast("Testo formattato");
+      el.value = val; el.dispatchEvent(new Event('input')); showToast("Testo formattato");
     }
 
-    function updateAllPreviews() {
-      updatePreview('wa'); updatePreview('ytTitle'); updatePreview('ytDesc');
-      ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount);
-    }
+    function updateAllPreviews() { updatePreview('wa'); updatePreview('ytTitle'); updatePreview('ytDesc'); ['wa', 'ytTitle', 'ytDesc'].forEach(updateCount); }
 
     function updatePreview(sourceField) {
-      const news = newsState.find(n => n.id === activeNewsId);
-      if(!news) return;
+      const news = newsState.find(n => n.id === activeNewsId); if(!news) return;
       
       if(sourceField === 'wa' || sourceField === 'ytLink') {
-        let waHtml = `${(news.wa || "").replace(/\n/g, '<br>')}`;
-        if (news.ytLink) {
-           waHtml += `<br><br>${news.ytLink}<br>➡️ TG [https://tgposte.poste.it/tgposte/](https://tgposte.poste.it/tgposte/)`;
-           const ytMatch = news.ytLink.match(/(?:v=|\/|youtu\.be\/|shorts\/)([0-9A-Za-z_-]{11})/);
-           if (ytMatch && ytMatch[1]) {
-             waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:14px; border:1px solid #ddd; flex-shrink:0;"><iframe src="[https://www.youtube.com/embed/$](https://www.youtube.com/embed/$){ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
-           }
-        }
-        const el = document.getElementById('preview-wa');
-        if(el) el.innerHTML = waHtml;
-      }
-
-      if(sourceField === 'ytTitle') {
-        const el = document.getElementById('preview-ytTitle');
-        if(el) el.innerText = news.ytTitle || "";
-      }
-
-      if(sourceField === 'ytDesc' || sourceField === 'tgLink') {
-        let ytDescRaw = (news.ytDesc || "").trim();
-        const tgLink = news.tgLink || "";
-        let extractedHashtags = "";
-        
-        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
-        const match = ytDescRaw.match(hashtagRegex);
-        
-        if (match) {
-            extractedHashtags = match[0].trim();
-            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
-        }
-        
-        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
-        const baseTags = "#TGPoste #PosteItaliane";
-        const finalTags = extractedHashtags ? `${baseTags} ${extractedHashtags}` : baseTags;
-        
-        const el = document.getElementById('preview-social');
-        if(el) el.innerText = `${ytDescRaw}\n\n➡️ ${tgLink}\n\n${finalTags}`;
-      }
-    }
-
-    function updateCount(field) {
-      if(!LIMITS[field]) return;
-      const el = document.getElementById(`editor-${field}`);
-      const counter = document.getElementById(`count-${field}`);
-      if(el && counter) {
-        const len = el.value.length;
-        counter.innerText = `${len}/${LIMITS[field]}`;
-        counter.classList.toggle('over', len > LIMITS[field]);
-      }
-    }
-
-    function copyCard(type, btnElement) {
-      const targetMap = { 'wa': 'preview-wa', 'ytTitle': 'preview-ytTitle', 'social': 'preview-social' };
-      const el = document.getElementById(targetMap[type]);
-      if(!el) return;
-      const text = el.innerText;
-      if(!text.trim()) return showToast("Nessun testo da copiare", "error");
-      copyToClipboardSafe(text, btnElement, "Copiato!");
-    }
-
-    function copyAllNewsDefinitive(btnElement) {
-      let fullText = "";
-      newsState.forEach((news, idx) => {
-        let ytDescRaw = (news.ytDesc || "").trim();
-        let extractedHashtags = "";
-        const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
-        const match = ytDescRaw.match(hashtagRegex);
-        if (match) {
-            extractedHashtags = match[0].trim();
-            ytDescRaw = ytDescRaw.replace(hashtagRegex, '').trim();
-        }
-        extractedHashtags = extractedHashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
-        const baseTags = "#TGPoste #PosteItaliane";
-        const finalTags = extractedHashtags ? `${baseTags} ${extractedHashtags}` : baseTags;
-
-        fullText += `*** NEWS ${idx+1} ***\n\n`;
-        fullText += `[WHATSAPP]\n${news.wa}\n${news.ytLink}\n➡️ TG [https://tgposte.poste.it/tgposte/](https://tgposte.poste.it/tgposte/)\n\n`;
-        fullText += `[YOUTUBE TITOLO]\n${news.ytTitle}\n\n`;
-        fullText += `[POST SOCIAL]\n${ytDescRaw}\n➡️ ${news.tgLink}\n${finalTags}\n`;
-        fullText += `\n-------------------------\n\n`;
-      });
-      copyToClipboardSafe(fullText, btnElement, "Tutto Copiato!");
-    }
-
-    function animateButton(btn, msg) {
-      const original = btn.innerHTML;
-      btn.classList.add('btn-success-anim');
-      btn.innerHTML = `<i class="fas fa-check"></i> ${msg}`;
-      setTimeout(() => { btn.classList.remove('btn-success-anim'); btn.innerHTML = original; }, 2000);
-    }
-
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      if(!container) return;
-      const toast = document.createElement('div');
-      toast.className = `toast`;
-      toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${type === 'error' ? '#ff7a5c' : '#4cc790'}"></i> <span>${message}</span>`;
-      container.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.add('show'));
-      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
-    }
-
-    function exportCsv() {
-      const rows = [["News ID", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
-      newsState.forEach((n, i) => {
-        rows.push([
-          `News ${i+1}`, `"${(n.wa||"").replace(/"/g, '""')}"`, `"${(n.ytTitle||"").replace(/"/g, '""')}"`,
-          `"${(n.ytDesc||"").replace(/"/g, '""')}"`, `"${(n.ytLink||"").replace(/"/g, '""')}"`, `"${(n.tgLink||"").replace(/"/g, '""')}"`
-        ]);
-      });
-      const csv = rows.map(e => e.join(",")).join("\n");
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `CopyWhatsapp_${new Date().getTime()}.csv`;
-      link.click();
-    }
-
-    function exportExcel() {
-      const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
-      newsState.forEach((n, i) => { rows.push([`News ${i+1}`, n.wa, n.ytTitle, n.ytDesc, n.ytLink, n.tgLink]); });
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
-      XLSX.writeFile(wb, `CopyWhatsapp_${new Date().getTime()}.xlsx`);
-    }
-  </script>
-</body>
-</html>
+        let waHtml =
