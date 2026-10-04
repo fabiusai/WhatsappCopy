@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta name="robots" content="noindex">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Dashboard – Final v6.9</title>
+  <link rel="icon" href="faviconAI.ico" />
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root{
+      --blue:#0047bb; --blue-dk:#00368f; --blue-tint:#eaf1ff; --blue-line:#c3d6f7; --yellow:#eedc00;
+      --bg:#f2f4f8; --surface:#fff; --ink:#16233b; --muted:#5a6579; --line:#dce1ea; --line-soft:#eceff4;
+      --danger:#c62828; --ok:#1b7f4b; --r:10px; --r-sm:7px;
+      --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--font);font-size:15px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+    button,input,textarea,label{font:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+    .hidden{display:none}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+    /* Header */
+    .app-container{max-width:1440px;margin:0 auto;padding:0 24px 56px}
+    .main-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:18px 0}
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:9px;background:var(--blue);color:#fff;border-bottom:3px solid var(--yellow)}
+    .main-header h1{margin:0;font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+    .main-header p{margin:0;font-size:.78rem;color:var(--muted)}
+    .header-actions{display:flex;gap:8px;flex-wrap:wrap}
+    #fileInput:focus-visible + label{outline:2px solid var(--blue);outline-offset:2px}
+
+    /* Pulsanti */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);font-size:.875rem;font-weight:500;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+    .btn i{color:var(--blue)}
+    .btn:hover{background:var(--blue-tint);border-color:var(--blue-line);color:var(--blue)}
+    .btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn-primary i{color:#fff}
+    .btn-primary:hover{background:var(--blue-dk);border-color:var(--blue-dk);color:#fff}
+    .tool-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-size:.8125rem;font-weight:500;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+    .tool-btn:hover{background:var(--bg);color:var(--ink);border-color:#c5ccd8}
+    .tool-btn[data-action="auto"]{color:var(--blue);background:var(--blue-tint);border-color:var(--blue-line)}
+    .tool-btn[data-action="auto"]:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .tool-btn.btn-save{background:var(--blue);border-color:var(--blue);color:#fff}
+    .tool-btn.btn-save:hover{background:var(--blue-dk);border-color:var(--blue-dk)}
+    .tool-btn.btn-clear{color:var(--danger);border-color:#efc4c4}
+    .tool-btn.btn-clear:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+    .tool-btn.btn-copy-current,.tool-btn.btn-copy-all{background:var(--blue-tint);border-color:var(--blue-line);color:var(--blue)}
+    .tool-btn.btn-copy-current:hover,.tool-btn.btn-copy-all:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+    .seg{display:inline-flex}
+    .seg .tool-btn{border-radius:0;margin-left:-1px}
+    .seg .tool-btn:first-child{border-radius:6px 0 0 6px;margin-left:0}
+    .seg .tool-btn:last-child{border-radius:0 6px 6px 0}
+    .seg .tool-btn:hover{position:relative;z-index:1}
+    .btn-prompt-modal{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-size:.8125rem;font-weight:500}
+    .btn-prompt-modal:hover{background:var(--blue-tint);border-color:var(--blue-line);color:var(--blue)}
+    .btn-success-state{background:#e3f4ea !important;color:var(--ok) !important;border-color:#b7e0c8 !important;cursor:default}
+    .btn-success-state i{color:var(--ok) !important}
+    button:active{transform:scale(.97)}
+
+    /* Schede */
+    .tabs-container{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);overflow-x:auto}
+    .tab-btn{margin-bottom:-1px;padding:12px 24px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);font-size:.9375rem;font-weight:600;white-space:nowrap;transition:color .15s}
+    .tab-btn:hover{color:var(--ink)}
+    .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+    /* Barra comandi */
+    .command-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;margin-bottom:20px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+    .cmd-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .cmd-group + .cmd-group{padding-left:20px;border-left:1px solid var(--line)}
+    .cmd-title{font-size:.8125rem;color:var(--muted)}
+    .cmd-row{display:flex;gap:6px;flex-wrap:wrap}
+
+    /* Layout */
+    .layout-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start}
+    @media (min-width:1024px){.layout-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+    @media (max-width:760px){
+      .app-container{padding:0 14px 40px}
+      .cmd-group + .cmd-group{padding-left:0;border-left:0}
+    }
+    .editor-container{overflow:hidden;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+    .fields{padding:2px 20px}
+    .field-group{padding:18px 0;border-bottom:1px solid var(--line-soft)}
+    .field-group:last-child{border-bottom:0}
+    .label-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;min-height:32px;margin-bottom:10px}
+    .label-text{display:flex;align-items:center;gap:9px;font-size:.9375rem;font-weight:600}
+    .right-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .counter{padding:2px 9px;border-radius:99px;background:var(--bg);font-size:.8125rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+    .counter.over{background:#fdecec;font-weight:600}
+    .toolbar-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
+    /* Campi */
+    textarea,input[type="text"]{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;color:var(--ink);line-height:1.5;resize:vertical;transition:border-color .15s,box-shadow .15s}
+    textarea::placeholder,input::placeholder{color:#8b95a7}
+    textarea:hover,input[type="text"]:hover{border-color:#c5ccd8}
+    textarea:focus,input[type="text"]:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,71,187,.14)}
+    textarea[data-type="ytLink"],textarea[data-type="tgLink"]{resize:none;font-size:.875rem}
+    .input-wrap{position:relative}
+    .input-wrap textarea{padding-right:46px}
+    .paste-float{position:absolute;top:6px;right:6px;width:32px;padding:0;border-color:transparent;background:transparent}
+
+    /* Assistente */
+    .ai-box{padding:18px 20px;border-bottom:1px solid var(--line);background:#f7f9fd}
+    .ai-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+    .ai-header h3{display:flex;align-items:center;gap:9px;margin:0;font-size:.9375rem;font-weight:600}
+    .ai-header h3 i{color:var(--blue)}
+    .ai-box textarea{min-height:84px}
+    .btn-generate{width:100%;margin-top:10px}
+    .loader{display:none;margin-top:10px;text-align:center;font-size:.875rem;color:var(--muted)}
+
+    /* Anteprime */
+    .preview-container{display:flex;flex-direction:column;gap:16px}
+    @media (min-width:1024px){.preview-container{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;padding-bottom:2px}}
+    .card-anteprima-finale{overflow:hidden;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+    .header-anteprima{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-bottom:1px solid var(--line-soft);background:#fafbfd}
+    .titolo-anteprima{display:flex;align-items:center;gap:10px;font-size:.875rem;font-weight:600}
+    .btn-copia-header{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);font-size:.8125rem;font-weight:500;transition:background .15s,border-color .15s,color .15s}
+    .btn-copia-header:hover{background:var(--blue-tint);border-color:var(--blue-line);color:var(--blue)}
+    .corpo-anteprima{min-height:96px;padding:18px;background:#fff !important;color:#1f2a3d !important;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;text-align:left;overflow-wrap:anywhere}
+    .corpo-anteprima.compact{min-height:0;padding:14px 18px}
+    .corpo-anteprima:empty::before{content:"L'anteprima si aggiorna mentre scrivi";color:#8b95a7}
+
+    /* Modale */
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:1000;justify-content:center;align-items:center;background:rgba(15,27,51,.55);backdrop-filter:blur(2px)}
+    .modal-overlay.open{display:flex;animation:fadeIn .2s}
+    .modal-content{display:flex;flex-direction:column;width:92%;max-width:960px;max-height:90vh;overflow:hidden;border-radius:12px;background:#fff;box-shadow:0 24px 60px rgba(15,27,51,.25)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line)}
+    .modal-header h2{display:flex;align-items:center;gap:10px;margin:0;font-size:1.0625rem;font-weight:600}
+    .modal-header h2 i{color:var(--blue)}
+    .close-modal{width:34px;height:34px;border:0;border-radius:6px;background:none;font-size:1.5rem;line-height:1;color:var(--muted)}
+    .close-modal:hover{background:var(--bg);color:var(--ink)}
+    .modal-body{flex:1;padding:22px;overflow-y:auto}
+    .modal-intro{margin:0 0 18px;color:var(--muted);font-size:.9rem}
+    .modal-news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:18px}
+    .news-input-block{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:#fafbfd}
+    .news-input-block h3{display:flex;align-items:center;gap:8px;margin:0;font-size:.9375rem;font-weight:600}
+    .news-input-block h3 i{color:var(--blue)}
+    .prompt-output-area{display:none;position:relative;margin-top:18px;padding:52px 20px 20px;border-radius:var(--r);background:#0f1b33;color:#e6ecf7;font-family:ui-monospace,'SFMono-Regular',Menlo,monospace;font-size:.8125rem;line-height:1.6;white-space:pre-wrap}
+    #btnCopyPrompt{position:absolute;top:10px;right:10px;border:0;background:#2a3a5c;color:#fff}
+    #btnCopyPrompt:hover{background:#3a4d75;color:#fff}
+
+    /* Toast */
+    #toast-container{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .toast{display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:10px;background:var(--ink);color:#fff;font-size:.875rem;font-weight:500;box-shadow:0 8px 24px rgba(15,27,51,.25);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.success i{color:#4cc790}
+    .toast.error i{color:#ff7a5c}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+  </style>
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="app-container">
+    <header class="main-header">
+      <div class="brand">
+        <span class="brand-mark"><i class="fas fa-newspaper"></i></span>
+        <div>
+          <h1>Social Dashboard</h1>
+          <p>v8.0</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <input type="file" id="fileInput" accept=".xlsx,.csv" class="sr-only" />
+        <label for="fileInput" class="btn"><i class="fas fa-file-arrow-up"></i> Importa Excel/CSV</label>
+        <button id="pasteCsvButton" class="btn" type="button"><i class="fas fa-clipboard"></i> Incolla CSV</button>
+      </div>
+    </header>
+
+    <nav class="tabs-container">
+      <button type="button" class="tab-btn active" data-index="0">News 1</button>
+      <button type="button" class="tab-btn" data-index="1">News 2</button>
+      <button type="button" class="tab-btn" data-index="2">News 3</button>
+    </nav>
+
+    <div id="dynamicContent"></div>
+  </div>
+
+  <div class="modal-overlay" id="promptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-wand-magic-sparkles"></i> Generatore prompt</h2>
+        <button class="close-modal" id="closePromptModal" type="button" aria-label="Chiudi">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">Inserisci i dettagli di ogni notizia, clicca "Genera", copia il testo e usalo su Gemini.</p>
+
+        <div class="modal-news-grid">
+          <div class="news-input-block">
+            <h3><i class="far fa-newspaper"></i> News 1</h3>
+            <div class="input-wrap">
+              <textarea id="modal-news-1" rows="4" placeholder="Testo della notizia 1"></textarea>
+              <button class="tool-btn paste-float" type="button" data-action="paste" data-target="modal-news-1" title="Incolla dagli appunti"><i class="fas fa-paste"></i></button>
+            </div>
+            <input type="text" id="modal-video-1" placeholder="Riferimento video (nome file)">
+            <input type="text" id="modal-specs-1" placeholder="Note aggiuntive">
+          </div>
+          <div class="news-input-block">
+            <h3><i class="far fa-newspaper"></i> News 2</h3>
+            <div class="input-wrap">
+              <textarea id="modal-news-2" rows="4" placeholder="Testo della notizia 2"></textarea>
+              <button class="tool-btn paste-float" type="button" data-action="paste" data-target="modal-news-2" title="Incolla dagli appunti"><i class="fas fa-paste"></i></button>
+            </div>
+            <input type="text" id="modal-video-2" placeholder="Riferimento video (nome file)">
+            <input type="text" id="modal-specs-2" placeholder="Note aggiuntive">
+          </div>
+          <div class="news-input-block">
+            <h3><i class="far fa-newspaper"></i> News 3</h3>
+            <div class="input-wrap">
+              <textarea id="modal-news-3" rows="4" placeholder="Testo della notizia 3"></textarea>
+              <button class="tool-btn paste-float" type="button" data-action="paste" data-target="modal-news-3" title="Incolla dagli appunti"><i class="fas fa-paste"></i></button>
+            </div>
+            <input type="text" id="modal-video-3" placeholder="Riferimento video (nome file)">
+            <input type="text" id="modal-specs-3" placeholder="Note aggiuntive">
+          </div>
+        </div>
+
+        <button id="btnGeneratePrompt" class="btn btn-primary" type="button" style="width:100%;height:46px;">Genera prompt strutturato</button>
+
+        <div id="promptOutputArea" class="prompt-output-area">
+          <button id="btnCopyPrompt" class="btn-prompt-modal" type="button"><i class="far fa-copy"></i> Copia</button>
+          <code id="promptCodeBlock"></code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* --- CONFIGURAZIONE --- */
+    let masterList = [];
+    const API_URL = 'https://aipost.onrender.com/generate';
+    const googleSheetURL = 'https://fabiusai.github.io/WhatsappCopy/maiuscole.csv';
+
+    const tabsConfig = Array.from({ length: 3 }, () => ({
+      limits: { wa: 82, ytTitle: 49, ytDesc: 280 },
+      fields: ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink']
+    }));
+
+        /* --- HTML GENERATOR --- */
+    // Aggiornamento versione
+    const APP_VERSION = "8.0";
+    document.title = `Social Dashboard – Final v${APP_VERSION}`;
+    window.addEventListener('DOMContentLoaded', () => {
+        const verEl = document.querySelector('.main-header p');
+        if(verEl) verEl.innerText = `v${APP_VERSION}`;
+    });
+
+    
+    /* --- FORMATO COPIA NEWS (NEWS / TUTTE) --- */
+    function buildNewsText(i) {
+      const v = id => (document.getElementById(`${id}-${i}`)?.value || '').trim();
+      return `***NEWS ${i+1}***\n\n***COPY WHATSAPP***\n${v('wa')}\n\n***TITOLO YOUTUBE***\n${v('ytTitle')}\n\n***COPY POST SOCIAL***\n${v('ytDesc')}`;
+    }
+
+    // Ridefiniscono le funzioni dichiarate più sotto (stesso scope globale)
+    copyAllData = function(btn) {
+      if (copyAllData._t && Date.now() - copyAllData._t < 400) return; // evita il doppio listener
+      copyAllData._t = Date.now();
+      const txt = [0,1,2].map(i => buildNewsText(i)).join('\n\n-----\n\n');
+      navigator.clipboard.writeText(txt).then(() => {
+        animateButtonFeedback(btn, "Copiato!");
+        showToast("Tutte le news copiate!");
+      });
+    };
+
+    copyCurrentNews = function(idx, btn) {
+      const n = parseInt(idx);
+      navigator.clipboard.writeText(buildNewsText(n)).then(() => {
+        animateButtonFeedback(btn, "Copiato!");
+        showToast(`News ${n+1} copiata!`);
+      });
+    };
+
+    // Sincronizza la card "Titolo YouTube" (colonna destra) col campo di input
+    document.addEventListener('input', (e) => {
+      const el = e.target;
+      if (!el || !el.dataset || el.dataset.type !== 'ytTitle') return;
+      const box = document.getElementById(`preview-yt-${el.id.split('-')[1]}`);
+      if (box) box.textContent = el.value;
+    }, true);
+
+    function generateTabHTML(index) {
+      const L = tabsConfig[index].limits;
+      const n = index + 1;
+
+      const getToolbar = () => `
+        <div class="toolbar-row">
+          <div class="seg">
+            <button type="button" class="tool-btn" data-action="lower" title="Tutto minuscolo"><i class="fas fa-arrow-down"></i> minuscolo</button>
+            <button type="button" class="tool-btn" data-action="title" title="Iniziali Maiuscole"><i class="fas fa-font"></i> Iniziali</button>
+            <button type="button" class="tool-btn" data-action="upper" title="TUTTO MAIUSCOLO"><i class="fas fa-arrow-up"></i> MAIUSCOLO</button>
+          </div>
+          <button type="button" class="tool-btn" data-action="auto" title="Formattazione automatica (maiuscole dopo il punto e parole speciali)"><i class="fas fa-wand-magic-sparkles"></i> Formatta auto</button>
+          <button type="button" class="tool-btn" data-action="revert" title="Annulla l'ultima modifica di formato"><i class="fas fa-rotate-left"></i> Annulla</button>
+        </div>`;
+
+      const ico = (cls, color) => `<i class="${cls}" style="color:${color};"></i>`;
+
+      const head = (icon, label, type) => `
+        <div class="label-row">
+          <span class="label-text">${icon}${label}</span>
+          <span class="counter" id="count-${type}-${index}">0/${L[type]}</span>
+        </div>`;
+
+      return `
+      <div class="tab-pane ${index === 0 ? '' : 'hidden'}" data-tab="${index}">
+
+        <div class="command-bar">
+          <div class="cmd-group">
+            <span class="cmd-title">Scheda</span>
+            <div class="cmd-row">
+              <button type="button" class="tool-btn btn-save" data-idx="${index}" title="Salva le bozze di questa scheda nel browser"><i class="fas fa-save"></i> Salva bozza</button>
+              <button type="button" class="tool-btn btn-clear" data-idx="${index}" title="Svuota tutti i campi di questa scheda"><i class="fas fa-trash-alt"></i> Svuota scheda</button>
+            </div>
+          </div>
+          <div class="cmd-group">
+            <span class="cmd-title">Copia per approvazione copy</span>
+            <div class="cmd-row">
+              <button type="button" class="tool-btn btn-copy-current" data-idx="${index}" title="Copia WhatsApp + Titolo YouTube + Post Social di questa news"><i class="far fa-copy"></i> Copia News ${n}</button>
+              <button type="button" class="tool-btn btn-copy-all" title="Copia in un unico blocco tutte e 3 le news"><i class="fas fa-copy"></i> Copia tutte (3)</button>
+            </div>
+          </div>
+          <div class="cmd-group">
+            <span class="cmd-title">Esporta tutte le news</span>
+            <div class="cmd-row">
+              <button type="button" class="tool-btn" onclick="exportExcel()" title="Scarica file Excel"><i class="fas fa-file-excel" style="color:#1d6f42;"></i> Excel</button>
+              <button type="button" class="tool-btn" onclick="exportCsv()" title="Scarica file CSV"><i class="fas fa-file-csv" style="color:#5a6579;"></i> CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="layout-grid">
+
+          <div class="editor-container">
+
+            <section class="ai-box">
+              <div class="ai-header">
+                <h3><i class="fas fa-robot"></i> Assistente</h3>
+                <button type="button" class="btn-prompt-modal" id="openPromptBtn-${index}" title="Crea prompt"><i class="fas fa-pen-nib"></i> Crea prompt</button>
+              </div>
+              <div class="input-wrap">
+                <textarea id="ai-input-${index}" placeholder="Incolla qui il testo della notizia…"></textarea>
+                <button type="button" class="tool-btn paste-float" data-action="paste" data-target="ai-input-${index}" title="Incolla dagli appunti"><i class="fas fa-paste"></i></button>
+              </div>
+              <button type="button" class="btn btn-primary btn-generate" data-idx="${index}"><i class="fas fa-bolt"></i> Genera bozze</button>
+              <div class="loader" id="ai-loader-${index}"><i class="fas fa-spinner fa-spin"></i> Elaborazione in corso…</div>
+            </section>
+
+            <div class="fields">
+
+              <div class="field-group">
+                ${head(ico('fab fa-whatsapp', '#25D366'), 'Testo WhatsApp', 'wa')}
+                ${getToolbar()}
+                <textarea id="wa-${index}" data-type="wa" rows="3"></textarea>
+              </div>
+
+              <div class="field-group">
+                ${head(ico('fab fa-youtube', '#FF0000'), 'Titolo YouTube', 'ytTitle')}
+                ${getToolbar()}
+                <textarea id="ytTitle-${index}" data-type="ytTitle" rows="2"></textarea>
+              </div>
+
+              <div class="field-group">
+                ${head(ico('fas fa-share-nodes', 'var(--blue)'), 'Descrizione Social', 'ytDesc')}
+                ${getToolbar()}
+                <textarea id="ytDesc-${index}" data-type="ytDesc" rows="5"></textarea>
+              </div>
+
+              <div class="field-group">
+                <div class="label-row">
+                  <span class="label-text">${ico('fab fa-youtube', '#FF0000')}Link YouTube</span>
+                  <div class="right-controls">
+                    <button type="button" class="tool-btn" data-action="paste" data-target="ytLink-${index}" title="Incolla il link dagli appunti"><i class="fas fa-paste"></i> Incolla link</button>
+                  </div>
+                </div>
+                <textarea id="ytLink-${index}" data-type="ytLink" rows="1" placeholder="https://youtu.be/..."></textarea>
+              </div>
+
+              <div class="field-group">
+                <div class="label-row">
+                  <span class="label-text">${ico('fab fa-telegram', '#0088cc')}Link TG Poste</span>
+                  <div class="right-controls">
+                    <button type="button" class="tool-btn btn-date" data-idx="${index}" data-day="today" title="Genera il link del TG di oggi"><i class="far fa-calendar-check"></i> Link di oggi</button>
+                    <button type="button" class="tool-btn btn-date" data-idx="${index}" data-day="yesterday" title="Genera il link del TG di ieri"><i class="far fa-calendar-minus"></i> Link di ieri</button>
+                  </div>
+                </div>
+                <textarea id="tgLink-${index}" data-type="tgLink" rows="1"></textarea>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="preview-container">
+
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima">${ico('fab fa-whatsapp', '#25D366')} Copy WhatsApp</div>
+                <button type="button" class="btn-copia-header" data-copy-target="preview-wa-${index}"><i class="far fa-copy"></i> Copia WhatsApp</button>
+              </div>
+              <div class="corpo-anteprima" id="preview-wa-${index}"></div>
+            </div>
+
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima">${ico('fab fa-youtube', '#FF0000')} Titolo YouTube</div>
+                <button type="button" class="btn-copia-header" data-copy-target="preview-yt-${index}"><i class="far fa-copy"></i> Copia titolo</button>
+              </div>
+              <div class="corpo-anteprima compact" id="preview-yt-${index}"></div>
+            </div>
+
+            <div class="card-anteprima-finale">
+              <div class="header-anteprima">
+                <div class="titolo-anteprima">${ico('fas fa-share-nodes', 'var(--blue)')} Copy Post Social</div>
+                <button type="button" class="btn-copia-header" data-copy-target="preview-social-${index}"><i class="far fa-copy"></i> Copia post</button>
+              </div>
+              <div class="corpo-anteprima" id="preview-social-${index}"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+      `;
+    }
+
+    /* --- LOGICA JS --- */
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = '<i class="fas fa-check-circle"></i>';
+        if(type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
+        
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function animateButtonFeedback(btn, msg = null) {
+        if (!btn) return;
+        const originalHtml = btn.innerHTML;
+        const originalWidth = btn.offsetWidth;
+        
+        if(btn.offsetWidth > 40) {
+            btn.style.width = `${originalWidth}px`;
+            btn.style.justifyContent = 'center';
+        }
+        
+        btn.classList.add('btn-success-state');
+        btn.innerHTML = msg ? `<i class="fas fa-check"></i> ${msg}` : `<i class="fas fa-check"></i>`;
+
+        setTimeout(() => {
+            btn.classList.remove('btn-success-state');
+            btn.innerHTML = originalHtml;
+            btn.style.width = '';
+        }, 1500);
+    }
+
+    async function init() {
+      masterList = await getMasterList();
+      const container = document.getElementById('dynamicContent');
+      container.innerHTML = [0, 1, 2].map(i => generateTabHTML(i)).join('');
+      
+      setupListeners();
+      loadSavedData();
+      updateAllPreviews();
+      setupModalLogic();
+    }
+
+    function setupListeners() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          e.target.classList.add('active');
+          document.querySelector(`.tab-pane[data-tab="${e.target.dataset.index}"]`).classList.remove('hidden');
+        });
+      });
+
+      document.querySelectorAll('textarea').forEach(el => {
+        el.addEventListener('input', (e) => {
+          updateCounts(e.target);
+          updatePreview(e.target.closest('.tab-pane').dataset.tab);
+        });
+        el.addEventListener('focus', function() {
+           if(!this.dataset.original) this.dataset.original = this.value;
+        });
+      });
+
+            document.body.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tool-btn');
+        if (!btn) return;
+        
+        if (btn.dataset.action === 'paste') {
+           const targetId = btn.dataset.target;
+           const textarea = document.getElementById(targetId);
+           navigator.clipboard.readText().then(text => {
+               textarea.value = text;
+               textarea.dispatchEvent(new Event('input'));
+               animateButtonFeedback(btn, "Incollato!");
+           }).catch(() => {
+               showToast("Errore lettura appunti", "error");
+           });
+           return;
+        }
+        
+        if (btn.dataset.action) {
+          const textarea = btn.closest('.field-group').querySelector('textarea');
+          handleTextAction(textarea, btn.dataset.action, btn);
+        }
+        
+        if (btn.classList.contains('btn-copy-simple')) {
+           const targetId = btn.dataset.target;
+           const textarea = document.getElementById(targetId);
+           copyToClipboard(textarea.value, btn);
+        }
+
+        if (btn.classList.contains('btn-date')) {
+           const idx = btn.dataset.idx;
+           const target = document.getElementById(`tgLink-${idx}`);
+           const date = new Date();
+           if(btn.dataset.day === 'yesterday') date.setDate(date.getDate() - 1);
+           target.value = generateTgLink(date);
+           target.dispatchEvent(new Event('input'));
+           animateButtonFeedback(btn);
+        }
+      });
+
+      document.querySelectorAll('.btn-generate').forEach(btn => {
+        btn.addEventListener('click', () => handleAI(btn.dataset.idx));
+      });
+
+      document.querySelectorAll('.btn-prompt-modal').forEach(btn => {
+          if(!btn.id.includes('btnCopyPrompt')) {
+             btn.addEventListener('click', openPromptModal);
+          }
+      });
+
+      document.querySelectorAll('.btn-copia-header').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.copyTarget;
+          const idx = targetId.split('-')[2];
+          
+          if (targetId.includes('preview-wa')) {
+             if(!document.getElementById(`ytLink-${idx}`).value.trim()) {
+                 showToast("Inserisci prima il Link YouTube!", "error");
+                 return;
+             }
+          }
+          if (targetId.includes('preview-social')) {
+             if(!document.getElementById(`tgLink-${idx}`).value.trim()) {
+                 showToast("Inserisci prima il Link TG Poste!", "error");
+                 return;
+             }
+          }
+
+          const text = document.getElementById(targetId).innerText;
+          copyToClipboard(text, btn);
+        });
+      });
+
+      document.querySelectorAll('.btn-save').forEach(btn => btn.addEventListener('click', () => saveData(btn.dataset.idx, btn)));
+      document.querySelectorAll('.btn-clear').forEach(btn => btn.addEventListener('click', () => clearData(btn.dataset.idx)));
+      document.querySelector('.btn-copy-all').addEventListener('click', (e) => copyAllData(e.target.closest('button')));
+      
+      document.getElementById('fileInput').addEventListener('change', handleFileInput);
+      document.getElementById('pasteCsvButton').addEventListener('click', handlePasteCsv);
+    }
+
+    function setupModalLogic() {
+        const modal = document.getElementById('promptModal');
+        const closeBtn = document.getElementById('closePromptModal');
+        const generateBtn = document.getElementById('btnGeneratePrompt');
+        const copyBtn = document.getElementById('btnCopyPrompt');
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('open');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        generateBtn.addEventListener('click', () => {
+            let newsCount = 0;
+            let newsContent = "";
+            let columnHeaders = [];
+
+            for (let i = 1; i <= 3; i++) {
+                const text = document.getElementById(`modal-news-${i}`).value.trim();
+                const video = document.getElementById(`modal-video-${i}`).value.trim();
+                const specs = document.getElementById(`modal-specs-${i}`).value.trim();
+
+                if (text) {
+                    newsCount++;
+                    columnHeaders.push(`"News ${newsCount}"`);
+                    newsContent += `\n---\n**NEWS ${newsCount}**\n**Testo:**\n${text}\n`;
+                    if (video) newsContent += `**Riferimento video:**\n${video}\n`;
+                    if (specs) newsContent += `**Specifiche aggiuntive:**\n${specs}\n`;
+                }
+            }
+
+            if (newsCount === 0) return showToast("Inserisci almeno una notizia!", "error");
+
+            const finalPrompt = `Sei un assistente social media. Genera testi per i canali social.
+
+**INFO NEWS:**
+${newsContent}
+
+**TONO E STILE:**
+* Il tono di voce deve essere chiaro, istituzionale e informativo. Evitare enfasi, eccessi di punteggiatura, emoticon o un uso eccessivo di hashtag. Lo stile deve essere sobrio e corretto, in linea con la comunicazione ufficiale di un’azienda pubblica. Non rivolgersi mai direttamente al lettore (“tu”), ma mantenere una forma giornalistica e neutra.
+I testi si riferiscono ad un comunicato stampa o ad un servizio video giornalistico, quindi devono comunicare notizie e aggiornamenti in modo chiaro e fedele alle fonti.
+Parlare a nome dell'azienda, ma nominare il brand solo quando serve. Evita di ripetere le parole contenute nel testo per Whatsapp anche nel titolo di Youtube, privilegiando la chiarezza dell'informazione sul testo di Whatsapp.
+
+**LUNGHEZZE:**
+1. **WhatsApp:** ~90 caratteri.
+2. **YouTube Titolo:** Max 49 caratteri.
+3. **Social:** Sintetico ma completo. Hashtag pertinenti.
+
+**OUTPUT CSV REQUISITO:**
+Output SOLO CSV puro.
+Delimitatore: Virgola (,)
+Qualificatore: Doppie virgolette (")
+Intestazione: ,${columnHeaders.join(',')}
+Righe:
+"Testo descrittivo news Canale WA",...
+"Titolo YouTube",...
+"Copy post e descrizione YT",...
+"Link YouTube",...
+"Link TG Poste",...
+
+Solo codice CSV.`;
+
+            document.getElementById('promptCodeBlock').textContent = finalPrompt;
+            document.getElementById('promptOutputArea').style.display = 'block';
+            animateButtonFeedback(generateBtn, "Generato!");
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const txt = document.getElementById('promptCodeBlock').textContent;
+            navigator.clipboard.writeText(txt).then(() => {
+                animateButtonFeedback(copyBtn, "Copiato!");
+                showToast("Prompt copiato!");
+            });
+        });
+    }
+
+    function openPromptModal() {
+        for(let i=0; i<3; i++) {
+            const editorText = document.getElementById(`ai-input-${i}`).value;
+            if(editorText) {
+                document.getElementById(`modal-news-${i+1}`).value = editorText;
+            }
+        }
+        document.getElementById('promptModal').classList.add('open');
+    }
+
+    function updatePreview(idx) {
+      const getVal = (type) => document.getElementById(`${type}-${idx}`)?.value || '';
+      
+      const waText = getVal('wa');
+      const ytLink = getVal('ytLink');
+      
+      let waHtml = `${waText.replace(/\n/g, '<br>')}<br>${ytLink}<br>➡️ TG https://tgposte.poste.it/tgposte/`;
+      
+            // *** MODIFICA: Sostituita immagine con player video ***
+      const ytMatch = ytLink.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+          waHtml += `<br><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px; margin-top:10px; border:1px solid #ddd;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
+      }
+      
+      document.getElementById(`preview-wa-${idx}`).innerHTML = waHtml;
+
+      let ytDesc = getVal('ytDesc').trim();
+      const tgLink = getVal('tgLink');
+      let hashtags = '';
+      const hashtagRegex = /(\s*#[^\s]*[^.\s])+$/;
+      const match = ytDesc.match(hashtagRegex);
+      if (match) {
+        hashtags = match[0].trim();
+        ytDesc = ytDesc.replace(hashtagRegex, '').trim();
+      }
+
+      // Rimuove duplicati dei tag base se presenti nell'input utente
+      hashtags = hashtags.replace(/#TGPoste/gi, '').replace(/#PosteItaliane/gi, '').replace(/\s+/g, ' ').trim();
+
+      const baseTags = "#TGPoste #PosteItaliane";
+      const finalTags = hashtags ? `${baseTags} ${hashtags}` : baseTags;
+      document.getElementById(`preview-social-${idx}`).innerText = `${ytDesc}\n\n➡️ ${tgLink}\n\n${finalTags}`;
+    }
+
+    function updateAllPreviews() {
+      [0,1,2].forEach(i => {
+         updateCounts(document.getElementById(`wa-${i}`));
+         updateCounts(document.getElementById(`ytTitle-${i}`));
+         updateCounts(document.getElementById(`ytDesc-${i}`));
+         updatePreview(i);
+      });
+    }
+
+    function updateCounts(el) {
+      if(!el) return;
+      const idParts = el.id.split('-'); 
+      const type = idParts[0];
+      const idx = idParts[1];
+      const counter = document.getElementById(`count-${type}-${idx}`);
+      if(counter && tabsConfig[0].limits[type]) {
+        const len = el.value.length;
+        const max = tabsConfig[0].limits[type];
+        counter.innerText = `${len}/${max}`;
+        counter.style.color = len > max ? '#dc3545' : '#777';
+        counter.classList.toggle('over', len > max);
+      }
+    }
+
+    function handleTextAction(textarea, action, btnElement) {
+      if(!textarea) return;
+      if(action !== 'revert') textarea.dataset.original = textarea.value;
+      
+      let val = textarea.value;
+      if(action === 'lower') val = val.toLowerCase();
+      if(action === 'upper') val = val.toUpperCase();
+      if(action === 'title') val = val.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+      if(action === 'revert') val = textarea.dataset.original || val;
+      if(action === 'auto') { applyAutoFormat(textarea); }
+      else {
+          textarea.value = val;
+          textarea.dispatchEvent(new Event('input'));
+      }
+
+      if(btnElement) animateButtonFeedback(btnElement);
+    }
+
+    function applyAutoFormat(textarea) {
+      let text = textarea.value;
+      const urls = [];
+      text = text.replace(/(https?:\/\/[^\s]+)/g, (m) => { urls.push(m); return '___URL___'; });
+      text = text.toLowerCase();
+      text = text.replace(/(^|[.?!]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+      masterList.forEach(word => {
+        const re = new RegExp(`\\b${word}\\b`, 'gi');
+        text = text.replace(re, word);
+      });
+      urls.forEach(u => { text = text.replace('___URL___', u); });
+      textarea.value = text;
+      textarea.dispatchEvent(new Event('input'));
+    }
+
+    async function handleFileInput(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const fileName = file.name.toLowerCase();
+        
+        if (fileName.endsWith('.xlsx')) {
+            await importFromExcel(file);
+        } else if (fileName.endsWith('.csv')) {
+            const reader = new FileReader();
+            reader.onload = e => importFromCsvText(e.target.result);
+            reader.readAsText(file);
+        } else {
+            showToast('Formato non supportato. Usa .xlsx o .csv', 'error');
+        }
+        event.target.value = '';
+    }
+
+    async function handlePasteCsv() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                importFromCsvText(text);
+                showToast("CSV incollato e processato!");
+            } else {
+                showToast('Appunti vuoti o permessi negati.', 'error');
+            }
+        } catch (error) {
+            showToast("Errore lettura appunti.", 'error');
+        }
+    }
+
+    async function importFromExcel(file) {
+      try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        processImportRows(rows);
+        // showToast("Excel importato con successo!"); // DISABILITATO SU RICHIESTA
+      } catch (e) {
+        showToast("Errore Import Excel", 'error');
+      }
+    }
+
+    function importFromCsvText(csvText) {
+        const rows = parseCsvText(csvText);
+        if (rows.length > 0) processImportRows(rows);
+        else showToast("CSV vuoto o non valido", 'error');
+    }
+
+    function parseCsvText(csvText) {
+        const rows = [];
+        let row = [];
+        let field = "";
+        let inQuote = false;
+        
+        for (let i = 0; i < csvText.length; i++) {
+            const c = csvText[i];
+            if (inQuote) {
+                if (c === '"') {
+                    if (i + 1 < csvText.length && csvText[i + 1] === '"') {
+                        field += '"'; i++;
+                    } else { inQuote = false; }
+                } else { field += c; }
+            } else {
+                if (c === '"') { inQuote = true; }
+                else if (c === ',') { row.push(field); field = ""; }
+                else if (c === '\n' || c === '\r') {
+                    row.push(field); 
+                    if (row.length > 0 && (row.length > 1 || row[0] !== "")) rows.push(row);
+                    row = []; field = "";
+                    if (c === '\r' && csvText[i + 1] === '\n') i++;
+                } else { field += c; }
+            }
+        }
+        if (field || row.length > 0) { row.push(field); rows.push(row); }
+        return rows;
+    }
+
+    function processImportRows(rows) {
+        if (!rows || rows.length < 2) return showToast("Dati CSV non validi.", 'error');
+
+        // Check for Standard Format (Header row contains known keys from Export)
+        const header = rows[0].map(c => String(c).trim());
+        if (header.includes('WA') && header.includes('YT Title')) {
+            const colMap = {'WA':'wa', 'YT Title':'ytTitle', 'YT Desc':'ytDesc', 'YT Link':'ytLink', 'TG Link':'tgLink'};
+            const indices = {};
+            for(let k in colMap) indices[colMap[k]] = header.indexOf(k);
+
+            rows.slice(1).forEach((row, i) => {
+                if(i > 2) return; 
+                for(let field in indices) {
+                    const idx = indices[field];
+                    if(idx > -1) {
+                         const val = row[idx];
+                         if (val !== undefined) {
+                             const el = document.getElementById(`${field}-${i}`);
+                             if (el) {
+                                 el.value = String(val).replace(/""/g, '"');
+                                 el.dispatchEvent(new Event('input'));
+                             }
+                         }
+                    }
+                }
+            });
+            showToast("CSV Standard importato!");
+            return;
+        }
+
+        // Fallback: Legacy Transposed Format
+        const fieldMap = {
+            'Testo descrittivo news Canale WA': 'wa',
+            'Titolo YouTube': 'ytTitle',
+            'Copy post e descrizione YT': 'ytDesc',
+            'Link YouTube': 'ytLink',
+            'Link TG Poste': 'tgLink'
+        };
+
+        rows.slice(1).forEach(row => {
+            const rowLabel = (row[0] || '').trim();
+            const fieldType = fieldMap[rowLabel];
+            
+            if (fieldType) {
+                for (let i = 0; i < 3; i++) {
+                    const val = row[i + 1];
+                    if (val !== undefined) {
+                        const el = document.getElementById(`${fieldType}-${i}`);
+                        if (el) {
+                            el.value = String(val).replace(/""/g, '"');
+                            el.dispatchEvent(new Event('input')); 
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function handleAI(idx) {
+      const input = document.getElementById(`ai-input-${idx}`).value;
+      if(!input) return showToast("Inserisci testo prima!", "error");
+      
+      const loader = document.getElementById(`ai-loader-${idx}`);
+      loader.style.display = 'block';
+      
+      try {
+        const res = await fetch(API_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inputText: input})
+        });
+        const data = await res.json();
+        const setVal = (id, val) => {
+           const el = document.getElementById(id);
+           el.value = val;
+           el.dataset.original = val;
+           el.dispatchEvent(new Event('input'));
+        };
+        setVal(`wa-${idx}`, data.whatsapp);
+        setVal(`ytTitle-${idx}`, data.youtube);
+        setVal(`ytDesc-${idx}`, data.facebook_linkedin);
+        showToast("Contenuti generati dall'AI!");
+      } catch(e) { 
+          showToast("Errore connessione AI", "error"); 
+      } finally { 
+          loader.style.display = 'none'; 
+      }
+    }
+
+    function copyToClipboard(text, btn) {
+      if(!text) return showToast("Nulla da copiare", "error");
+      navigator.clipboard.writeText(text).then(() => {
+        if(btn) animateButtonFeedback(btn, "Copiato!");
+        showToast("Copiato negli appunti");
+      });
+    }
+
+    function saveData(idx, btn) {
+      const data = {};
+      document.querySelectorAll(`.tab-pane[data-tab="${idx}"] textarea`).forEach(el => {
+        data[el.dataset.type] = el.value;
+      });
+      localStorage.setItem(`news_data_${idx}`, JSON.stringify(data));
+      animateButtonFeedback(btn, "Salvato!");
+      showToast("Bozza salvata");
+    }
+
+    function loadSavedData() {
+      [0,1,2].forEach(idx => {
+        const saved = localStorage.getItem(`news_data_${idx}`);
+        if(saved) {
+          const data = JSON.parse(saved);
+          Object.keys(data).forEach(key => {
+            const el = document.getElementById(`${key}-${idx}`);
+            if(el) {
+                el.value = data[key];
+                el.dispatchEvent(new Event('input'));
+            }
+          });
+        }
+      });
+    }
+
+    function clearData(idx) {
+      if(!confirm("Cancellare tutti i campi di questa scheda?")) return;
+      document.querySelectorAll(`.tab-pane[data-tab="${idx}"] textarea`).forEach(el => {
+        el.value = '';
+        el.dispatchEvent(new Event('input'));
+      });
+      showToast("Campi puliti", "info");
+    }
+
+    function generateTgLink(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const d_raw = String(date.getDate());
+        const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+        return `https://tgposte.poste.it/tgposte/${y}/${m}/${d}/tg-poste-del-${d_raw}-${months[date.getMonth()]}-${y}/`;
+    }
+
+    async function getMasterList() {
+      try {
+        const r = await fetch(googleSheetURL);
+        const t = await r.text();
+        return t.split('\n').map(s => s.trim()).filter(Boolean);
+      } catch { return []; }
+    }
+    
+    function copyAllData(btn) {
+       let txt = '';
+       [0,1,2].forEach(i => {
+          txt += `NEWS ${i+1}\nWA: ${document.getElementById(`wa-${i}`).value}\nYT Title: ${document.getElementById(`ytTitle-${i}`).value}\nSocial: ${document.getElementById(`ytDesc-${i}`).value}\n\n`;
+       });
+       navigator.clipboard.writeText(txt).then(() => {
+           animateButtonFeedback(btn, "Fatto!");
+           showToast("Tutte le news copiate!");
+       });
+    }
+
+    function copyCurrentNews(idx, btn) {
+       const wa = document.getElementById(`wa-${idx}`).value;
+       const yt = document.getElementById(`ytTitle-${idx}`).value;
+       const desc = document.getElementById(`ytDesc-${idx}`).value;
+       const txt = `NEWS ${parseInt(idx)+1}\nWA: ${wa}\nYT Title: ${yt}\nSocial: ${desc}`;
+       
+       navigator.clipboard.writeText(txt).then(() => {
+           animateButtonFeedback(btn, "Copiato!");
+           showToast(`News ${parseInt(idx)+1} copiata!`);
+       });
+    }
+
+    // In setupListeners, sostituisci la riga del btn-copy-all e aggiungi il listener delegato:
+    document.body.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-copy-all')) {
+            copyAllData(e.target.closest('.btn-copy-all'));
+        }
+        if (e.target.closest('.btn-copy-current')) {
+            const btn = e.target.closest('.btn-copy-current');
+            copyCurrentNews(btn.dataset.idx, btn);
+        }
+    });
+
+    function getExportName(ext) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const name = `CopyWhatsapp_${now.getFullYear()}_${pad(now.getMonth()+1)}_${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}`;
+        return `${name}.${ext}`;
+    }
+
+    function exportExcel() {
+       const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+       [0,1,2].forEach(i => {
+         rows.push([
+           `News ${i+1}`,
+           document.getElementById(`wa-${i}`).value,
+           document.getElementById(`ytTitle-${i}`).value,
+           document.getElementById(`ytDesc-${i}`).value,
+           document.getElementById(`ytLink-${i}`).value,
+           document.getElementById(`tgLink-${i}`).value
+         ]);
+       });
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
+       XLSX.writeFile(wb, getExportName('xlsx'));
+       showToast("Excel scaricato!");
+    }
+
+    function exportCsv() {
+        const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+       [0,1,2].forEach(i => {
+         rows.push([
+           `News ${i+1}`,
+           `"${document.getElementById(`wa-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytTitle-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytDesc-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`ytLink-${i}`).value.replace(/"/g, '""')}"`,
+           `"${document.getElementById(`tgLink-${i}`).value.replace(/"/g, '""')}"`
+         ]);
+       });
+       const csvContent = rows.map(e => e.join(",")).join("\n");
+       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+       const link = document.createElement("a");
+       const url = URL.createObjectURL(blob);
+       link.setAttribute("href", url);
+       link.setAttribute("download", getExportName('csv'));
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+       showToast("CSV scaricato!");
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+  </script>
+</body>
+</html>
