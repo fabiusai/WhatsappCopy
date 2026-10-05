@@ -204,11 +204,24 @@
     <main class="colonna-scroll">
       <div class="editor-wrapper">
         
-        <div class="editor-header">
-          <h2 id="editorTitle">Modifica: News 1</h2>
-          <div class="editor-actions">
-            <button class="btn-tool" onclick="clearCurrentNews()" title="Svuota campi"><i class="fas fa-eraser"></i></button>
-            <button class="btn-tool" onclick="deleteCurrentNews()" title="Elimina news" style="color: var(--danger);"><i class="fas fa-trash-alt"></i></button>
+        <div class="editor-header" style="flex-direction: column; align-items: stretch; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="editorTitle" style="font-size: 1.4rem; color: var(--blue); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Editor copy News 1</h2>
+            <div class="editor-actions">
+              <button class="btn-tool" onclick="clearCurrentNews()" title="Svuota campi"><i class="fas fa-eraser"></i></button>
+              <button class="btn-tool" onclick="deleteCurrentNews()" title="Elimina news" style="color: var(--danger);"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          </div>
+          <div class="social-selector-container" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm);">
+            <span style="font-weight: 600; font-size: 0.95rem; color: var(--ink);">Proposta canali social:</span>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;" id="social-checkboxes">
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-fb" value="Facebook"> <i class="fab fa-facebook" style="color:#1877F2; font-size:1.1rem;"></i> Facebook</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-x" value="X"> <i class="fab fa-x-twitter" style="font-size:1.1rem; color:#000;"></i> X</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-ig" value="Instagram"> <i class="fab fa-instagram" style="color:#E4405F; font-size:1.1rem;"></i> Instagram</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-in" value="Linkedin"> <i class="fab fa-linkedin" style="color:#0A66C2; font-size:1.1rem;"></i> Linkedin</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-yt" value="Youtube"> <i class="fab fa-youtube" style="color:#FF0000; font-size:1.1rem;"></i> Youtube</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size: 0.9rem;"><input type="checkbox" id="chk-wa" value="Whatsapp"> <i class="fab fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i> Whatsapp</label>
+            </div>
           </div>
         </div>
 
@@ -232,8 +245,10 @@
             <div class="field-label-row">
               <div class="field-title"><i class="fab fa-youtube" style="color:var(--yt-red)"></i> Titolo YouTube</div>
               <div class="editor-toolbar">
-                <button class="btn-tool" onclick="formatText('ytTitle', 'title')">Aa</button>
-                <button class="btn-tool btn-auto" onclick="formatText('ytTitle', 'auto')"><i class="fas fa-magic"></i></button>
+                <button class="btn-tool" onclick="formatText('ytTitle', 'lower')" title="Tutto minuscolo">a</button>
+                <button class="btn-tool" onclick="formatText('ytTitle', 'title')" title="Iniziali maiuscole">Aa</button>
+                <button class="btn-tool" onclick="formatText('ytTitle', 'upper')" title="Tutto maiuscolo">A</button>
+                <button class="btn-tool btn-auto" onclick="formatText('ytTitle', 'auto')" title="Auto Format"><i class="fas fa-magic"></i></button>
               </div>
             </div>
             <textarea id="editor-ytTitle" class="main-input" rows="2"></textarea>
@@ -244,7 +259,10 @@
             <div class="field-label-row">
               <div class="field-title"><i class="fas fa-share-nodes" style="color:var(--blue)"></i> Copy Post Social</div>
               <div class="editor-toolbar">
-                <button class="btn-tool btn-auto" onclick="formatText('ytDesc', 'auto')"><i class="fas fa-magic"></i></button>
+                <button class="btn-tool" onclick="formatText('ytDesc', 'lower')" title="Tutto minuscolo">a</button>
+                <button class="btn-tool" onclick="formatText('ytDesc', 'title')" title="Iniziali maiuscole">Aa</button>
+                <button class="btn-tool" onclick="formatText('ytDesc', 'upper')" title="Tutto maiuscolo">A</button>
+                <button class="btn-tool btn-auto" onclick="formatText('ytDesc', 'auto')" title="Auto Format"><i class="fas fa-magic"></i></button>
               </div>
             </div>
             <textarea id="editor-ytDesc" class="main-input" rows="4"></textarea>
@@ -407,6 +425,7 @@
             // Retrocompatibilità
             newsState.forEach(n => {
                 if(typeof n.aiInput === 'undefined') n.aiInput = "";
+                if(typeof n.channels === 'undefined') n.channels = "";
             });
         }
       }
@@ -423,7 +442,7 @@
       newsState = [{ 
           id: Date.now(), 
           title: "News 1", 
-          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "" 
+          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "", channels: "" 
       }];
     }
 
@@ -479,7 +498,8 @@
           t: n.ytTitle || "",
           d: n.ytDesc || "",
           yl: n.ytLink || "",
-          tl: n.tgLink || ""
+          tl: n.tgLink || "",
+          c: n.channels || ""
       }));
 
       const stateStr = JSON.stringify(lightState);
@@ -511,7 +531,8 @@
                   ytDesc: n.d || "",
                   ytLink: n.yl || "",
                   tgLink: n.tl || "",
-                  aiInput: "" 
+                  aiInput: "",
+                  channels: n.c || ""
               }));
           } else {
               // Fallback per vecchi link generati prima di questa ottimizzazione
@@ -519,6 +540,7 @@
               // Assicuriamoci che i campi opzionali esistano
               newsState.forEach(n => {
                   if(typeof n.aiInput === 'undefined') n.aiInput = "";
+                  if(typeof n.channels === 'undefined') n.channels = "";
               });
           }
           
@@ -628,7 +650,8 @@
                     ytDesc: data.facebook_linkedin || "", 
                     ytLink: inputs[i].link, 
                     tgLink: "", 
-                    aiInput: inputs[i].text 
+                    aiInput: inputs[i].text,
+                    channels: ""
                 });
             } catch(e) {
                 generatedNews.push({ 
@@ -639,7 +662,8 @@
                     ytDesc: "Connessione fallita", 
                     ytLink: inputs[i].link, 
                     tgLink: "", 
-                    aiInput: inputs[i].text 
+                    aiInput: inputs[i].text,
+                    channels: ""
                 });
             }
         }
@@ -775,7 +799,8 @@ Usa esattamente questa struttura per ogni notizia:
                 ytDesc: jsonData[i].ytDesc || "", 
                 ytLink: jsonData[i].ytLink || (rawInputs[i] ? rawInputs[i].link : ""), 
                 tgLink: jsonData[i].tgLink || "", 
-                aiInput: rawInputs[i] ? rawInputs[i].text : ""
+                aiInput: rawInputs[i] ? rawInputs[i].text : "",
+                channels: ""
             });
         }
 
@@ -815,6 +840,7 @@ Usa esattamente questa struttura per ogni notizia:
                 ytDesc: String(row[3] || "").replace(/""/g, '"'), 
                 ytLink: String(row[4] || "").replace(/""/g, '"'),
                 tgLink: String(row[5] || "").replace(/""/g, '"'), 
+                channels: String(row[6] || "").replace(/""/g, '"'),
                 aiInput: ""
               });
             }
@@ -854,7 +880,7 @@ Usa esattamente questa struttura per ogni notizia:
       const newId = Date.now() + Math.random();
       newsState.push({
           id: newId, title: `News ${newsState.length + 1}`,
-          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: ""
+          wa: "", ytTitle: "", ytDesc: "", ytLink: "", tgLink: "", aiInput: "", channels: ""
       });
       renderNewsList();
       selectNews(newId);
@@ -871,11 +897,18 @@ Usa esattamente questa struttura per ogni notizia:
       
       const idx = newsState.findIndex(n => n.id === activeNewsId) + 1;
       const titleEl = document.getElementById('editorTitle');
-      if(titleEl) titleEl.innerText = `Modifica: News ${idx}`;
+      if(titleEl) titleEl.innerText = `Editor copy News ${idx}`;
       
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
         const el = document.getElementById(`editor-${field}`);
         if(el) el.value = news[field] || "";
+      });
+
+      // Aggiorna checkbox canali social
+      const selectedChannels = news.channels ? news.channels.split(',') : [];
+      ['fb', 'x', 'ig', 'in', 'yt', 'wa'].forEach(chkId => {
+          const chk = document.getElementById(`chk-${chkId}`);
+          if(chk) chk.checked = selectedChannels.includes(chk.value);
       });
       
       updateAllPreviews(); 
@@ -896,13 +929,32 @@ Usa esattamente questa struttura per ogni notizia:
             });
         }
       });
+
+      // Listeners per checkboxes social
+      ['fb', 'x', 'ig', 'in', 'yt', 'wa'].forEach(chkId => {
+          const chk = document.getElementById(`chk-${chkId}`);
+          if(chk) {
+              chk.addEventListener('change', () => {
+                  const news = newsState.find(n => n.id === activeNewsId);
+                  if(news) {
+                      const selected = [];
+                      ['fb', 'x', 'ig', 'in', 'yt', 'wa'].forEach(id => {
+                          const c = document.getElementById(`chk-${id}`);
+                          if(c && c.checked) selected.push(c.value);
+                      });
+                      news.channels = selected.join(',');
+                      saveState();
+                  }
+              });
+          }
+      });
     }
 
     function clearCurrentNews() {
       if(!confirm("Vuoi svuotare tutti i campi di questa news?")) return;
       const news = newsState.find(n => n.id === activeNewsId);
       if(!news) return;
-      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput'].forEach(f => news[f] = "");
+      ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink', 'aiInput', 'channels'].forEach(f => news[f] = "");
       selectNews(activeNewsId);
       saveState();
     }
@@ -1087,7 +1139,7 @@ Usa esattamente questa struttura per ogni notizia:
     }
 
     function exportCsv() {
-      const rows = [["News ID", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      const rows = [["News ID", "WA", "YT Title", "YT Desc", "YT Link", "TG Link", "Canali Social"]];
       newsState.forEach((n, i) => {
         rows.push([
           `News ${i+1}`, 
@@ -1095,7 +1147,8 @@ Usa esattamente questa struttura per ogni notizia:
           `"${(n.ytTitle||"").replace(/"/g, '""')}"`, 
           `"${(n.ytDesc||"").replace(/"/g, '""')}"`, 
           `"${(n.ytLink||"").replace(/"/g, '""')}"`, 
-          `"${(n.tgLink||"").replace(/"/g, '""')}"`
+          `"${(n.tgLink||"").replace(/"/g, '""')}"`,
+          `"${(n.channels||"").replace(/"/g, '""')}"`
         ]);
       });
       const csv = rows.map(e => e.join(",")).join("\n");
@@ -1107,13 +1160,14 @@ Usa esattamente questa struttura per ogni notizia:
     }
 
     function exportExcel() {
-      const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link"]];
+      const rows = [["News", "WA", "YT Title", "YT Desc", "YT Link", "TG Link", "Canali Social"]];
       newsState.forEach((n, i) => {
-          rows.push([`News ${i+1}`, n.wa, n.ytTitle, n.ytDesc, n.ytLink, n.tgLink]);
+          rows.push([`News ${i+1}`, n.wa, n.ytTitle, n.ytDesc, n.ytLink, n.tgLink, n.channels || ""]);
       });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
       XLSX.writeFile(wb, `CopyWhatsapp_${new Date().getTime()}.xlsx`);
+    }
     }
   </script>
 </body>
