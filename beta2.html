@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
   <style>
     :root {
@@ -472,19 +473,55 @@
 
     /* --- SMART LINK (CONDIVISIONE BOZZE) --- */
     function generateSmartLink() {
-      const stateStr = JSON.stringify(newsState);
-      const encoded = btoa(encodeURIComponent(stateStr));
+      // Array alleggerito: rimuoviamo 'aiInput', 'id', 'title' e usiamo chiavi minime (w, t, d, yl, tl)
+      const lightState = newsState.map(n => ({
+          w: n.wa || "",
+          t: n.ytTitle || "",
+          d: n.ytDesc || "",
+          yl: n.ytLink || "",
+          tl: n.tgLink || ""
+      }));
+
+      const stateStr = JSON.stringify(lightState);
+      const compressed = LZString.compressToEncodedURIComponent(stateStr);
       const appUrl = "https://fabiusai.github.io/WhatsappCopy/beta2.html";
-      const finalUrl = appUrl + '#share=' + encoded;
-      copyToClipboardSafe(finalUrl, null, "Link intelligente copiato! Incollalo su Teams.");
+      const finalUrl = appUrl + '#share=' + compressed;
+      copyToClipboardSafe(finalUrl, null, "Link ultra-compresso copiato! Incollalo su Teams.");
     }
 
     function loadFromSmartLink(hashString) {
       if (hashString && hashString.includes('#share=')) {
         try {
           const encoded = hashString.split('#share=')[1]; 
-          const stateStr = decodeURIComponent(atob(encoded));
-          newsState = JSON.parse(stateStr);
+          let stateStr = LZString.decompressFromEncodedURIComponent(encoded);
+          
+          if (!stateStr) {
+              stateStr = decodeURIComponent(atob(encoded));
+          }
+          
+          let parsed = JSON.parse(stateStr);
+          
+          // Controlliamo se è il nuovo formato "light" (ha la chiave 'w' al posto di 'wa')
+          if (parsed.length > 0 && typeof parsed[0].w !== 'undefined') {
+              newsState = parsed.map((n, i) => ({
+                  id: Date.now() + i,
+                  title: `News ${i+1}`,
+                  wa: n.w || "",
+                  ytTitle: n.t || "",
+                  ytDesc: n.d || "",
+                  ytLink: n.yl || "",
+                  tgLink: n.tl || "",
+                  aiInput: "" 
+              }));
+          } else {
+              // Fallback per vecchi link generati prima di questa ottimizzazione
+              newsState = parsed; 
+              // Assicuriamoci che i campi opzionali esistano
+              newsState.forEach(n => {
+                  if(typeof n.aiInput === 'undefined') n.aiInput = "";
+              });
+          }
+          
           history.replaceState(null, null, window.location.pathname);
           showToast("Bozze importate con successo dal link!");
           return true;
