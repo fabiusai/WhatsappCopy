@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v10.1 Pro (AI Auto-Repair)</title>
+  <title>Social Dashboard – v11.0 Pro (AI Auto-Repair)</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -140,6 +140,24 @@
     #btnCopyPrompt:hover { background: var(--blue); color: #fff; }
     
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* === RESPONSIVE LAYOUT === */
+    @media (max-width: 1200px) {
+      body { height: auto; overflow: auto; }
+      .app-layout { grid-template-columns: 260px 1fr; height: auto; }
+      .preview-wrapper { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+      .colonna-scroll { overflow-y: visible; padding-bottom: 24px; }
+    }
+
+    @media (max-width: 768px) {
+      .app-layout { grid-template-columns: 1fr; padding: 16px; gap: 24px; }
+      aside.sidebar { border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+      .editor-header { padding: 16px; }
+      .editor-header > div:first-child { flex-direction: column; align-items: flex-start; gap: 12px; position: relative; width: 100%; }
+      .editor-actions { position: absolute; right: 0; top: 0; }
+      .social-selector-container { flex-direction: column !important; align-items: flex-start !important; }
+      .fields-container { padding: 0 16px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -154,7 +172,7 @@
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v10.1 Pro Edition</p>
+          <p>v11.0 Pro Edition</p>
         </div>
       </div>
 
@@ -1167,7 +1185,6 @@ Usa esattamente questa struttura per ogni notizia:
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
       XLSX.writeFile(wb, `CopyWhatsapp_${new Date().getTime()}.xlsx`);
-    }
     }
   </script>
 </body>
