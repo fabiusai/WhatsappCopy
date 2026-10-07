@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v11.1 Pro</title>
+  <title>Social Dashboard – v11.2 Pro</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -149,8 +149,13 @@
       .colonna-scroll { overflow-y: visible; padding-bottom: 24px; }
     }
 
+    /* Regola per forzare le preview in singola colonna su schermi piccoli per evitare che "sfondino" la larghezza */
     @media (max-width: 768px) {
-      .app-layout { grid-template-columns: 1fr; padding: 16px; gap: 24px; }
+      .preview-wrapper { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .app-layout { grid-template-columns: 100%; padding: 12px; gap: 16px; max-width: 100vw; overflow-x: hidden; }
       aside.sidebar { border-bottom: 1px solid var(--line); padding-bottom: 24px; }
       .editor-header { padding: 16px; }
       .editor-header > div:first-child { flex-direction: column; align-items: flex-start; gap: 12px; position: relative; width: 100%; }
@@ -180,7 +185,7 @@
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v11.1 Pro Edition</p>
+          <p>v11.2 Pro Edition</p>
         </div>
       </div>
 
@@ -930,9 +935,10 @@ Usa esattamente questa struttura per ogni notizia:
         if(el) {
             el.value = news[field] || "";
             if (window.innerWidth <= 768 && el.tagName === 'TEXTAREA') {
-                el.style.height = 'auto';
-                el.style.height = el.scrollHeight + 'px';
-            }
+                  el.style.height = 'auto';
+                  // Aggiungiamo un leggero buffer per evitare lo scrollbar indesiderato
+                  el.style.height = (el.scrollHeight + 2) + 'px';
+              }
         }
       });
 
