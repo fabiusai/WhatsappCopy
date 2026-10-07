@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Dashboard – v11.0 Pro</title>
+  <title>Social Dashboard – v11.1 Pro</title>
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -180,7 +180,7 @@
         <div class="brand-mark"><i class="fas fa-bolt"></i></div>
         <div>
           <h1>Social Dashboard</h1>
-          <p>v11.0 Pro Edition</p>
+          <p>v11.1 Pro Edition</p>
         </div>
       </div>
 
@@ -927,7 +927,13 @@ Usa esattamente questa struttura per ogni notizia:
       
       ['wa', 'ytTitle', 'ytDesc', 'ytLink', 'tgLink'].forEach(field => {
         const el = document.getElementById(`editor-${field}`);
-        if(el) el.value = news[field] || "";
+        if(el) {
+            el.value = news[field] || "";
+            if (window.innerWidth <= 768 && el.tagName === 'TEXTAREA') {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            }
+        }
       });
 
       // Aggiorna checkbox canali social
@@ -951,6 +957,10 @@ Usa esattamente questa struttura per ogni notizia:
                   saveState();
                   updatePreview(field);
                   if(['wa', 'ytTitle', 'ytDesc'].includes(field)) updateCount(field);
+              }
+              if (window.innerWidth <= 768 && el.tagName === 'TEXTAREA') {
+                  el.style.height = 'auto';
+                  el.style.height = el.scrollHeight + 'px';
               }
             });
         }
